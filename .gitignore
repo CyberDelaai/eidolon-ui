@@ -1,0 +1,3 @@
+# Ignore all dot-directories at the repo root (.claude, .vscode, .idea, etc.)
+.*/
+!.git/
