@@ -391,7 +391,7 @@
   #popDone.short .lbl-short { display: inline; }
   .side-switch.pop-mode { width: 150px; }
   .stage.brushing #tokenCanvas { cursor: crosshair; }
-  .btn.pop-paint { height: 36px; margin-top: 12px; font-size: 12px; letter-spacing: 2px; }
+  .btn-row.pop-row { margin-top: 12px; }
   .btn.pop-paint.active { background: color-mix(in srgb, var(--btn-color) 28%, transparent); box-shadow: 0 0 12px color-mix(in srgb, var(--btn-color) 50%, transparent); }
   .ref-tiles { display: flex; gap: 6px; }
   .ref-tile {

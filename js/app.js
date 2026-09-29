@@ -736,6 +736,7 @@
     $('popToggle').dataset.pos = it && it.popOn ? 'right' : 'left';
     $('popToggle').closest('.fx-toggle').classList.toggle('disabled', !it);
     $('popPaintBtn').disabled = !it;
+    $('popLoadBtn').disabled = !it;
     $('popPaintBtn').classList.toggle('active', brush.on);
     $('popMode').dataset.pos = brush.erase ? 'right' : 'left';
     $('popSize').value = brush.size;
@@ -752,7 +753,33 @@
     // group starts below the bottom edge of the bar's first item
     if (acts.offsetTop >= first.offsetTop + first.offsetHeight) done.classList.add('short');
   }
+  // LOAD POP-OUT: an image becomes the token's pop-out mask, stretched over
+  // the portrait. Images with transparency use their alpha (e.g. a cut-out of
+  // the character); opaque ones use brightness (white breaks out, black stays in).
+  function loadPopMask(file) {
+    const it = cur();
+    if (!it) return;
+    decode(file).then((img) => {
+      const m = ensureMask(it), x = m.getContext('2d', { willReadFrequently: true });
+      x.globalCompositeOperation = 'source-over';
+      x.clearRect(0, 0, m.width, m.height);
+      x.drawImage(img, 0, 0, m.width, m.height);
+      const d = x.getImageData(0, 0, m.width, m.height), p = d.data;
+      let alpha = false;
+      for (let i = 3; i < p.length; i += 4) if (p[i] < 250) { alpha = true; break; }
+      for (let i = 0; i < p.length; i += 4) {
+        const a = alpha ? p[i + 3] : 0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2];
+        p[i] = p[i + 1] = p[i + 2] = 255; p[i + 3] = a;
+      }
+      x.putImageData(d, 0, 0);
+      it.popOn = true;
+      itemChanged(it);
+      setStatus(t('s_popmask'), 'ok');
+    }).catch(() => setStatus(t('s_loadfail'), 'warn'));
+  }
   function setupPopout() {
+    $('popLoadBtn').addEventListener('click', () => $('popMaskInput').click());
+    $('popMaskInput').addEventListener('change', (e) => { if (e.target.files[0]) loadPopMask(e.target.files[0]); e.target.value = ''; });
     $('popToggle').addEventListener('click', () => { const it = cur(); if (it) { it.popOn = !it.popOn; itemChanged(it); } });
     $('popPaintBtn').addEventListener('click', () => setBrush(!brush.on));
     $('popDone').addEventListener('click', () => setBrush(false));

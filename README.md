@@ -40,7 +40,8 @@ client-side; your images are never uploaded.
   break out over the frame (a head, horns, a blade) — works on any portrait, no
   background removal needed. While painting, a faint ghost shows the part of
   the portrait hidden outside the frame; PAINT / ERASE, brush size, FILL and
-  CLEAR. The mask follows pan / zoom / rotate / mirror and is saved per token.
+  CLEAR. Or LOAD POP-OUT a ready mask image (white / opaque breaks out, black /
+  transparent stays in), then touch it up with the brush. The mask follows pan / zoom / rotate / mirror and is saved per token.
 - **Margin** — 0% (the token fills the whole image) up to 10% empty space on
   each side.
 - **FX** — a second slide-out tab with a master switch and stackable effects,

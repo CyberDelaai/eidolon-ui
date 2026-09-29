@@ -1,4 +1,4 @@
-<!-- EIDOLON v1.4.1 -->
+<!-- EIDOLON v1.4.2 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -76,7 +76,7 @@
         <a class="app-menu-item current" href="https://cyberdeck.tools/eidolon-ui/" aria-current="page">&gt; EIDOLON_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.4.1</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.4.2</span></span></div>
     <select class="lang-select" id="uiLangSel" aria-label="interface language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </header>
 
@@ -244,7 +244,11 @@
           <span class="thumb"></span><span class="lab l" data-i18n="b_off">OFF</span><span class="lab r" data-i18n="b_on">ON</span>
         </button>
       </div>
-      <button id="popPaintBtn" class="btn btn-block btn-alt pop-paint" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_paint">PAINT POP-OUT</button>
+      <div class="btn-row pop-row">
+        <button id="popPaintBtn" class="btn btn-sm btn-alt pop-paint" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_paint">PAINT POP-OUT</button>
+        <button id="popLoadBtn" class="btn btn-sm btn-alt" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_popload" data-i18n-title="t_popload" title="load a mask image — white (or opaque) breaks out, black (or transparent) stays inside; stretched over the portrait">LOAD POP-OUT</button>
+      </div>
+      <input type="file" id="popMaskInput" accept="image/*" hidden />
       <p class="hint" data-i18n="hint_popout">Paint what should break out over the frame — a head, horns, a blade. Works on any portrait.</p>
       <div class="btn-row">
         <button id="resetTfBtn" class="btn btn-sm btn-warn" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_reset">RESET POSITION</button>
