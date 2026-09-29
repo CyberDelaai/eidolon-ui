@@ -1,4 +1,4 @@
-<!-- EIDOLON v1.2.0 -->
+<!-- EIDOLON v1.2.1 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -76,7 +76,7 @@
         <a class="app-menu-item current" href="https://cyberdeck.tools/eidolon-ui/" aria-current="page">&gt; EIDOLON_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.2.0</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.2.1</span></span></div>
     <select class="lang-select" id="uiLangSel" aria-label="interface language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </header>
 
@@ -291,17 +291,40 @@
       <button id="exportBtn" class="btn btn-block" type="button" data-augmented-ui="tl-clip br-clip border" disabled>EXPORT PNG</button>
       <button id="copyBtn" class="btn btn-block btn-alt" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_copy" disabled>COPY TO CLIPBOARD</button>
 
-      <hr class="divider" />
-      <h2 data-i18n="h_batch">// BATCH</h2>
+      <button id="batchBtn" class="btn btn-block btn-alt" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_batch" aria-haspopup="dialog" aria-controls="batchModal" disabled>BATCH EXPORT…</button>
+      <div class="status" id="status" role="status"></div>
+    </aside>
+  </div>
+</div>
+
+<!-- BATCH EXPORT modal (the CHRONOS / COMMLINK .modal-overlay pattern) -->
+<div class="modal-overlay" id="batchModal" role="dialog" aria-modal="true" aria-labelledby="batchTitle" hidden>
+  <div class="modal-content config" data-augmented-ui="tl-clip tr-clip br-clip bl-clip border">
+    <div class="modal-head">
+      <h2 id="batchTitle" data-i18n="h_batch">// BATCH</h2>
+      <span class="batch-fmt" id="batchFmt"></span>
+    </div>
+    <div class="batch-block">
+      <div class="fx-toggle">
+        <span class="fx-label" data-i18n="l_zipall">// ALL TOKENS:</span>
+        <b class="batch-count" id="batchCount">0</b>
+      </div>
+      <p class="hint" data-i18n="hint_zipall">Every token in the roster, each with its own framing, name and badge, packed into one ZIP.</p>
       <button id="zipAllBtn" class="btn btn-block btn-alt" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_zipall" disabled>EXPORT ALL · ZIP</button>
+    </div>
+    <hr class="divider" />
+    <div class="batch-block">
       <div class="fx-toggle">
         <span class="fx-label" data-i18n="l_setcount">// SET OF:</span>
         <input type="number" id="setCount" class="set-count" data-out="setCount" min="2" max="99" step="1" inputmode="numeric" aria-label="numbered set size" />
       </div>
+      <p class="hint" data-i18n="hint_set">A numbered set exports the selected token N times with badges 1…N — for minions and mooks.</p>
       <button id="zipSetBtn" class="btn btn-block btn-alt" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_zipset" disabled>NUMBERED SET · ZIP</button>
-      <p class="hint hint-gap" data-i18n="hint_set">A numbered set exports the selected token N times with badges 1…N — for minions and mooks.</p>
-      <div class="status" id="status" role="status"></div>
-    </aside>
+    </div>
+    <div class="status" id="batchStatus" role="status"></div>
+    <div class="modal-actions">
+      <button id="batchClose" class="btn btn-sm btn-warn" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_close">CLOSE</button>
+    </div>
   </div>
 </div>
 

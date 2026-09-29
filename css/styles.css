@@ -478,6 +478,28 @@
   .preset-hint { margin-top: 14px; }   /* sits at the bottom: the list above flexes to fill */
   .preset-io { margin-top: 12px; }
 
+  /* ---------- Modal (ported from chronos-ui / commlink-ui .modal-overlay) ----------
+     .modal-content also carries .config for the shared form styles; the
+     rules below come later, so they win over .config's column sizing. */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.75); backdrop-filter: blur(2px);
+  }
+  .modal-overlay[hidden] { display: none; }
+  .modal-content {
+    width: 90%; max-width: 420px; padding: 24px; align-self: center;
+    background: var(--panel);
+    --aug-border-all: 1px; --aug-border-bg: rgba(var(--accent-rgb),0.45);
+    --aug-tl: 14px; --aug-tr: 14px; --aug-br: 14px; --aug-bl: 14px;
+  }
+  .modal-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+  .modal-head h2 { margin: 0; color: var(--accent); letter-spacing: 3px; }
+  .batch-fmt { font-size: 11px; letter-spacing: 1.5px; color: var(--main); text-transform: uppercase; }
+  .batch-count { font-size: 20px; letter-spacing: 1px; color: var(--accent); }
+  .batch-block .btn-block { margin-top: 12px; }
+  .modal-actions { display: flex; justify-content: flex-end; margin-top: 16px; }
+
   /* faint fixed footer stamp (shared across cyberdeck.tools apps) */
   .footer-stamp {
     position: fixed; left: 0; right: 0; bottom: 6px; z-index: 0;

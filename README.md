@@ -45,7 +45,8 @@ client-side; your images are never uploaded.
   badges. Each card shows a live mini-token; overwrite, delete, and EXPORT /
   IMPORT all presets as JSON to share them.
 - **Export** — PNG or WebP at 256 / 280 (Roll20) / 400 (Foundry) / 512 / 1024 /
-  2048 px, copy to clipboard, **export all** tokens as one ZIP, or a **numbered
+  2048 px, copy to clipboard, and a **BATCH EXPORT…** dialog: **export all**
+  tokens as one ZIP, or a **numbered
   set** (the same token ×N with badges 1…N — minions, mooks) as a ZIP.
 - **8 interface languages** — EN / RU / FR / DE / ES / IT / JP / CN.
 

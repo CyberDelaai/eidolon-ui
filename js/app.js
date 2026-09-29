@@ -17,11 +17,14 @@
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 
   // ---- helpers ----
+  // Status line: the OUTPUT column's, mirrored inside the BATCH modal.
   function setStatus(msg, kind) {
-    const el = $('status');
-    if (!el) return;
-    el.textContent = msg || '';
-    el.className = 'status' + (kind ? ' ' + kind : '');
+    ['status', 'batchStatus'].forEach((id) => {
+      const el = $(id);
+      if (!el) return;
+      el.textContent = msg || '';
+      el.className = 'status' + (kind ? ' ' + kind : '');
+    });
   }
   function debounce(fn, ms) {
     let id = 0;
@@ -462,6 +465,34 @@
     buildRefBar();
   }
 
+  // ---- batch export modal: EXPORT ALL + NUMBERED SET behind one button ----
+  let batchReturn = null; // element to refocus when the modal closes
+  function openBatch() {
+    if (!S.items.length) return;
+    batchReturn = document.activeElement;
+    updateButtons();
+    $('batchModal').hidden = false;
+    const first = [$('zipAllBtn'), $('zipSetBtn'), $('batchClose')].find((b) => !b.disabled);
+    if (first) first.focus();
+  }
+  function closeBatch() {
+    if ($('batchModal').hidden) return;
+    $('batchModal').hidden = true;
+    if (batchReturn && batchReturn.focus) batchReturn.focus();
+  }
+  function setupBatch() {
+    $('batchBtn').addEventListener('click', openBatch);
+    $('batchClose').addEventListener('click', closeBatch);
+    // click on the dimmed backdrop (not the panel) closes
+    $('batchModal').addEventListener('click', (e) => { if (e.target === $('batchModal')) closeBatch(); });
+    // keys stay inside the modal: Esc closes, nothing reaches the stage
+    // shortcuts or the PRESETS panel's Esc handler
+    $('batchModal').addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); closeBatch(); }
+      e.stopPropagation();
+    });
+  }
+
   // ---- presets: named snapshots of the global look (S.style, optionally
   // S.out), in a COMMLINK-style slide-out side panel. Stored as
   // eidolon:presets = { NAME: { style, out?, savedAt } }. Per-token data
@@ -823,12 +854,15 @@
     $('copyBtn').disabled = !it || !window.ClipboardItem;
     $('zipSetBtn').disabled = !it;
     $('zipAllBtn').disabled = S.items.length < 2;
+    $('batchBtn').disabled = !S.items.length;
+    $('batchCount').textContent = S.items.length;
     $('clearBtn').disabled = !S.items.length;
     updateTexts();
   }
   // Texts assembled in JS (not plain data-i18n nodes) — rerun on language change.
   function updateTexts() {
     $('exportBtn').textContent = t('b_export') + ' ' + S.out.format.toUpperCase();
+    $('batchFmt').textContent = `${S.out.size} PX · ${S.out.format.toUpperCase()}`;
     $('cframeBtn').textContent = t(S.customFrame ? 'b_cframe_x' : 'b_cframe');
     $('cmaskBtn').textContent = t(S.customMask ? 'b_cmask_x' : 'b_cmask');
     $('clearBtn').textContent = t(clearArmed ? 'b_sure' : 'b_clear');
@@ -913,6 +947,7 @@
     buildPalette();
     setupRefBar();
     setupPresets();
+    setupBatch();
     buildFrameGrid();
     bindControls();
     setupStage();
