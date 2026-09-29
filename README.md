@@ -25,7 +25,8 @@ client-side; your images are never uploaded.
 - **Custom frame & mask** — upload a black & white transparent PNG frame (tinted
   like the built-ins; white tint keeps its colours) and/or a greyscale mask
   (white keeps, black cuts) for any cut-out shape.
-- **Background** — solid colour, a blurred copy of the portrait, or transparent.
+- **Background** — solid colour, EXTEND (the portrait's edges stretched and
+  blurred into the empty space, like GRIDMAP's VIBRANT fill), or transparent.
 - **Effects** — per-token brightness / contrast / saturation / hue, a tinted
   vignette overlay and scanlines.
 - **Labels** — the token's name as a clipped name PLATE or ARC text, and a corner

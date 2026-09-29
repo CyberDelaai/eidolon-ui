@@ -78,14 +78,38 @@
     return c;
   }
 
+  // ---- EXTEND fill: the portrait's outermost rows/columns stretched outward
+  // (plus the four corner pixels into the diagonals), blurred and overscanned —
+  // the same idea as GRIDMAP's VIBRANT fill. Drawn in the portrait's own
+  // transform, so it follows pan / zoom / rotate / mirror and its adjustments. ----
+  function drawEdgeExtend(x, item, g) {
+    const N = g.N, src = item.src, tf = item.tf, s = baseScale(src, g) * tf.zoom;
+    const W = src.width, H = src.height, w = W * s, h = H * s;
+    const L = -w / 2, T = -h / 2, R = w / 2, B = h / 2;
+    const blur = Math.max(3, Math.round(N * 0.025)), m = blur * 2, E = N * 2; // E reaches past any token corner
+    const adj = adjFilter(item.adj);
+    x.save();
+    x.translate(g.cx + tf.x * N, g.cy + tf.y * N);
+    x.rotate((tf.rot * Math.PI) / 180);
+    x.scale(tf.flip ? -1 : 1, 1);
+    x.filter = (adj === 'none' ? '' : adj + ' ') + `blur(${blur}px)`;
+    x.drawImage(src, 0, 0, 1, H, L - E, T, E + m, h);                 // left
+    x.drawImage(src, W - 1, 0, 1, H, R - m, T, E + m, h);             // right
+    x.drawImage(src, 0, 0, W, 1, L, T - E, w, E + m);                 // top
+    x.drawImage(src, 0, H - 1, W, 1, L, B - m, w, E + m);             // bottom
+    x.drawImage(src, 0, 0, 1, 1, L - E, T - E, E + m, E + m);         // TL
+    x.drawImage(src, W - 1, 0, 1, 1, R - m, T - E, E + m, E + m);     // TR
+    x.drawImage(src, 0, H - 1, 1, 1, L - E, B - m, E + m, E + m);     // BL
+    x.drawImage(src, W - 1, H - 1, 1, 1, R - m, B - m, E + m, E + m); // BR
+    x.drawImage(src, L, T, w, h);                                      // centre, so the blur has no seam
+    x.restore();
+  }
+
   // ---- L: background + portrait + overlay, clipped to the cut-out ----
   function cutoutLayer(item, U, g, F) {
     const N = g.N, st = S.style, c = scratch('L', N), x = c.getContext('2d');
-    if (st.bgMode === 'blur' && item) {
-      const src = item.src, s = (N / Math.min(src.width, src.height)) * 1.15;
-      x.filter = `blur(${Math.round(N / 36)}px) brightness(60%) saturate(130%)`;
-      x.drawImage(src, g.cx - (src.width * s) / 2, g.cy - (src.height * s) / 2, src.width * s, src.height * s);
-      x.filter = 'none';
+    if (st.bgMode === 'extend' && item) {
+      drawEdgeExtend(x, item, g);
     } else if (st.bgMode !== 'transparent') {
       x.fillStyle = st.bgColor; x.fillRect(0, 0, N, N);
     }

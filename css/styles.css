@@ -255,7 +255,7 @@
   /* colour swatches: a clickable augmented-ui rectangle hiding a colour input
      (ported from gridmap-ui); the group matches the 112px toggle footprint */
   .fill-group { display: flex; align-items: center; gap: 6px; width: 112px; flex-shrink: 0; }
-  .fill-swatch, .fill-blur, .fill-transparent, .fill-swap {
+  .fill-swatch, .fill-extend, .fill-transparent, .fill-swap {
     flex: 1; height: 30px; cursor: pointer; border: none; padding: 0;
     display: flex; align-items: center; justify-content: center;
     --aug-border-all: 1px; --aug-border-bg: rgba(255, 255, 255, 0.3);
@@ -267,8 +267,10 @@
     --aug-border-bg: rgba(var(--main-rgb),0.4);
   }
   .fill-swap:hover { background: rgba(var(--main-rgb),0.15); }
-  /* BLUR fill mode: a soft smeared swatch */
-  .fill-blur { background: radial-gradient(circle at 35% 35%, #7a8ea8 0%, #3a4a66 45%, #1a1f2e 100%); }
+  /* EXTEND fill mode: the radial rainbow of gridmap-ui's VIBRANT fill button */
+  .fill-extend {
+    background: radial-gradient(circle at 32% 30%, #ff3d81 0%, #ff9e00 30%, #ffe600 48%, #2bd9a0 66%, #38a8ff 82%, #b15cff 100%);
+  }
   /* TRANSPARENT fill mode: a checkerboard swatch */
   .fill-transparent {
     background-color: #cfcfcf;
@@ -277,7 +279,7 @@
       linear-gradient(45deg, transparent 75%, #8a8a8a 75%), linear-gradient(-45deg, transparent 75%, #8a8a8a 75%);
     background-size: 10px 10px; background-position: 0 0, 0 5px, 5px -5px, -5px 0;
   }
-  .fill-swatch.active, .fill-blur.active, .fill-transparent.active {
+  .fill-swatch.active, .fill-extend.active, .fill-transparent.active {
     --aug-border-bg: var(--main); --aug-border-all: 2px;
     filter: drop-shadow(0 0 5px rgba(var(--main-rgb), 0.9));
   }

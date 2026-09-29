@@ -75,6 +75,7 @@
     mergeInto(S.style, read('eidolon:style'));
     mergeInto(S.out, read('eidolon:out'));
     if (S.style.frame !== 'custom' && !EIDOLON.frames[S.style.frame]) S.style.frame = 'ring';
+    if (S.style.bgMode === 'blur') S.style.bgMode = 'extend'; // the old BLUR fill became EXTEND
   }
   // Roster + custom assets come back asynchronously from IndexedDB.
   function restoreDb() {

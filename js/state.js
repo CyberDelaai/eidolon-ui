@@ -35,7 +35,7 @@ EIDOLON.state = {
     margin: 4,              // empty space on each side, % of the token edge (0 = full bleed, max 10)
     frameOpacity: 100,      // %
     glow: 'all',            // neon bloom: 'inner' | 'outer' | 'all' | 'off'
-    bgMode: 'color',        // 'color' | 'blur' | 'transparent'
+    bgMode: 'color',        // 'color' | 'extend' | 'transparent'
     bgColor: '#0b0b10',
     overlayColor: '#ff003c',
     overlayOpacity: 0,      // % — tinted vignette over the portrait
