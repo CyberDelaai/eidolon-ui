@@ -79,6 +79,8 @@
     mergeInto(S.style, read('eidolon:style'));
     mergeInto(S.out, read('eidolon:out'));
     mergeInto(S.ref, read('eidolon:ref'));
+    mergeInto(S.fx, read('eidolon:fx'));
+    if (!['none', 'mono', 'neon', 'holo'].includes(S.fx.tone)) S.fx.tone = 'none';
     if (!['off', 'custom'].concat(EIDOLON.refOrder).includes(S.ref.kind)) S.ref.kind = 'off';
     if (S.style.frame !== 'custom' && !EIDOLON.frames[S.style.frame]) S.style.frame = 'ring';
     if (S.style.bgMode === 'blur') S.style.bgMode = 'extend'; // the old BLUR fill became EXTEND
@@ -501,20 +503,22 @@
     try { return JSON.parse(localStorage.getItem('eidolon:presets') || '{}') || {}; } catch (e) { return {}; }
   }
   const savePresets = (p) => EIDOLON.save('eidolon:presets', JSON.stringify(p));
-  const styleKey = (st) => JSON.stringify(Object.keys(S.style).map((k) => st[k]));
+  // Identity of a look (style + fx) — used to highlight the preset matching the current settings.
+  const lookKey = (st, fx) => JSON.stringify([Object.keys(S.style).map((k) => st[k]), Object.keys(S.fx).map((k) => fx[k])]);
+  const presetLook = (p) => [Object.assign({}, S.style, p.style), Object.assign({}, S.fx, p.fx || {})];
   function presetStamp(ms) {
     const d = new Date(ms || 0);
     if (isNaN(d.getTime())) return '';
     const p2 = (n) => String(n).padStart(2, '0');
     return `${p2(d.getDate())}.${p2(d.getMonth() + 1)}.${p2(d.getFullYear() % 100)} ${p2(d.getHours())}:${p2(d.getMinutes())}`;
   }
-  // Draw the current token (or the empty frame) as it would look with `style`.
-  function renderPresetThumb(canvas, style) {
+  // Draw the current token (or the empty frame) as it would look with a preset.
+  function renderPresetThumb(canvas, p) {
     const N = Math.round(56 * dpr());
     canvas.width = N; canvas.height = N;
-    const keep = S.style;
-    S.style = Object.assign({}, keep, style);
-    try { EIDOLON.render(canvas.getContext('2d'), N, cur()); } finally { S.style = keep; }
+    const keepStyle = S.style, keepFx = S.fx;
+    [S.style, S.fx] = presetLook(p);
+    try { EIDOLON.render(canvas.getContext('2d'), N, cur()); } finally { S.style = keepStyle; S.fx = keepFx; }
   }
   function buildPresetList() {
     const box = $('presetList'), presets = loadPresets();
@@ -526,16 +530,16 @@
       box.appendChild(e);
       return;
     }
-    const nowKey = styleKey(S.style);
+    const nowKey = lookKey(S.style, S.fx);
     names.forEach((name) => {
       const p = presets[name];
       const item = document.createElement('div');
       item.className = 'preset-item';
-      item.dataset.key = styleKey(Object.assign({}, S.style, p.style));
+      item.dataset.key = lookKey(...presetLook(p));
       item.classList.toggle('active', item.dataset.key === nowKey);
       const c = document.createElement('canvas');
       c.className = 'preset-thumb'; c.title = t('b_apply');
-      renderPresetThumb(c, p.style);
+      renderPresetThumb(c, p);
       c.addEventListener('click', () => applyPreset(name));
       const body = document.createElement('div');
       body.className = 'preset-body';
@@ -543,7 +547,7 @@
       nm.className = 'preset-name'; nm.textContent = name;
       const meta = document.createElement('div');
       meta.className = 'preset-meta';
-      meta.textContent = '// ' + [presetStamp(p.savedAt), String(p.style.frame || '').toUpperCase(), p.out ? '+OUT' : '']
+      meta.textContent = '// ' + [presetStamp(p.savedAt), String(p.style.frame || '').toUpperCase(), p.fx && p.fx.on ? '+FX' : '', p.out ? '+OUT' : '']
         .filter(Boolean).join(' · ');
       const acts = document.createElement('div');
       acts.className = 'preset-actions';
@@ -577,12 +581,12 @@
   const presetsChanged = debounce(() => { if ($('sidePresets').classList.contains('open')) buildPresetList(); }, 200);
   // Cheap highlight refresh on every style change (no thumbnail re-render).
   function markActivePreset() {
-    const nowKey = styleKey(S.style);
+    const nowKey = lookKey(S.style, S.fx);
     document.querySelectorAll('.preset-item').forEach((el) => el.classList.toggle('active', el.dataset.key === nowKey));
   }
   function storePreset(name) {
     const all = loadPresets();
-    all[name] = { style: JSON.parse(JSON.stringify(S.style)), savedAt: Date.now() };
+    all[name] = { style: JSON.parse(JSON.stringify(S.style)), fx: JSON.parse(JSON.stringify(S.fx)), savedAt: Date.now() };
     if ($('presetWithOut').checked) all[name].out = JSON.parse(JSON.stringify(S.out));
     savePresets(all);
     buildPresetList();
@@ -601,6 +605,7 @@
     mergeInto(S.style, p.style);
     if (S.style.frame !== 'custom' && !EIDOLON.frames[S.style.frame]) S.style.frame = 'ring';
     if (p.out) { mergeInto(S.out, p.out); saveOut(); updateTexts(); }
+    if (p.fx) { mergeInto(S.fx, p.fx); saveFx(); syncFx(); }
     styleChanged();
     setStatus(t('s_papplied', { n: name }), 'ok');
   }
@@ -620,6 +625,7 @@
         if (!key) return;
         all[key] = { style: p.style, savedAt: p.savedAt || Date.now() };
         if (p.out && typeof p.out === 'object') all[key].out = p.out;
+        if (p.fx && typeof p.fx === 'object') all[key].fx = p.fx;
         n++;
       });
       if (!n) throw new Error('empty');
@@ -628,15 +634,7 @@
       setStatus(t('s_pimported', { n }), 'ok');
     }).catch(() => setStatus(t('s_pimportfail'), 'warn'));
   }
-  function setPresetsOpen(open) {
-    $('sidePresets').classList.toggle('open', open);
-    $('presetsToggle').setAttribute('aria-expanded', open ? 'true' : 'false');
-    $('presetsArrow').textContent = open ? '<' : '>';
-    EIDOLON.save('eidolon:panel', open ? 'presets' : '');
-    if (open) buildPresetList();
-  }
   function setupPresets() {
-    $('presetsToggle').addEventListener('click', () => setPresetsOpen(!$('sidePresets').classList.contains('open')));
     $('presetSave').addEventListener('click', savePresetFromInput);
     $('presetName').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); savePresetFromInput(); } });
     $('presetWithOut').checked = (() => { try { return localStorage.getItem('eidolon:presetOut') === '1'; } catch (e) { return false; } })();
@@ -644,11 +642,80 @@
     $('presetExport').addEventListener('click', exportPresets);
     $('presetImport').addEventListener('click', () => $('presetFile').click());
     $('presetFile').addEventListener('change', (e) => { if (e.target.files[0]) importPresets(e.target.files[0]); e.target.value = ''; });
+  }
+
+  // ---- side panels (PRESETS, FX): fixed, slide in from the left edge, one
+  // open at a time (COMMLINK pattern). Each is <aside class="side-panel"
+  // data-panel="name"> with a .side-toggle tab inside. ----
+  const PANEL_OPEN = { presets: () => buildPresetList(), fx: () => syncFx() };
+  function setOpenPanel(name) {
+    document.querySelectorAll('.side-panel').forEach((p) => {
+      const on = p.dataset.panel === name, tab = p.querySelector('.side-toggle');
+      p.classList.toggle('open', on);
+      p.classList.toggle('peer-open', !!name && !on);
+      tab.setAttribute('aria-expanded', on ? 'true' : 'false');
+      tab.querySelector('.arrow').textContent = on ? '<' : '>';
+    });
+    EIDOLON.save('eidolon:panel', name || '');
+    if (PANEL_OPEN[name]) PANEL_OPEN[name]();
+  }
+  function setupPanels() {
+    document.querySelectorAll('.side-panel').forEach((p) => {
+      p.querySelector('.side-toggle').addEventListener('click', () => setOpenPanel(p.classList.contains('open') ? '' : p.dataset.panel));
+    });
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && $('sidePresets').classList.contains('open')) setPresetsOpen(false);
+      if (e.key === 'Escape' && document.querySelector('.side-panel.open')) setOpenPanel('');
     });
     const was = (() => { try { return localStorage.getItem('eidolon:panel'); } catch (e) { return ''; } })();
-    setPresetsOpen(was === 'presets');
+    setOpenPanel(PANEL_OPEN[was] ? was : '');
+  }
+
+  // ---- FX panel: S.fx — master switch + per-effect switches and settings,
+  // bound via data-fx (value), data-fxfor (colour swatch) and data-needs
+  // (a settings row that dims while its effect is off). ----
+  const saveFx = debounce(() => EIDOLON.save('eidolon:fx', JSON.stringify(S.fx)), 150);
+  function fxLive() {
+    const f = S.fx;
+    return f.on && (f.tone !== 'none' || f.glitch || f.rgb || f.grain || f.vig || f.scan);
+  }
+  function fxChanged() {
+    syncFx(); saveFx(); requestDraw(); rosterChanged(); markActivePreset();
+  }
+  function syncFx() {
+    const f = S.fx;
+    document.querySelectorAll('[data-fx]').forEach((el) => {
+      const v = f[el.dataset.fx];
+      if (el.classList.contains('side-switch')) el.dataset.pos = v ? 'right' : 'left';
+      else if (String(el.value) !== String(v)) el.value = v;
+    });
+    document.querySelectorAll('[data-fxfor]').forEach((b) => { b.style.background = $(b.dataset.fxfor).value; });
+    document.querySelectorAll('[data-needs]').forEach((row) => {
+      const k = row.dataset.needs;
+      row.classList.toggle('disabled', !(k === 'tone' ? f.tone !== 'none' : f[k]));
+    });
+    document.querySelectorAll('[data-val^="fx."]').forEach((el) => {
+      el.textContent = (VAL_FMT[el.dataset.val] || String)(f[el.dataset.val.slice(3)]);
+    });
+    $('fxBody').classList.toggle('off', !f.on);
+    $('fxTab').classList.toggle('lit', fxLive());
+  }
+  function setupFx() {
+    document.querySelectorAll('[data-fx]').forEach((el) => {
+      const k = el.dataset.fx;
+      if (el.classList.contains('side-switch')) {
+        el.addEventListener('click', () => { S.fx[k] = !S.fx[k]; fxChanged(); });
+      } else {
+        el.addEventListener('input', () => { S.fx[k] = el.type === 'range' ? +el.value : el.value; fxChanged(); });
+      }
+    });
+    document.querySelectorAll('[data-fxfor]').forEach((b) => b.addEventListener('click', () => openPicker($(b.dataset.fxfor))));
+    $('fxReroll').addEventListener('click', () => { S.fx.glitchSeed = 1 + Math.floor(Math.random() * 9999); fxChanged(); });
+    $('fxReset').addEventListener('click', () => {
+      const on = S.fx.on;
+      S.fx = Object.assign(EIDOLON.newFx(), { on });
+      fxChanged();
+    });
+    syncFx();
   }
 
   // ---- frame grid + palette ----
@@ -812,6 +879,8 @@
   const VAL_FMT = {
     thickness: (v) => v + '%', margin: (v) => v + '%', frameOpacity: (v) => v + '%',
     'tf.zoom': (v) => Math.round(v * 100) + '%', 'tf.rot': (v) => Math.round(v) + '°',
+    'fx.toneMix': (v) => v + '%', 'fx.glitchAmt': (v) => v + '%', 'fx.rgbAmt': (v) => v + 'px',
+    'fx.grainAmt': (v) => v + '%', 'fx.vigAmt': (v) => v + '%', 'fx.scanAmt': (v) => v + '%', 'fx.scanGap': (v) => v + 'px',
     'adj.bright': (v) => v + '%', 'adj.contrast': (v) => v + '%', 'adj.sat': (v) => v + '%', 'adj.hue': (v) => v + '°',
   };
   // Push state into every control (values, toggles, swatches, readouts).
@@ -843,7 +912,7 @@
     document.querySelectorAll('[data-out]').forEach((el) => { if (document.activeElement !== el) el.value = S.out[el.dataset.out]; });
     document.querySelectorAll('[data-val]').forEach((el) => {
       const p = el.dataset.val, [a, b] = p.split('.');
-      const v = b ? (a === 'tf' ? tf : adj)[b] : st[a];
+      const v = b ? (a === 'tf' ? tf : a === 'fx' ? S.fx : adj)[b] : st[a];
       el.textContent = (VAL_FMT[p] || String)(v);
     });
     $('resetTfBtn').disabled = !it; $('resetAdjBtn').disabled = !it;
@@ -947,6 +1016,8 @@
     buildPalette();
     setupRefBar();
     setupPresets();
+    setupFx();
+    setupPanels();
     setupBatch();
     buildFrameGrid();
     bindControls();

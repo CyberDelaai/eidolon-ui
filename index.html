@@ -1,4 +1,4 @@
-<!-- EIDOLON v1.2.2 -->
+<!-- EIDOLON v1.3.0 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -76,7 +76,7 @@
         <a class="app-menu-item current" href="https://cyberdeck.tools/eidolon-ui/" aria-current="page">&gt; EIDOLON_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.2.2</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.3.0</span></span></div>
     <select class="lang-select" id="uiLangSel" aria-label="interface language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </header>
 
@@ -330,7 +330,7 @@
 
 <!-- PRESETS: slide-out side panel with a vertical edge tab (the COMMLINK
      side-panel pattern). Saves / applies the global look by name. -->
-<aside class="side-panel" id="sidePresets" aria-label="presets">
+<aside class="side-panel" id="sidePresets" data-panel="presets" aria-label="presets">
   <button class="side-toggle" id="presetsToggle" type="button" aria-expanded="false" aria-controls="sidePresets" data-augmented-ui="tr-clip br-clip border">
     <span class="label" data-i18n="panel_presets">PRESETS</span>
     <span class="arrow" id="presetsArrow">&gt;</span>
@@ -352,6 +352,117 @@
       <button id="presetImport" class="btn btn-sm btn-alt" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_pimport">IMPORT</button>
     </div>
     <input type="file" id="presetFile" accept="application/json,.json" hidden />
+  </div>
+</aside>
+
+<!-- FX: second slide-out side panel. Master switch + every effect with its
+     own OFF/ON switch and settings; bound via data-fx attributes. -->
+<aside class="side-panel" id="sideFx" data-panel="fx" aria-label="effects">
+  <button class="side-toggle" id="fxTab" type="button" aria-expanded="false" aria-controls="sideFx" data-augmented-ui="tr-clip br-clip border">
+    <span class="label" data-i18n="panel_fx">EFFECTS</span>
+    <span class="arrow">&gt;</span>
+  </button>
+  <div class="side-inner">
+    <h2 data-i18n="h_fx">// EFFECTS</h2>
+    <div class="fx-toggle fx-master">
+      <span class="fx-label" data-i18n="l_fxall">// EFFECTS:</span>
+      <button class="side-switch" type="button" data-fx="on" data-pos="left" aria-label="all effects">
+        <span class="thumb"></span><span class="lab l" data-i18n="b_off">OFF</span><span class="lab r" data-i18n="b_on">ON</span>
+      </button>
+    </div>
+    <p class="hint" data-i18n="hint_fx">Effects apply to every token and are saved with presets. TONE, GLITCH, RGB and GRAIN change the portrait; VIGNETTE and SCANLINES cover the whole cut-out.</p>
+    <div class="fx-body" id="fxBody">
+      <hr class="divider" />
+      <div class="fx-toggle">
+        <span class="fx-label" data-i18n="l_tone">// TONE:</span>
+        <select class="scale-select" data-fx="tone" aria-label="tone">
+          <option value="none" data-i18n="o_none">NONE</option>
+          <option value="mono" data-i18n="o_mono">MONO</option>
+          <option value="neon" data-i18n="o_neon">NEON</option>
+          <option value="holo" data-i18n="o_holo">HOLO</option>
+        </select>
+      </div>
+      <div class="fx-toggle fx-param" data-needs="tone">
+        <span class="fx-label"><span data-i18n="l_mix">MIX:</span> <b class="val" data-val="fx.toneMix"></b></span>
+        <input type="range" class="potency-slider" data-fx="toneMix" min="0" max="100" step="1" aria-label="tone mix" />
+      </div>
+
+      <hr class="divider" />
+      <div class="fx-toggle">
+        <span class="fx-label" data-i18n="l_glitch">// GLITCH:</span>
+        <button class="side-switch" type="button" data-fx="glitch" data-pos="left" aria-label="glitch">
+          <span class="thumb"></span><span class="lab l" data-i18n="b_off">OFF</span><span class="lab r" data-i18n="b_on">ON</span>
+        </button>
+      </div>
+      <div class="fx-toggle fx-param" data-needs="glitch">
+        <span class="fx-label"><span data-i18n="l_amount">AMOUNT:</span> <b class="val" data-val="fx.glitchAmt"></b></span>
+        <input type="range" class="potency-slider" data-fx="glitchAmt" min="0" max="100" step="1" aria-label="glitch amount" />
+      </div>
+      <div class="fx-toggle fx-param" data-needs="glitch">
+        <span class="fx-label" data-i18n="l_seed">SEED:</span>
+        <button id="fxReroll" class="btn btn-sm btn-alt fx-reroll" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_reroll">REROLL</button>
+      </div>
+
+      <hr class="divider" />
+      <div class="fx-toggle">
+        <span class="fx-label" data-i18n="l_rgb">// RGB SPLIT:</span>
+        <button class="side-switch" type="button" data-fx="rgb" data-pos="left" aria-label="RGB split">
+          <span class="thumb"></span><span class="lab l" data-i18n="b_off">OFF</span><span class="lab r" data-i18n="b_on">ON</span>
+        </button>
+      </div>
+      <div class="fx-toggle fx-param" data-needs="rgb">
+        <span class="fx-label"><span data-i18n="l_shift">SHIFT:</span> <b class="val" data-val="fx.rgbAmt"></b></span>
+        <input type="range" class="potency-slider" data-fx="rgbAmt" min="1" max="16" step="1" aria-label="RGB shift" />
+      </div>
+
+      <hr class="divider" />
+      <div class="fx-toggle">
+        <span class="fx-label" data-i18n="l_grain">// GRAIN:</span>
+        <button class="side-switch" type="button" data-fx="grain" data-pos="left" aria-label="grain">
+          <span class="thumb"></span><span class="lab l" data-i18n="b_off">OFF</span><span class="lab r" data-i18n="b_on">ON</span>
+        </button>
+      </div>
+      <div class="fx-toggle fx-param" data-needs="grain">
+        <span class="fx-label"><span data-i18n="l_amount">AMOUNT:</span> <b class="val" data-val="fx.grainAmt"></b></span>
+        <input type="range" class="potency-slider" data-fx="grainAmt" min="0" max="100" step="1" aria-label="grain amount" />
+      </div>
+
+      <hr class="divider" />
+      <div class="fx-toggle">
+        <span class="fx-label" data-i18n="l_vig">// VIGNETTE:</span>
+        <button class="side-switch" type="button" data-fx="vig" data-pos="left" aria-label="vignette">
+          <span class="thumb"></span><span class="lab l" data-i18n="b_off">OFF</span><span class="lab r" data-i18n="b_on">ON</span>
+        </button>
+      </div>
+      <div class="fx-toggle fx-param" data-needs="vig">
+        <span class="fx-label" data-i18n="l_colour">COLOUR:</span>
+        <span class="fill-group"><button class="fill-swatch" type="button" data-augmented-ui="tl-clip br-clip border" data-fxfor="fxVigColor" aria-label="vignette colour"></button></span>
+        <input type="color" id="fxVigColor" class="fill-input" data-fx="vigColor" aria-label="vignette colour" />
+      </div>
+      <div class="fx-toggle fx-param" data-needs="vig">
+        <span class="fx-label"><span data-i18n="l_strength">STRENGTH:</span> <b class="val" data-val="fx.vigAmt"></b></span>
+        <input type="range" class="potency-slider" data-fx="vigAmt" min="0" max="100" step="1" aria-label="vignette strength" />
+      </div>
+
+      <hr class="divider" />
+      <div class="fx-toggle">
+        <span class="fx-label" data-i18n="l_scan">// SCANLINES:</span>
+        <button class="side-switch" type="button" data-fx="scan" data-pos="left" aria-label="scanlines">
+          <span class="thumb"></span><span class="lab l" data-i18n="b_off">OFF</span><span class="lab r" data-i18n="b_on">ON</span>
+        </button>
+      </div>
+      <div class="fx-toggle fx-param" data-needs="scan">
+        <span class="fx-label"><span data-i18n="l_strength">STRENGTH:</span> <b class="val" data-val="fx.scanAmt"></b></span>
+        <input type="range" class="potency-slider" data-fx="scanAmt" min="0" max="100" step="1" aria-label="scanline strength" />
+      </div>
+      <div class="fx-toggle fx-param" data-needs="scan">
+        <span class="fx-label"><span data-i18n="l_spacing">SPACING:</span> <b class="val" data-val="fx.scanGap"></b></span>
+        <input type="range" class="potency-slider" data-fx="scanGap" min="2" max="12" step="1" aria-label="scanline spacing" />
+      </div>
+    </div>
+    <div class="btn-row fx-reset">
+      <button id="fxReset" class="btn btn-sm btn-warn" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_fxreset">RESET FX</button>
+    </div>
   </div>
 </aside>
 

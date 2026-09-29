@@ -5,8 +5,8 @@
   // same pipeline. Transforms are stored as fractions of N (resolution-free).
   //
   // Layer order:
-  //   U  portrait layer — the image with transform and adjustments (unclipped)
-  //   L  cut-out layer  — background + U, clipped to the shape/mask
+  //   U  portrait layer — the image with transform, adjustments and pixel FX (unclipped)
+  //   L  cut-out layer  — background + U + FX overlays, clipped to the shape/mask
   //   B  frame layer    — built-in frame or tinted custom PNG (+ opacity)
   //   G  glow halo      — B's blur minus B itself, optionally split at the frame's outer edge
   //   then pop-out (top half of U over the frame), label, badge. ----
@@ -18,7 +18,7 @@
     let c = pool[key];
     if (!c) c = pool[key] = document.createElement('canvas');
     if (c.width !== N || c.height !== N) { c.width = N; c.height = N; }
-    const x = c.getContext('2d');
+    const x = c.getContext('2d', { willReadFrequently: key === 'U' }); // U gets FX pixel passes
     x.setTransform(1, 0, 0, 1, 0, 0);
     x.globalAlpha = 1; x.globalCompositeOperation = 'source-over'; x.filter = 'none';
     x.shadowBlur = 0; x.shadowColor = 'transparent';
@@ -38,6 +38,19 @@
     return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.55 ? '#050507' : '#e8e8ee';
   }
   EIDOLON.ink = ink;
+  const rgba = (hex, a) => { const [r, g, b] = rgb(hex); return `rgba(${r},${g},${b},${a})`; };
+  // Deterministic PRNG, so GLITCH slices and GRAIN don't flicker between redraws.
+  function rng(seedStr) {
+    let s = 0;
+    for (let i = 0; i < seedStr.length; i++) s = Math.imul(s ^ seedStr.charCodeAt(i), 2654435761) >>> 0;
+    return () => {
+      s = (s + 0x6d2b79f5) >>> 0;
+      let t = s;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
   const font = (px) => `700 ${px}px "JetBrains Mono", monospace`;
   function setSpacing(ctx, px) { if ('letterSpacing' in ctx) ctx.letterSpacing = px + 'px'; }
 
@@ -64,7 +77,7 @@
 
   // ---- U: the portrait with transform + adjustments ----
   function portraitLayer(item, g) {
-    const N = g.N, c = scratch('U', N), x = c.getContext('2d');
+    const N = g.N, c = scratch('U', N), x = c.getContext('2d', { willReadFrequently: true });
     const src = item.src, tf = item.tf, s = baseScale(src, g) * tf.zoom;
     x.save();
     x.translate(g.cx + tf.x * N, g.cy + tf.y * N);
@@ -74,7 +87,99 @@
     x.imageSmoothingQuality = 'high';
     x.drawImage(src, (-src.width * s) / 2, (-src.height * s) / 2, src.width * s, src.height * s);
     x.restore();
+    if (S.fx.on) portraitFx(x, N, item);
     return c;
+  }
+
+  // ---- FX (S.fx, gated by the master switch). TONE / GLITCH / RGB / GRAIN are
+  // pixel passes on the portrait layer U; VIGNETTE / SCANLINES are drawn over
+  // the whole cut-out in cutoutFx(). ----
+  function portraitFx(x, N, item) {
+    const f = S.fx;
+    const tone = f.tone !== 'none' && f.toneMix > 0;
+    const glitch = f.glitch && f.glitchAmt > 0, split = f.rgb && f.rgbAmt > 0, grain = f.grain && f.grainAmt > 0;
+    if (!tone && !glitch && !split && !grain) return;
+    const img = x.getImageData(0, 0, N, N), d = img.data;
+    if (tone) toneMap(d, N, f);
+    if (glitch || split) resample(d, N, f, item, glitch, split);
+    if (grain) addGrain(d, N, f);
+    x.putImageData(img, 0, 0);
+  }
+  // MONO greyscale · NEON gradient map (near-black -> frame colour -> accent) ·
+  // HOLO projection in the frame colour with scan banding; blended by MIX.
+  function toneMap(d, N, f) {
+    const m = f.toneMix / 100, dark = [5, 5, 7], a = rgb(S.style.frameColor), b = rgb(S.style.accentColor);
+    const period = Math.max(2, Math.round(N / 150));
+    for (let i = 0, px = 0; i < d.length; i += 4, px++) {
+      const r = d[i], g = d[i + 1], bl = d[i + 2], al = d[i + 3];
+      const l = (0.299 * r + 0.587 * g + 0.114 * bl) / 255;
+      let tr, tg, tb, ta = al;
+      if (f.tone === 'mono') {
+        tr = tg = tb = l * 255;
+      } else if (f.tone === 'neon') {
+        const k0 = Math.min(1, Math.max(0, (l - 0.5) * 1.25 + 0.5));
+        const [p, q, k] = k0 < 0.5 ? [dark, a, k0 * 2] : [a, b, (k0 - 0.5) * 2];
+        tr = p[0] + (q[0] - p[0]) * k; tg = p[1] + (q[1] - p[1]) * k; tb = p[2] + (q[2] - p[2]) * k;
+      } else {
+        const band = Math.floor(px / N) % period < period / 2 ? 1 : 0.55, ll = 0.25 + l * 1.05;
+        tr = a[0] * ll + 40 * ll; tg = a[1] * ll + 40 * ll; tb = a[2] * ll + 40 * ll;
+        ta = al * 0.9 * band;
+      }
+      d[i] = r + (tr - r) * m; d[i + 1] = g + (tg - g) * m; d[i + 2] = bl + (tb - bl) * m;
+      d[i + 3] = al + (ta - al) * m;
+    }
+  }
+  // GLITCH: seeded horizontal slices shifted sideways; RGB: red and blue
+  // sampled left / right of green. One resample pass does both.
+  function resample(d, N, f, item, glitch, split) {
+    const src = new Uint8ClampedArray(d), shift = new Int32Array(N);
+    if (glitch) {
+      const amt = f.glitchAmt / 100, rand = rng((item ? item.id : '') + ':' + f.glitchSeed);
+      const count = 3 + Math.round(amt * 9);
+      for (let k = 0; k < count; k++) {
+        const y0 = Math.floor(rand() * N), h = Math.max(1, Math.floor((0.008 + rand() * 0.05) * N));
+        const dx = Math.round((rand() - 0.5) * 2 * amt * 0.1 * N);
+        for (let y = y0; y < Math.min(N, y0 + h); y++) shift[y] = dx;
+      }
+    }
+    const sh = split ? Math.max(1, Math.round((f.rgbAmt * N) / 512)) : 0;
+    const at = (y, xx) => (y * N + Math.min(N - 1, Math.max(0, xx))) * 4;
+    for (let y = 0; y < N; y++) {
+      for (let xx = 0; xx < N; xx++) {
+        const i = (y * N + xx) * 4, xs = xx - shift[y];
+        const ir = at(y, xs - sh), ig = at(y, xs), ib = at(y, xs + sh);
+        d[i] = src[ir]; d[i + 1] = src[ig + 1]; d[i + 2] = src[ib + 2];
+        d[i + 3] = Math.max(src[ir + 3], src[ig + 3], src[ib + 3]);
+      }
+    }
+  }
+  // GRAIN: monochrome noise on visible pixels.
+  function addGrain(d, N, f) {
+    const rand = rng('grain:' + N), a = f.grainAmt * 1.1;
+    for (let i = 0; i < d.length; i += 4) {
+      if (!d[i + 3]) continue;
+      const n = (rand() - 0.5) * a;
+      d[i] += n; d[i + 1] += n; d[i + 2] += n;
+    }
+  }
+  // VIGNETTE (tinted edge fade) + SCANLINES, drawn source-atop over the
+  // background + portrait, before the cut-out clip.
+  function cutoutFx(x, g) {
+    const f = S.fx, N = g.N;
+    x.save();
+    x.globalCompositeOperation = 'source-atop';
+    if (f.vig && f.vigAmt > 0) {
+      const gr = x.createRadialGradient(g.cx, g.cy, g.R * 0.35, g.cx, g.cy, g.R);
+      gr.addColorStop(0, rgba(f.vigColor, 0));
+      gr.addColorStop(1, rgba(f.vigColor, f.vigAmt / 100));
+      x.fillStyle = gr; x.fillRect(0, 0, N, N);
+    }
+    if (f.scan && f.scanAmt > 0) {
+      const p = Math.max(2, Math.round((f.scanGap * N) / 512)), h = Math.max(1, Math.round(p / 2));
+      x.fillStyle = `rgba(0,0,0,${f.scanAmt / 100})`;
+      for (let y = 0; y < N; y += p) x.fillRect(0, y, N, h);
+    }
+    x.restore();
   }
 
   // ---- EXTEND fill: the portrait's outermost rows/columns stretched outward
@@ -113,6 +218,7 @@
       x.fillStyle = st.bgColor; x.fillRect(0, 0, N, N);
     }
     if (U) x.drawImage(U, 0, 0);
+    if (S.fx.on) cutoutFx(x, g);
     clipCutout(x, g, F);
     return c;
   }

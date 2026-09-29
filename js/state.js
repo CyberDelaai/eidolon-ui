@@ -14,6 +14,17 @@ EIDOLON.const = {
 // must never break the app.
 EIDOLON.save = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
 
+// Default FX settings (the FX side panel). Shared by every token, saved with presets.
+EIDOLON.newFx = () => ({
+  on: false,                                   // master switch
+  tone: 'none', toneMix: 100,                  // 'none' | 'mono' | 'neon' | 'holo', mix %
+  glitch: false, glitchAmt: 40, glitchSeed: 1, // displaced horizontal slices
+  rgb: false, rgbAmt: 4,                       // RGB channel split, px at 512
+  grain: false, grainAmt: 25,                  // film grain %
+  vig: false, vigColor: '#000000', vigAmt: 60, // vignette (tinted), %
+  scan: false, scanAmt: 30, scanGap: 4,        // scanlines: strength %, spacing px at 512
+});
+
 // Default per-token image transform / adjustments (each roster item gets a copy).
 EIDOLON.newTransform = () => ({ x: 0, y: 0, zoom: 1, rot: 0, flip: false });
 EIDOLON.newAdjust = () => ({ bright: 100, contrast: 100, sat: 100, hue: 0 });
@@ -42,6 +53,9 @@ EIDOLON.state = {
     popout: false,          // draw the (transparent) portrait's top half over the frame
     badgePos: 'br',         // 'tl' | 'tr' | 'bl' | 'br'
   },
+
+  // -- FX: effects over the portrait / cut-out (persisted as eidolon:fx) --
+  fx: EIDOLON.newFx(),
 
   // -- reference overlay: preview-only guide, never exported (persisted as eidolon:ref) --
   ref: { kind: 'off', opacity: 40 }, // kind: 'off' | EIDOLON.refOrder key | 'custom'

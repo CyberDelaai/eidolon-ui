@@ -38,6 +38,10 @@ client-side; your images are never uploaded.
   the frame.
 - **Margin** — 0% (the token fills the whole image) up to 10% empty space on
   each side.
+- **FX** — a second slide-out tab with a master switch and stackable effects,
+  each with its own settings: TONE (MONO / NEON gradient-map / HOLO, with mix),
+  GLITCH (amount + reroll seed), RGB SPLIT, GRAIN, a tinted VIGNETTE and
+  SCANLINES (strength + spacing). Shared by every token and saved with presets.
 - **Presets** — a slide-out PRESETS tab on the left edge: name the current look
   (ENEMIES, PCs, NPCs…) and save it, then re-apply it in one click. Presets hold
   the global look (frame, colours, glow, margin, background, label and badge
