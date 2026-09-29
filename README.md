@@ -16,6 +16,10 @@ client-side; your images are never uploaded.
   colour adjustments, name and badge. Click a thumbnail to edit it; the roster,
   your custom frame/mask and all settings survive a reload (IndexedDB +
   localStorage, never uploaded).
+- **Reference overlay** — a bar above the preview with person silhouettes (head &
+  shoulders, close-up head, full body, profile) or your own reference image,
+  laid over the token at adjustable opacity to line portraits up consistently.
+  Preview only — it never appears in exported images.
 - **Framing** — drag to pan, Ctrl+wheel to zoom (around the cursor), Shift+wheel to
   rotate, mirror, arrow keys to nudge, `[` `]` to rotate, `0` to reset.
 - **12 procedural frames** — RING, DOUBLE, SEGMENT, GLITCH, CIRCUIT, SQUARE,
@@ -27,8 +31,7 @@ client-side; your images are never uploaded.
   (white keeps, black cuts) for any cut-out shape.
 - **Background** — solid colour, EXTEND (the portrait's edges stretched and
   blurred into the empty space, like GRIDMAP's VIBRANT fill), or transparent.
-- **Effects** — per-token brightness / contrast / saturation / hue, a tinted
-  vignette overlay and scanlines.
+- **Adjustments** — per-token brightness / contrast / saturation / hue.
 - **Labels** — the token's name as a clipped name PLATE or ARC text, and a corner
   **badge** (number / letter) at any corner.
 - **Pop-out** — the top half of a transparent-background portrait breaks out over

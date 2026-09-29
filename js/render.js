@@ -6,7 +6,7 @@
   //
   // Layer order:
   //   U  portrait layer — the image with transform and adjustments (unclipped)
-  //   L  cut-out layer  — background + U + overlay/scanlines, clipped to the shape/mask
+  //   L  cut-out layer  — background + U, clipped to the shape/mask
   //   B  frame layer    — built-in frame or tinted custom PNG (+ opacity)
   //   G  glow halo      — B's blur minus B itself, optionally split at the frame's outer edge
   //   then pop-out (top half of U over the frame), label, badge. ----
@@ -32,7 +32,6 @@
     const n = parseInt(h.length === 3 ? h.replace(/./g, '$&$&') : h, 16) || 0;
     return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
   }
-  const rgba = (hex, a) => { const [r, g, b] = rgb(hex); return `rgba(${r},${g},${b},${a})`; };
   // Dark or light ink for text sitting on a `hex` fill.
   function ink(hex) {
     const [r, g, b] = rgb(hex);
@@ -105,7 +104,7 @@
     x.restore();
   }
 
-  // ---- L: background + portrait + overlay, clipped to the cut-out ----
+  // ---- L: background + portrait, clipped to the cut-out ----
   function cutoutLayer(item, U, g, F) {
     const N = g.N, st = S.style, c = scratch('L', N), x = c.getContext('2d');
     if (st.bgMode === 'extend' && item) {
@@ -114,31 +113,29 @@
       x.fillStyle = st.bgColor; x.fillRect(0, 0, N, N);
     }
     if (U) x.drawImage(U, 0, 0);
-    x.globalCompositeOperation = 'source-atop';
-    if (st.overlayOpacity > 0) {
-      const a = st.overlayOpacity / 100;
-      const gr = x.createRadialGradient(g.cx, g.cy, g.R * 0.25, g.cx, g.cy, g.R);
-      gr.addColorStop(0, rgba(st.overlayColor, a * 0.15));
-      gr.addColorStop(1, rgba(st.overlayColor, a));
-      x.fillStyle = gr; x.fillRect(0, 0, N, N);
-    }
-    if (st.scanlines) {
-      const p = Math.max(2, Math.round(N / 128));
-      x.fillStyle = 'rgba(0,0,0,0.3)';
-      for (let y = 0; y < N; y += p) x.fillRect(0, y, N, Math.max(1, p / 2));
-    }
-    // clip to the cut-out: the custom mask if loaded, else the frame's shape
+    clipCutout(x, g, F);
+    return c;
+  }
+
+  // Keep only what lies inside the cut-out: the custom mask if loaded, else
+  // the frame's shape. Leaves the context in source-over.
+  function clipCutout(x, g, F) {
+    x.save();
+    x.setTransform(1, 0, 0, 1, 0, 0);
+    x.globalAlpha = 1;
     x.globalCompositeOperation = 'destination-in';
     if (S.customMask) {
-      x.drawImage(S.customMask, 0, 0, N, N);
+      x.drawImage(S.customMask, 0, 0, g.N, g.N);
     } else {
-      const inset = st.frame === 'none' ? 0 : g.t * (F.inset != null ? F.inset : 0.5);
+      const inset = S.style.frame === 'none' ? 0 : g.t * (F.inset != null ? F.inset : 0.5);
       x.fillStyle = '#000'; x.beginPath();
       EIDOLON.shapePath(x, F.shape, g.cx, g.cy, g.R, inset);
       x.fill();
     }
-    return c;
+    x.restore();
   }
+  // For preview-only overlays (the reference): clip an N×N canvas to the cut-out.
+  EIDOLON.applyCutout = (ctx, N) => clipCutout(ctx, geom(N), frameDef());
 
   // ---- B: the frame ----
   function frameLayer(g, F) {

@@ -52,6 +52,7 @@
   // ---- persistence: style/output in localStorage, roster + assets in IndexedDB ----
   const saveStyle = debounce(() => EIDOLON.save('eidolon:style', JSON.stringify(S.style)), 150);
   const saveOut = () => EIDOLON.save('eidolon:out', JSON.stringify(S.out));
+  const saveRef = () => EIDOLON.save('eidolon:ref', JSON.stringify(S.ref));
   const persistTimers = {};
   function persistItem(item) {
     clearTimeout(persistTimers[item.id]);
@@ -74,6 +75,8 @@
     const read = (k) => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
     mergeInto(S.style, read('eidolon:style'));
     mergeInto(S.out, read('eidolon:out'));
+    mergeInto(S.ref, read('eidolon:ref'));
+    if (!['off', 'custom'].concat(EIDOLON.refOrder).includes(S.ref.kind)) S.ref.kind = 'off';
     if (S.style.frame !== 'custom' && !EIDOLON.frames[S.style.frame]) S.style.frame = 'ring';
     if (S.style.bgMode === 'blur') S.style.bgMode = 'extend'; // the old BLUR fill became EXTEND
   }
@@ -95,6 +98,9 @@
     }).catch(() => {});
     EIDOLON.idb.get('assets', 'frame').then((b) => b && decode(b).then((img) => {
       S.customFrame = toSource(img, 1024); buildFrameGrid(); updateButtons(); styleChanged();
+    })).catch(() => {});
+    EIDOLON.idb.get('assets', 'ref').then((b) => b && decode(b).then((img) => {
+      S.customRef = toSource(img, 1024); buildRefBar(); requestDraw();
     })).catch(() => {});
     EIDOLON.idb.get('assets', 'mask').then((b) => b && decode(b).then((img) => {
       S.customMask = maskFrom(img); updateButtons(); styleChanged();
@@ -254,6 +260,7 @@
       drawQueued = false;
       const cv = $('tokenCanvas');
       EIDOLON.render(cv.getContext('2d'), cv.width, cur());
+      drawRef();
       $('stage').classList.toggle('has-image', !!cur());
     });
   }
@@ -359,6 +366,100 @@
       if (!fn) return;
       e.preventDefault(); fn(); itemChanged(it);
     });
+  }
+
+  // ---- reference overlay (preview only — drawn on #refCanvas, never exported) ----
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  function refIcon(kind) {
+    const svg = document.createElementNS(SVG_NS, 'svg');
+    svg.setAttribute('viewBox', '-112 -112 224 224');
+    svg.setAttribute('aria-hidden', 'true');
+    const make = (tag, attrs) => {
+      const el = document.createElementNS(SVG_NS, tag);
+      Object.keys(attrs).forEach((k) => el.setAttribute(k, attrs[k]));
+      return el;
+    };
+    const add = (tag, attrs) => svg.appendChild(make(tag, attrs));
+    const ring = { cx: 0, cy: 0, r: 100, fill: 'none', stroke: 'currentColor', 'stroke-width': 7, opacity: 0.45 };
+    if (kind === 'off') {
+      add('circle', ring);
+      add('line', { x1: -70, y1: 70, x2: 70, y2: -70, stroke: 'currentColor', 'stroke-width': 12 });
+    } else if (kind === 'custom') {
+      add('rect', { x: -80, y: -80, width: 160, height: 160, fill: 'none', stroke: 'currentColor', 'stroke-width': 10, 'stroke-dasharray': '22 14' });
+      add('path', { d: 'M 0 -45 L 0 45 M -45 0 L 45 0', stroke: 'currentColor', 'stroke-width': 14 });
+    } else {
+      add('circle', ring);
+      // clip the silhouette to the ring, like the overlay is clipped to the cut-out
+      add('clipPath', { id: 'refclip-' + kind }).appendChild(make('circle', { cx: 0, cy: 0, r: 100 }));
+      add('path', { d: EIDOLON.refShapes[kind], fill: 'currentColor', 'clip-path': `url(#refclip-${kind})` });
+    }
+    return svg;
+  }
+  function buildRefBar() {
+    const box = $('refTiles');
+    box.textContent = '';
+    ['off'].concat(EIDOLON.refOrder, ['custom']).forEach((k) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'ref-tile'; b.dataset.ref = k;
+      b.setAttribute('role', 'radio');
+      if (k === 'custom' && S.customRef) {
+        const c = document.createElement('canvas'), N = Math.round(28 * dpr());
+        c.width = N; c.height = N;
+        c.getContext('2d').drawImage(S.customRef, 0, 0, N, N);
+        b.appendChild(c);
+        const x = document.createElement('span');
+        x.className = 'roster-x'; x.textContent = '×'; x.dataset.i18nTitle = 't_ref_clear';
+        x.addEventListener('click', (e) => { e.stopPropagation(); clearCustomRef(); });
+        b.appendChild(x);
+      } else {
+        b.appendChild(refIcon(k));
+      }
+      b.addEventListener('click', () => {
+        if (k === 'custom' && (!S.customRef || S.ref.kind === 'custom')) { $('refInput').click(); return; }
+        S.ref.kind = k; saveRef(); syncRef();
+      });
+      box.appendChild(b);
+    });
+    syncRef();
+  }
+  function syncRef() {
+    document.querySelectorAll('.ref-tile').forEach((b) => {
+      const on = b.dataset.ref === S.ref.kind;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-checked', on ? 'true' : 'false');
+      b.title = t('t_ref_' + b.dataset.ref);
+      const x = b.querySelector('.roster-x');
+      if (x) x.title = t('t_ref_clear');
+    });
+    $('refOpacity').value = S.ref.opacity;
+    $('refOpVal').textContent = S.ref.opacity + '%';
+    $('refOpacity').disabled = S.ref.kind === 'off';
+    drawRef();
+  }
+  function drawRef() {
+    const rc = $('refCanvas'), cv = $('tokenCanvas');
+    if (rc.width !== cv.width) { rc.width = cv.width; rc.height = cv.height; }
+    EIDOLON.drawReference(rc.getContext('2d'), rc.width);
+  }
+  function setCustomRef(blob) {
+    decode(blob).then((img) => {
+      S.customRef = toSource(img, 1024);
+      S.ref.kind = 'custom'; saveRef();
+      EIDOLON.idb.put('assets', 'ref', blob).catch(() => {});
+      buildRefBar();
+      setStatus(t('s_ref'), 'ok');
+    }).catch(() => setStatus(t('s_loadfail'), 'warn'));
+  }
+  function clearCustomRef() {
+    S.customRef = null;
+    if (S.ref.kind === 'custom') { S.ref.kind = 'off'; saveRef(); }
+    EIDOLON.idb.del('assets', 'ref').catch(() => {});
+    buildRefBar();
+  }
+  function setupRefBar() {
+    $('refOpacity').addEventListener('input', (e) => { S.ref.opacity = +e.target.value; saveRef(); syncRef(); });
+    $('refInput').addEventListener('change', (e) => { if (e.target.files[0]) setCustomRef(e.target.files[0]); e.target.value = ''; });
+    buildRefBar();
   }
 
   // ---- frame grid + palette ----
@@ -520,7 +621,7 @@
   }
 
   const VAL_FMT = {
-    thickness: (v) => v + '%', margin: (v) => v + '%', frameOpacity: (v) => v + '%', overlayOpacity: (v) => v + '%',
+    thickness: (v) => v + '%', margin: (v) => v + '%', frameOpacity: (v) => v + '%',
     'tf.zoom': (v) => Math.round(v * 100) + '%', 'tf.rot': (v) => Math.round(v) + '°',
     'adj.bright': (v) => v + '%', 'adj.contrast': (v) => v + '%', 'adj.sat': (v) => v + '%', 'adj.hue': (v) => v + '°',
   };
@@ -652,6 +753,7 @@
   function init() {
     restore();
     buildPalette();
+    setupRefBar();
     buildFrameGrid();
     bindControls();
     setupStage();
@@ -665,7 +767,7 @@
     if (document.fonts && document.fonts.load) {
       document.fonts.load('700 32px "JetBrains Mono"').then(() => { requestDraw(); rosterChanged(); }).catch(() => {});
     }
-    document.addEventListener('eidolon:lang', () => { updateTexts(); buildRoster(); });
+    document.addEventListener('eidolon:lang', () => { updateTexts(); buildRoster(); syncRef(); });
   }
 
   document.addEventListener('DOMContentLoaded', init);

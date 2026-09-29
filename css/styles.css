@@ -358,6 +358,32 @@
   .canvas-footer { text-align: center; margin-top: -4px; }
   .canvas-hint { font-size: 10px; letter-spacing: 1.5px; color: var(--dim); text-transform: uppercase; }
 
+  /* REFERENCE bar above the stage: silhouette picker + opacity */
+  .ref-bar {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 10px 14px;
+    background: var(--panel);
+    --aug-border-all: 1px; --aug-border-bg: rgba(var(--main-rgb),0.35);
+    --aug-tl: 10px; --aug-br: 10px;
+  }
+  .ref-bar .ref-label { cursor: help; }
+  .ref-tiles { display: flex; gap: 6px; }
+  .ref-tile {
+    position: relative; width: 36px; height: 36px; padding: 3px; line-height: 0; cursor: pointer;
+    background: var(--bg); color: var(--main); border: 1px solid rgba(var(--main-rgb),0.2);
+    transition: border-color .12s, box-shadow .12s, color .12s, background .12s;
+  }
+  .ref-tile svg, .ref-tile canvas { width: 100%; height: 100%; display: block; }
+  .ref-tile:hover { border-color: rgba(var(--main-rgb),0.6); }
+  .ref-tile.active {
+    border-color: var(--accent); color: var(--accent); background: rgba(var(--accent-rgb),0.08);
+    box-shadow: 0 0 8px rgba(var(--accent-rgb),0.45);
+  }
+  .ref-tile .roster-x { width: 14px; height: 14px; line-height: 13px; font-size: 12px; }
+  .ref-tile:hover .roster-x { opacity: 1; }
+  .ref-op { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+  /* the overlay canvas sits exactly on the preview and never takes input */
+  .token-wrap .ref-canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
+
   /* roster: every loaded token as a live thumbnail */
   .roster { display: flex; flex-wrap: wrap; gap: 10px; min-height: 92px; }
   .roster-item, .roster-add {

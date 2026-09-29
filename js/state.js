@@ -37,14 +37,14 @@ EIDOLON.state = {
     glow: 'all',            // neon bloom: 'inner' | 'outer' | 'all' | 'off'
     bgMode: 'color',        // 'color' | 'extend' | 'transparent'
     bgColor: '#0b0b10',
-    overlayColor: '#ff003c',
-    overlayOpacity: 0,      // % — tinted vignette over the portrait
-    scanlines: false,
     labelStyle: 'none',     // 'none' | 'plate' | 'arc'
     labelColor: '#050507',
     popout: false,          // draw the (transparent) portrait's top half over the frame
     badgePos: 'br',         // 'tl' | 'tr' | 'bl' | 'br'
   },
+
+  // -- reference overlay: preview-only guide, never exported (persisted as eidolon:ref) --
+  ref: { kind: 'off', opacity: 40 }, // kind: 'off' | EIDOLON.refOrder key | 'custom'
 
   // -- output prefs (persisted as eidolon:out) --
   out: { size: 512, format: 'png', setCount: 4 },
@@ -57,4 +57,5 @@ EIDOLON.state = {
   // -- custom assets (persisted in IndexedDB) --
   customFrame: null,        // source canvas of the uploaded frame PNG
   customMask: null,         // alpha-mask canvas derived from the uploaded mask
+  customRef: null,          // source canvas of the uploaded reference image
 };
