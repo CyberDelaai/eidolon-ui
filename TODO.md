@@ -12,4 +12,3 @@ Items are removed from the list once they are implemented / resolved (no archive
 
 ## SMALL (Z version bump)
 
-1. Confirm the tagline (`tag` / `tag_alt` in `js/i18n.js`) — currently placeholder copy.

@@ -84,7 +84,7 @@
       l_scan: '// SCANLINES:',
       l_spacing: 'SPACING:',
       b_fxreset: 'RESET FX',
-      tag: 'TOKEN MAKER', tag_alt: 'SUMMON YOUR ECHO',
+      tag: 'TOKEN MAKER', tag_alt: 'PERSONAFIX',
     },
     ru: {
       h_source: '// ИСТОЧНИК', b_load: 'ФАЙЛ', b_clear: 'ОЧИСТИТЬ', b_sure: 'ТОЧНО?', b_go: 'ОК',
@@ -163,7 +163,7 @@
       l_scan: '// РАЗВЁРТКА:',
       l_spacing: 'ШАГ:',
       b_fxreset: 'СБРОС FX',
-      tag: 'СОЗДАНИЕ ТОКЕНОВ', tag_alt: 'ПРИЗОВИ СВОЁ ЭХО',
+      tag: 'КОНСТРУКТОР ТОКЕНОВ', tag_alt: 'PERSONAFIX',
     },
     fr: {
       h_source: '// SOURCE', b_load: 'CHARGER', b_clear: 'VIDER', b_sure: 'SÛR ?', b_go: 'OK',
@@ -242,7 +242,7 @@
       l_scan: '// BALAYAGE :',
       l_spacing: 'ESPACEMENT :',
       b_fxreset: 'RÉINIT. FX',
-      tag: 'CRÉATEUR DE JETONS', tag_alt: 'INVOQUE TON ÉCHO',
+      tag: 'CRÉATEUR DE JETONS', tag_alt: 'PERSONAFIX',
     },
     de: {
       h_source: '// QUELLE', b_load: 'LADEN', b_clear: 'LEEREN', b_sure: 'SICHER?', b_go: 'OK',
@@ -321,7 +321,7 @@
       l_scan: '// SCANLINES:',
       l_spacing: 'ABSTAND:',
       b_fxreset: 'FX ZURÜCK',
-      tag: 'TOKEN-ERSTELLER', tag_alt: 'RUF DEIN ECHO',
+      tag: 'TOKEN-ERSTELLER', tag_alt: 'PERSONAFIX',
     },
     es: {
       h_source: '// ORIGEN', b_load: 'CARGAR', b_clear: 'VACIAR', b_sure: '¿SEGURO?', b_go: 'OK',
@@ -400,7 +400,7 @@
       l_scan: '// ESCANEO:',
       l_spacing: 'SEPARACIÓN:',
       b_fxreset: 'REINICIAR FX',
-      tag: 'CREADOR DE TOKENS', tag_alt: 'INVOCA TU ECO',
+      tag: 'CREADOR DE TOKENS', tag_alt: 'PERSONAFIX',
     },
     it: {
       h_source: '// ORIGINE', b_load: 'CARICA', b_clear: 'SVUOTA', b_sure: 'SICURO?', b_go: 'OK',
@@ -479,7 +479,7 @@
       l_scan: '// SCANSIONE:',
       l_spacing: 'SPAZIATURA:',
       b_fxreset: 'AZZERA FX',
-      tag: 'CREATORE DI TOKEN', tag_alt: 'EVOCA IL TUO ECO',
+      tag: 'CREATORE DI TOKEN', tag_alt: 'PERSONAFIX',
     },
     ja: {
       h_source: '// ソース', b_load: '読込', b_clear: 'クリア', b_sure: '本当に？', b_go: 'OK',
@@ -558,7 +558,7 @@
       l_scan: '// 走査線:',
       l_spacing: '間隔:',
       b_fxreset: 'FXリセット',
-      tag: 'トークンメーカー', tag_alt: '残響を呼べ',
+      tag: 'トークンメーカー', tag_alt: 'PERSONAFIX',
     },
     zh: {
       h_source: '// 来源', b_load: '载入', b_clear: '清空', b_sure: '确定？', b_go: '确定',
@@ -637,7 +637,7 @@
       l_scan: '// 扫描线:',
       l_spacing: '间距:',
       b_fxreset: '重置特效',
-      tag: '令牌制作器', tag_alt: '召唤你的回响',
+      tag: '令牌制作器', tag_alt: 'PERSONAFIX',
     },
   };
   let lang = 'en';

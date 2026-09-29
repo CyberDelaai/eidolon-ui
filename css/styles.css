@@ -426,8 +426,8 @@
   .side-panel.peer-open { visibility: hidden; }
   /* FX tab sits under PRESETS (whose tab can grow to ~180px for long labels) */
   .side-panel[data-panel="fx"] .side-toggle { top: 290px; }
-  /* tab lights up cyan while any effect is live */
-  .side-toggle.lit { color: var(--cyan); --aug-border-bg: rgba(var(--main-rgb),0.7); box-shadow: 0 0 12px rgba(var(--main-rgb),0.35); }
+  /* tab stays yellow and glows brighter while any effect is live */
+  .side-toggle.lit { color: var(--yellow); --aug-border-bg: rgba(var(--accent-rgb),0.9); box-shadow: 0 0 14px rgba(var(--accent-rgb),0.45); text-shadow: 0 0 6px rgba(var(--accent-rgb),0.7); }
   .side-toggle {
     position: absolute; left: 100%; top: 90px; width: 32px; min-height: 150px; /* grows with long labels (FR) */
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
