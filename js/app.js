@@ -17,14 +17,16 @@
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 
   // ---- helpers ----
-  // Status line: the OUTPUT column's, mirrored inside the BATCH modal.
+  // Status messages pop up as a toast at the bottom centre. kind: 'ok' | 'warn'
+  // | undefined (info). Repeated calls (e.g. PACKING 3/12…) update it in place
+  // and keep it up; warnings linger a little longer. An empty msg is ignored.
   function setStatus(msg, kind) {
-    ['status', 'batchStatus'].forEach((id) => {
-      const el = $(id);
-      if (!el) return;
-      el.textContent = msg || '';
-      el.className = 'status' + (kind ? ' ' + kind : '');
-    });
+    const el = $('toast');
+    if (!el || !msg) return;
+    el.textContent = msg;
+    el.className = 'toast show' + (kind ? ' ' + kind : '');
+    clearTimeout(setStatus.timer);
+    setStatus.timer = setTimeout(() => el.classList.remove('show'), kind === 'warn' ? 3600 : 2200);
   }
   function debounce(fn, ms) {
     let id = 0;

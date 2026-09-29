@@ -1,4 +1,4 @@
-<!-- EIDOLON v1.4.2 -->
+<!-- EIDOLON v1.4.3 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -76,7 +76,7 @@
         <a class="app-menu-item current" href="https://cyberdeck.tools/eidolon-ui/" aria-current="page">&gt; EIDOLON_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.4.2</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.4.3</span></span></div>
     <select class="lang-select" id="uiLangSel" aria-label="interface language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </header>
 
@@ -328,7 +328,6 @@
       <button id="copyBtn" class="btn btn-block btn-alt" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_copy" disabled>COPY TO CLIPBOARD</button>
 
       <button id="batchBtn" class="btn btn-block btn-alt" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_batch" aria-haspopup="dialog" aria-controls="batchModal" disabled>BATCH EXPORT</button>
-      <div class="status" id="status" role="status"></div>
     </aside>
   </div>
 </div>
@@ -357,7 +356,6 @@
       <p class="hint" data-i18n="hint_set">A numbered set exports the selected token N times with badges 1…N — for minions and mooks.</p>
       <button id="zipSetBtn" class="btn btn-block btn-alt" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_zipset" disabled>NUMBERED SET · ZIP</button>
     </div>
-    <div class="status" id="batchStatus" role="status"></div>
     <div class="modal-actions">
       <button id="batchClose" class="btn btn-sm btn-warn" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_close">CLOSE</button>
     </div>
@@ -501,6 +499,9 @@
     </div>
   </div>
 </aside>
+
+<!-- toast: every status message pops up here (bottom centre), above panels and modals -->
+<div class="toast" id="toast" role="status" aria-live="polite" data-augmented-ui="tl-clip br-clip border"></div>
 
 <div class="footer-stamp" aria-hidden="true">EIDOLON (c) // 2026 // CYBERDELAAI // MIT</div>
 

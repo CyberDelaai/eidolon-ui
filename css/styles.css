@@ -211,9 +211,6 @@
   .config input::placeholder, .side-inner input::placeholder { color: rgba(122,122,136,0.6); }
   .row { display: flex; gap: 10px; align-items: flex-end; }
   .row .field { flex: 1; margin-bottom: 0; }
-  .status { margin-top: 10px; font-size: 11px; letter-spacing: 1px; color: var(--dim); min-height: 14px; }
-  .status.ok { color: var(--main); }
-  .status.warn { color: var(--magenta); }
 
   .config .hint { margin-top: 10px; }
   .config .hint-gap { margin-bottom: 4px; }
@@ -541,6 +538,25 @@
   .batch-count { font-size: 20px; letter-spacing: 1px; color: var(--accent); }
   .batch-block .btn-block { margin-top: 12px; }
   .modal-actions { display: flex; justify-content: flex-end; margin-top: 16px; }
+
+  /* ---------- Toast (commlink-ui style, augmented-ui clipped): status messages
+     rise from the bottom centre and fade out; yellow = info, cyan = done,
+     magenta = problem. Sits above side panels (50) and modals (200). ---------- */
+  .toast {
+    --toast-color: var(--yellow);
+    position: fixed; left: 50%; bottom: 28px; z-index: 300;
+    max-width: min(560px, calc(100vw - 40px)); padding: 11px 20px;
+    background: var(--panel); color: var(--toast-color);
+    font-size: 12px; letter-spacing: 2px; text-transform: uppercase; text-align: center; line-height: 1.5;
+    --aug-border-all: 1px; --aug-border-bg: var(--toast-color);
+    --aug-tl: 10px; --aug-br: 10px;
+    box-shadow: 0 0 18px color-mix(in srgb, var(--toast-color) 30%, transparent);
+    opacity: 0; transform: translateX(-50%) translateY(20px);
+    transition: opacity .2s, transform .2s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.ok { --toast-color: var(--cyan); }
+  .toast.warn { --toast-color: var(--magenta); }
 
   /* faint fixed footer stamp (shared across cyberdeck.tools apps) */
   .footer-stamp {
