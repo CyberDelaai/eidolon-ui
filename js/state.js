@@ -50,7 +50,6 @@ EIDOLON.state = {
     bgColor: '#0b0b10',
     labelStyle: 'none',     // 'none' | 'plate' | 'arc'
     labelColor: '#050507',
-    popout: false,          // draw the (transparent) portrait's top half over the frame
     badgePos: 'br',         // 'tl' | 'tr' | 'bl' | 'br'
   },
 
@@ -64,7 +63,8 @@ EIDOLON.state = {
   out: { size: 512, format: 'png', setCount: 4 },
 
   // -- roster: one entry per loaded image (persisted in IndexedDB) --
-  // { id, name, blob, src (canvas), tf: newTransform(), adj: newAdjust(), label, badge }
+  // { id, name, blob, src (canvas), tf: newTransform(), adj: newAdjust(), label, badge,
+  //   popOn, popMask (canvas in the image's pixel space, ≤512 px — the pop-out brush) }
   items: [],
   current: -1,              // index into items, -1 = empty
 

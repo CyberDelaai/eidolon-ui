@@ -1,4 +1,4 @@
-<!-- EIDOLON v1.3.3 -->
+<!-- EIDOLON v1.4.0 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -76,7 +76,7 @@
         <a class="app-menu-item current" href="https://cyberdeck.tools/eidolon-ui/" aria-current="page">&gt; EIDOLON_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.3.3</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.4.0</span></span></div>
     <select class="lang-select" id="uiLangSel" aria-label="interface language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </header>
 
@@ -165,6 +165,22 @@
         </span>
         <input type="file" id="refInput" accept="image/*" hidden />
       </div>
+      <!-- POP-OUT BRUSH bar: replaces the REFERENCE bar while painting -->
+      <div class="ref-bar pop-bar" id="popBar" data-augmented-ui="tl-clip br-clip border" hidden>
+        <span class="fx-label pop-title" data-i18n="l_popbrush">// POP-OUT BRUSH:</span>
+        <button class="side-switch pop-mode" id="popMode" type="button" data-pos="left" aria-label="paint or erase">
+          <span class="thumb"></span><span class="lab l" data-i18n="b_bpaint">PAINT</span><span class="lab r" data-i18n="b_berase">ERASE</span>
+        </button>
+        <span class="ref-op">
+          <span class="fx-label"><span data-i18n="l_bsize">SIZE:</span> <b class="val" id="popSizeVal"></b></span>
+          <input type="range" class="potency-slider" id="popSize" min="1" max="30" step="1" aria-label="brush size" />
+        </span>
+        <span class="pop-actions" id="popActions">
+          <button id="popFill" class="btn btn-sm btn-alt" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_bfill">FILL</button>
+          <button id="popClear" class="btn btn-sm btn-warn" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_bclear">CLEAR</button>
+          <button id="popDone" class="btn btn-sm" type="button" data-augmented-ui="tl-clip br-clip border"><span class="lbl-full" data-i18n="b_bdone">DONE</span><span class="lbl-short">OK</span></button>
+        </span>
+      </div>
       <div class="stage" id="stage">
         <div class="token-wrap" id="tokenWrap">
           <canvas id="tokenCanvas" tabindex="0" aria-label="token preview"></canvas>
@@ -222,6 +238,14 @@
         <span class="fx-label"><span data-i18n="l_hue">// HUE:</span> <b class="val" data-val="adj.hue"></b></span>
         <input type="range" class="potency-slider" data-adj="hue" min="-180" max="180" step="1" aria-label="hue" />
       </div>
+      <div class="fx-toggle">
+        <span class="fx-label" data-i18n="l_popout">// POP-OUT:</span>
+        <button class="side-switch" id="popToggle" type="button" data-pos="left" aria-label="pop-out">
+          <span class="thumb"></span><span class="lab l" data-i18n="b_off">OFF</span><span class="lab r" data-i18n="b_on">ON</span>
+        </button>
+      </div>
+      <button id="popPaintBtn" class="btn btn-block btn-alt pop-paint" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_paint">PAINT POP-OUT</button>
+      <p class="hint" data-i18n="hint_popout">Paint what should break out over the frame — a head, horns, a blade. Works on any portrait.</p>
       <div class="btn-row">
         <button id="resetTfBtn" class="btn btn-sm btn-warn" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_reset">RESET POSITION</button>
         <button id="resetAdjBtn" class="btn btn-sm btn-warn" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_resetadj">RESET LOOK</button>
@@ -252,13 +276,6 @@
           <option value="br" data-i18n="o_br">BOTTOM RIGHT</option>
         </select>
       </div>
-      <div class="fx-toggle">
-        <span class="fx-label" data-i18n="l_popout">// POP-OUT:</span>
-        <button class="side-switch" type="button" data-style="popout" data-pos="left" aria-label="pop-out">
-          <span class="thumb"></span><span class="lab l" data-i18n="b_off">OFF</span><span class="lab r" data-i18n="b_on">ON</span>
-        </button>
-      </div>
-      <p class="hint" data-i18n="hint_popout">Pop-out draws the top half of a transparent-background PNG over the frame.</p>
 
     </aside>
 

@@ -34,8 +34,11 @@ client-side; your images are never uploaded.
 - **Adjustments** — per-token brightness / contrast / saturation / hue.
 - **Labels** — the token's name as a clipped name PLATE or ARC text, and a corner
   **badge** (number / letter) at any corner.
-- **Pop-out** — the top half of a transparent-background portrait breaks out over
-  the frame.
+- **Pop-out brush** — per token: PAINT POP-OUT, then paint over whatever should
+  break out over the frame (a head, horns, a blade) — works on any portrait, no
+  background removal needed. While painting, a faint ghost shows the part of
+  the portrait hidden outside the frame; PAINT / ERASE, brush size, FILL and
+  CLEAR. The mask follows pan / zoom / rotate / mirror and is saved per token.
 - **Margin** — 0% (the token fills the whole image) up to 10% empty space on
   each side.
 - **FX** — a second slide-out tab with a master switch and stackable effects,

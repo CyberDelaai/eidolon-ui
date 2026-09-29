@@ -366,6 +366,19 @@
     --aug-tl: 10px; --aug-br: 10px;
   }
   .ref-bar .ref-label { cursor: help; }
+  .ref-bar[hidden] { display: none; }
+  /* POP-OUT BRUSH bar (same shell as the reference bar, yellow while painting) */
+  .pop-bar { --aug-border-bg: rgba(var(--accent-rgb),0.6); }
+  .pop-bar .pop-title { color: var(--accent); font-weight: 700; }
+  .pop-bar .btn { flex: none; }
+  /* FILL / CLEAR / DONE never split; DONE shortens to OK when the bar is tight */
+  .pop-actions { display: flex; gap: 8px; flex-wrap: nowrap; }
+  #popDone .lbl-short, #popDone.short .lbl-full { display: none; }
+  #popDone.short .lbl-short { display: inline; }
+  .side-switch.pop-mode { width: 150px; }
+  .stage.brushing #tokenCanvas { cursor: crosshair; }
+  .btn.pop-paint { height: 36px; margin-top: 12px; font-size: 12px; letter-spacing: 2px; }
+  .btn.pop-paint.active { background: color-mix(in srgb, var(--btn-color) 28%, transparent); box-shadow: 0 0 12px color-mix(in srgb, var(--btn-color) 50%, transparent); }
   .ref-tiles { display: flex; gap: 6px; }
   .ref-tile {
     position: relative; width: 36px; height: 36px; padding: 3px; line-height: 0; cursor: pointer;

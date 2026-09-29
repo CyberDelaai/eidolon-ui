@@ -60,10 +60,12 @@
   function persistItem(item) {
     clearTimeout(persistTimers[item.id]);
     persistTimers[item.id] = setTimeout(() => {
-      EIDOLON.idb.put('items', item.id, {
+      const rec = {
         id: item.id, name: item.name, blob: item.blob, order: item.order,
-        tf: item.tf, adj: item.adj, label: item.label, badge: item.badge,
-      }).catch(() => {});
+        tf: item.tf, adj: item.adj, label: item.label, badge: item.badge, popOn: !!item.popOn,
+      };
+      const put = (mask) => EIDOLON.idb.put('items', item.id, Object.assign(rec, { popMask: mask || null })).catch(() => {});
+      if (item.popMask) item.popMask.toBlob(put, 'image/png'); else put(null);
     }, 300);
   }
 
@@ -89,10 +91,14 @@
   function restoreDb() {
     EIDOLON.idb.all('items').then((recs) => {
       recs = (recs || []).filter((r) => r && r.blob).sort((a, b) => a.order - b.order);
-      return Promise.all(recs.map((r) => decode(r.blob).then((img) => ({
+      return Promise.all(recs.map((r) => Promise.all([
+        decode(r.blob),
+        r.popMask ? decode(r.popMask).catch(() => null) : null,
+      ]).then(([img, mask]) => ({
         id: r.id, name: r.name, blob: r.blob, order: r.order, src: toSource(img),
         tf: Object.assign(EIDOLON.newTransform(), r.tf), adj: Object.assign(EIDOLON.newAdjust(), r.adj),
         label: r.label || '', badge: r.badge || '',
+        popOn: !!r.popOn, popMask: mask ? toSource(mask, 512) : null,
       })).catch(() => null)));
     }).then((items) => {
       items = (items || []).filter(Boolean);
@@ -160,6 +166,7 @@
             id: 'tk' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
             name: blob.name || 'token', blob, order: orderSeq++, src: toSource(img),
             tf: EIDOLON.newTransform(), adj: EIDOLON.newAdjust(), label: '', badge: '',
+            popOn: false, popMask: null,
           };
           S.items.push(item);
           persistItem(item);
@@ -201,6 +208,7 @@
   // ---- roster ----
   function select(i) {
     S.current = S.items.length ? clamp(i, 0, S.items.length - 1) : -1;
+    if (brush.on && !cur()) setBrush(false);
     syncControls(); requestDraw(); rosterChanged(); updateButtons(); presetsChanged();
   }
   function removeItem(i) {
@@ -303,19 +311,25 @@
     cv.addEventListener('pointerdown', (e) => {
       const it = cur();
       if (!it) { $('fileInput').click(); return; }
+      if (brush.on) { brushDown(e); return; }
       cv.setPointerCapture(e.pointerId);
       drag = { x: e.clientX, y: e.clientY, w: cv.getBoundingClientRect().width };
       cv.classList.add('grabbing');
     });
     cv.addEventListener('pointermove', (e) => {
       const it = cur();
+      if (brush.on) { brushMove(e); return; }
       if (!drag || !it) return;
       it.tf.x += (e.clientX - drag.x) / drag.w;
       it.tf.y += (e.clientY - drag.y) / drag.w;
       drag.x = e.clientX; drag.y = e.clientY;
       requestDraw();
     });
-    const end = () => { if (drag) { drag = null; cv.classList.remove('grabbing'); itemChanged(); } };
+    const end = () => {
+      if (brush.stroke) { brushUp(); return; }
+      if (drag) { drag = null; cv.classList.remove('grabbing'); itemChanged(); }
+    };
+    cv.addEventListener('pointerleave', () => { if (brush.on && !brush.stroke) { brush.cursor = null; requestDraw(); } });
     cv.addEventListener('pointerup', end);
     cv.addEventListener('pointercancel', end);
     // Ctrl+wheel zooms (also trackpad pinch, which arrives as ctrlKey wheel),
@@ -445,6 +459,7 @@
     const rc = $('refCanvas'), cv = $('tokenCanvas');
     if (rc.width !== cv.width) { rc.width = cv.width; rc.height = cv.height; }
     EIDOLON.drawReference(rc.getContext('2d'), rc.width);
+    if (brush.on && cur()) EIDOLON.drawBrushOverlay(rc.getContext('2d'), rc.width, cur(), brush.cursor);
   }
   function setCustomRef(blob) {
     decode(blob).then((img) => {
@@ -646,6 +661,120 @@
     $('presetExport').addEventListener('click', exportPresets);
     $('presetImport').addEventListener('click', () => $('presetFile').click());
     $('presetFile').addEventListener('change', (e) => { if (e.target.files[0]) importPresets(e.target.files[0]); e.target.value = ''; });
+  }
+
+  // ---- pop-out brush: paint which parts of the portrait break out over the
+  // frame. Each token has its own mask (item.popMask), a canvas in the image's
+  // pixel space (≤512 px), so strokes follow pan / zoom / rotate / mirror. ----
+  const brush = { on: false, erase: false, size: 8, stroke: null, cursor: null };
+  function ensureMask(it) {
+    if (!it.popMask) {
+      const k = Math.min(1, 512 / Math.max(it.src.width, it.src.height));
+      const c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(it.src.width * k));
+      c.height = Math.max(1, Math.round(it.src.height * k));
+      it.popMask = c;
+    }
+    return it.popMask;
+  }
+  // Token point (fractions of the edge) -> mask pixels, inverting the portrait
+  // transform; kk = mask px per token edge (for brush widths).
+  function toMask(it, fx, fy) {
+    const N = 1000, g = EIDOLON.geom(N), s = EIDOLON.baseScale(it.src, g) * it.tf.zoom;
+    const dx = fx * N - (g.cx + it.tf.x * N), dy = fy * N - (g.cy + it.tf.y * N);
+    const a = (it.tf.rot * Math.PI) / 180, cos = Math.cos(a), sin = Math.sin(a);
+    let lx = dx * cos + dy * sin;
+    const ly = -dx * sin + dy * cos;
+    if (it.tf.flip) lx = -lx;
+    const k = it.popMask.width / (it.src.width * s);
+    return { x: (lx + (it.src.width * s) / 2) * k, y: (ly + (it.src.height * s) / 2) * k, kk: k * N };
+  }
+  function paintSegment(it, a, b) {
+    const m = ensureMask(it).getContext('2d'), p = toMask(it, a.x, a.y), q = toMask(it, b.x, b.y);
+    m.globalCompositeOperation = brush.erase ? 'destination-out' : 'source-over';
+    m.strokeStyle = '#fff'; m.lineCap = 'round'; m.lineJoin = 'round';
+    m.lineWidth = Math.max(1, (brush.size / 100) * p.kk);
+    m.beginPath(); m.moveTo(p.x, p.y); m.lineTo(q.x + 0.01, q.y); m.stroke();
+  }
+  function stagePoint(e) {
+    const r = $('tokenCanvas').getBoundingClientRect();
+    return { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height };
+  }
+  function brushDown(e) {
+    const it = cur();
+    if (!it) return;
+    $('tokenCanvas').setPointerCapture(e.pointerId);
+    const p = stagePoint(e);
+    if (!brush.erase) it.popOn = true;
+    brush.stroke = p;
+    brush.cursor = { x: p.x, y: p.y, r: brush.size / 200 };
+    paintSegment(it, p, p);
+    syncPop(); requestDraw();
+  }
+  function brushMove(e) {
+    const it = cur(), p = stagePoint(e);
+    brush.cursor = { x: p.x, y: p.y, r: brush.size / 200 };
+    if (it && brush.stroke) { paintSegment(it, brush.stroke, p); brush.stroke = p; }
+    requestDraw();
+  }
+  function brushUp() {
+    brush.stroke = null;
+    const it = cur();
+    if (it) { persistItem(it); rosterChanged(); }
+  }
+  function setBrush(on) {
+    brush.on = !!on && !!cur();
+    if (!brush.on) { brush.cursor = null; brush.stroke = null; }
+    $('stage').classList.toggle('brushing', brush.on);
+    $('popBar').hidden = !brush.on;
+    document.querySelector('.ref-bar:not(.pop-bar)').hidden = brush.on;
+    fitPopBar();
+    syncPop(); requestDraw();
+  }
+  function syncPop() {
+    const it = cur();
+    $('popToggle').dataset.pos = it && it.popOn ? 'right' : 'left';
+    $('popToggle').closest('.fx-toggle').classList.toggle('disabled', !it);
+    $('popPaintBtn').disabled = !it;
+    $('popPaintBtn').classList.toggle('active', brush.on);
+    $('popMode').dataset.pos = brush.erase ? 'right' : 'left';
+    $('popSize').value = brush.size;
+    $('popSizeVal').textContent = brush.size + '%';
+  }
+  // DONE -> OK when the brush bar can't hold everything on one row (the
+  // FILL / CLEAR / DONE group would wrap below the size slider).
+  function fitPopBar() {
+    const bar = $('popBar'), done = $('popDone'), acts = $('popActions');
+    if (bar.hidden) return;
+    const first = bar.firstElementChild;
+    done.classList.remove('short');
+    // items are centre-aligned with different heights, so "wrapped" means the
+    // group starts below the bottom edge of the bar's first item
+    if (acts.offsetTop >= first.offsetTop + first.offsetHeight) done.classList.add('short');
+  }
+  function setupPopout() {
+    $('popToggle').addEventListener('click', () => { const it = cur(); if (it) { it.popOn = !it.popOn; itemChanged(it); } });
+    $('popPaintBtn').addEventListener('click', () => setBrush(!brush.on));
+    $('popDone').addEventListener('click', () => setBrush(false));
+    $('popMode').addEventListener('click', () => { brush.erase = !brush.erase; syncPop(); });
+    $('popSize').addEventListener('input', (e) => { brush.size = +e.target.value; syncPop(); });
+    $('popFill').addEventListener('click', () => {
+      const it = cur();
+      if (!it) return;
+      const m = ensureMask(it), x = m.getContext('2d');
+      x.globalCompositeOperation = 'source-over'; x.fillStyle = '#fff'; x.fillRect(0, 0, m.width, m.height);
+      it.popOn = true; itemChanged(it);
+    });
+    $('popClear').addEventListener('click', () => {
+      const it = cur();
+      if (!it || !it.popMask) return;
+      it.popMask.getContext('2d').clearRect(0, 0, it.popMask.width, it.popMask.height);
+      itemChanged(it);
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && brush.on) setBrush(false); });
+    new ResizeObserver(fitPopBar).observe($('popBar'));
+    document.addEventListener('eidolon:lang', fitPopBar);
+    syncPop();
   }
 
   // ---- side panels (PRESETS, FX): fixed, slide in from the left edge, one
@@ -926,6 +1055,7 @@
       el.textContent = (VAL_FMT[p] || String)(v);
     });
     $('resetTfBtn').disabled = !it; $('resetAdjBtn').disabled = !it;
+    syncPop();
   }
   function updateButtons() {
     const it = cur();
@@ -1025,6 +1155,7 @@
     restore();
     buildPalette();
     setupRefBar();
+    setupPopout();
     setupPresets();
     setupFx();
     setupPanels();

@@ -278,6 +278,63 @@
     return c;
   }
 
+  // ---- pop-out: the parts of the portrait painted into the token's pop-out
+  // mask are redrawn over the frame. The mask lives in the image's own pixel
+  // space, so it follows pan / zoom / rotate / mirror. ----
+  function withImageTransform(x, item, g, draw) {
+    const N = g.N, src = item.src, tf = item.tf, s = baseScale(src, g) * tf.zoom;
+    const w = src.width * s, h = src.height * s;
+    x.save();
+    x.translate(g.cx + tf.x * N, g.cy + tf.y * N);
+    x.rotate((tf.rot * Math.PI) / 180);
+    x.scale(tf.flip ? -1 : 1, 1);
+    draw(-w / 2, -h / 2, w, h);
+    x.restore();
+  }
+  function popLayer(item, U, g) {
+    const c = scratch('P', g.N), x = c.getContext('2d');
+    x.filter = `blur(${Math.max(0.6, g.N / 700)}px)`; // soften the painted edge a touch
+    withImageTransform(x, item, g, (l, t, w, h) => x.drawImage(item.popMask, l, t, w, h));
+    x.filter = 'none';
+    x.globalCompositeOperation = 'source-in';
+    x.drawImage(U, 0, 0);
+    // U already carries the portrait FX (tone / glitch / RGB / grain); the
+    // cut-out overlays (vignette / scanlines) must be laid over the popped
+    // part too, or it reads as a clean cut-out pasted on top.
+    if (S.fx.on) cutoutFx(x, g);
+    return c;
+  }
+  // Preview-only guide while the pop-out brush is active (drawn on the
+  // overlay canvas, never exported): a faint ghost of the portrait outside the
+  // cut-out — the part hidden by the frame / background — the painted mask
+  // tinted red, and the brush ring. cursor = { x, y, r } in fractions of N.
+  EIDOLON.drawBrushOverlay = function drawBrushOverlay(ctx, N, item, cursor) {
+    const g = geom(N), F = frameDef(), U = portraitLayer(item, g);
+    const ghost = scratch('GH', N), gx = ghost.getContext('2d');
+    gx.globalAlpha = 0.35; gx.drawImage(U, 0, 0); gx.globalAlpha = 1;
+    const hole = scratch('HO', N), hx = hole.getContext('2d');
+    hx.fillStyle = '#000'; hx.fillRect(0, 0, N, N);
+    clipCutout(hx, g, F);
+    gx.globalCompositeOperation = 'destination-out';
+    gx.drawImage(hole, 0, 0);
+    ctx.drawImage(ghost, 0, 0);
+    if (item.popMask) {
+      const tint = scratch('TI', N), tx = tint.getContext('2d');
+      withImageTransform(tx, item, g, (l, t, w, h) => tx.drawImage(item.popMask, l, t, w, h));
+      tx.globalCompositeOperation = 'source-in';
+      tx.fillStyle = 'rgba(255,0,60,0.45)'; tx.fillRect(0, 0, N, N);
+      ctx.drawImage(tint, 0, 0);
+    }
+    if (cursor) {
+      ctx.save();
+      ctx.lineWidth = Math.max(1, N / 400);
+      ctx.beginPath(); ctx.arc(cursor.x * N, cursor.y * N, cursor.r * N, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(5,5,7,0.8)'; ctx.stroke();
+      ctx.setLineDash([N / 120, N / 160]); ctx.strokeStyle = '#fcee0a'; ctx.stroke();
+      ctx.restore();
+    }
+  };
+
   // ---- label: clipped name plate or text along the bottom arc ----
   function drawLabel(ctx, text, g) {
     const st = S.style, N = g.N;
@@ -361,12 +418,7 @@
     if (st.glow !== 'off') ctx.drawImage(glowLayer(B, g, F, st.glow), 0, 0);
     ctx.drawImage(B, 0, 0);
     ctx.globalAlpha = 1;
-    if (U && st.popout) {
-      ctx.save();
-      ctx.beginPath(); ctx.rect(0, 0, N, g.cy); ctx.clip();
-      ctx.drawImage(U, 0, 0);
-      ctx.restore();
-    }
+    if (U && item.popOn && item.popMask) ctx.drawImage(popLayer(item, U, g), 0, 0);
     const label = item && item.label ? item.label.trim().toUpperCase() : '';
     if (label && st.labelStyle !== 'none') drawLabel(ctx, label, g);
     const badge = String(opts.badge != null ? opts.badge : (item && item.badge) || '').trim().toUpperCase();
