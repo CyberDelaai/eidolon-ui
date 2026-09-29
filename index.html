@@ -1,4 +1,4 @@
-<!-- EIDOLON v1.2.1 -->
+<!-- EIDOLON v1.2.2 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -76,7 +76,7 @@
         <a class="app-menu-item current" href="https://cyberdeck.tools/eidolon-ui/" aria-current="page">&gt; EIDOLON_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.2.1</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.2.2</span></span></div>
     <select class="lang-select" id="uiLangSel" aria-label="interface language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </header>
 
@@ -223,8 +223,8 @@
         <input type="range" class="potency-slider" data-adj="hue" min="-180" max="180" step="1" aria-label="hue" />
       </div>
       <div class="btn-row">
-        <button id="resetTfBtn" class="btn btn-sm" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_reset">RESET POSITION</button>
-        <button id="resetAdjBtn" class="btn btn-sm" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_resetadj">RESET LOOK</button>
+        <button id="resetTfBtn" class="btn btn-sm btn-warn" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_reset">RESET POSITION</button>
+        <button id="resetAdjBtn" class="btn btn-sm btn-warn" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_resetadj">RESET LOOK</button>
       </div>
       <p class="hint" data-i18n="hint_token">Everything in // TOKEN belongs to the selected token only.</p>
 
@@ -291,7 +291,7 @@
       <button id="exportBtn" class="btn btn-block" type="button" data-augmented-ui="tl-clip br-clip border" disabled>EXPORT PNG</button>
       <button id="copyBtn" class="btn btn-block btn-alt" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_copy" disabled>COPY TO CLIPBOARD</button>
 
-      <button id="batchBtn" class="btn btn-block btn-alt" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_batch" aria-haspopup="dialog" aria-controls="batchModal" disabled>BATCH EXPORT…</button>
+      <button id="batchBtn" class="btn btn-block btn-alt" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_batch" aria-haspopup="dialog" aria-controls="batchModal" disabled>BATCH EXPORT</button>
       <div class="status" id="status" role="status"></div>
     </aside>
   </div>

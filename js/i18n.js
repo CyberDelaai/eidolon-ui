@@ -60,7 +60,7 @@
       s_pimported: 'IMPORTED {n} PRESET(S)',
       s_pimportfail: 'NOT A PRESETS FILE',
       s_pnamereq: 'ENTER A PRESET NAME',
-      b_batch: 'BATCH EXPORT…', l_zipall: '// ALL TOKENS:', hint_zipall: 'Every token in the roster, each with its own framing, name and badge, packed into one ZIP.', b_close: 'CLOSE',
+      b_batch: 'BATCH EXPORT', l_zipall: '// ALL TOKENS:', hint_zipall: 'Every token in the roster, each with its own framing, name and badge, packed into one ZIP.', b_close: 'CLOSE',
       tag: 'TOKEN MAKER', tag_alt: 'SUMMON YOUR ECHO',
     },
     ru: {
@@ -116,7 +116,7 @@
       s_pimported: 'ИМПОРТИРОВАНО ПРЕСЕТОВ: {n}',
       s_pimportfail: 'ЭТО НЕ ФАЙЛ ПРЕСЕТОВ',
       s_pnamereq: 'ВВЕДИТЕ ИМЯ ПРЕСЕТА',
-      b_batch: 'ПАКЕТНЫЙ ЭКСПОРТ…', l_zipall: '// ВСЕ ТОКЕНЫ:', hint_zipall: 'Все токены ростера — каждый со своим кадрированием, именем и значком — в одном ZIP.', b_close: 'ЗАКРЫТЬ',
+      b_batch: 'ПАКЕТНЫЙ ЭКСПОРТ', l_zipall: '// ВСЕ ТОКЕНЫ:', hint_zipall: 'Все токены ростера — каждый со своим кадрированием, именем и значком — в одном ZIP.', b_close: 'ЗАКРЫТЬ',
       tag: 'СОЗДАНИЕ ТОКЕНОВ', tag_alt: 'ПРИЗОВИ СВОЁ ЭХО',
     },
     fr: {
@@ -172,7 +172,7 @@
       s_pimported: '{n} PRÉRÉGLAGE(S) IMPORTÉ(S)',
       s_pimportfail: "CE N'EST PAS UN FICHIER DE PRÉRÉGLAGES",
       s_pnamereq: 'SAISISSEZ UN NOM',
-      b_batch: 'EXPORT PAR LOT…', l_zipall: '// TOUS LES JETONS :', hint_zipall: 'Chaque jeton de la liste, avec son cadrage, son nom et son badge, dans un seul ZIP.', b_close: 'FERMER',
+      b_batch: 'EXPORT PAR LOT', l_zipall: '// TOUS LES JETONS :', hint_zipall: 'Chaque jeton de la liste, avec son cadrage, son nom et son badge, dans un seul ZIP.', b_close: 'FERMER',
       tag: 'CRÉATEUR DE JETONS', tag_alt: 'INVOQUE TON ÉCHO',
     },
     de: {
@@ -228,7 +228,7 @@
       s_pimported: '{n} PRESET(S) IMPORTIERT',
       s_pimportfail: 'KEINE PRESET-DATEI',
       s_pnamereq: 'PRESET-NAMEN EINGEBEN',
-      b_batch: 'STAPELEXPORT…', l_zipall: '// ALLE TOKENS:', hint_zipall: 'Jedes Token der Liste mit eigenem Ausschnitt, Namen und Marke — in einem ZIP.', b_close: 'SCHLIESSEN',
+      b_batch: 'STAPELEXPORT', l_zipall: '// ALLE TOKENS:', hint_zipall: 'Jedes Token der Liste mit eigenem Ausschnitt, Namen und Marke — in einem ZIP.', b_close: 'SCHLIESSEN',
       tag: 'TOKEN-ERSTELLER', tag_alt: 'RUF DEIN ECHO',
     },
     es: {
@@ -284,7 +284,7 @@
       s_pimported: '{n} PREAJUSTE(S) IMPORTADO(S)',
       s_pimportfail: 'NO ES UN ARCHIVO DE PREAJUSTES',
       s_pnamereq: 'ESCRIBE UN NOMBRE',
-      b_batch: 'EXPORTAR EN LOTE…', l_zipall: '// TODOS LOS TOKENS:', hint_zipall: 'Cada token de la lista, con su encuadre, nombre e insignia, en un solo ZIP.', b_close: 'CERRAR',
+      b_batch: 'EXPORTAR EN LOTE', l_zipall: '// TODOS LOS TOKENS:', hint_zipall: 'Cada token de la lista, con su encuadre, nombre e insignia, en un solo ZIP.', b_close: 'CERRAR',
       tag: 'CREADOR DE TOKENS', tag_alt: 'INVOCA TU ECO',
     },
     it: {
@@ -340,7 +340,7 @@
       s_pimported: '{n} PRESET IMPORTATI',
       s_pimportfail: 'NON È UN FILE DI PRESET',
       s_pnamereq: 'INSERISCI UN NOME',
-      b_batch: 'ESPORTA IN BLOCCO…', l_zipall: '// TUTTI I TOKEN:', hint_zipall: "Ogni token dell'elenco, con la sua inquadratura, nome e badge, in un unico ZIP.", b_close: 'CHIUDI',
+      b_batch: 'ESPORTA IN BLOCCO', l_zipall: '// TUTTI I TOKEN:', hint_zipall: "Ogni token dell'elenco, con la sua inquadratura, nome e badge, in un unico ZIP.", b_close: 'CHIUDI',
       tag: 'CREATORE DI TOKEN', tag_alt: 'EVOCA IL TUO ECO',
     },
     ja: {
@@ -396,7 +396,7 @@
       s_pimported: '{n} 件のプリセットを読み込み',
       s_pimportfail: 'プリセットファイルではありません',
       s_pnamereq: 'プリセット名を入力',
-      b_batch: '一括書き出し…', l_zipall: '// 全トークン:', hint_zipall: 'ロスターの全トークンを、それぞれの構図・名前・バッジ付きで1つのZIPに。', b_close: '閉じる',
+      b_batch: '一括書き出し', l_zipall: '// 全トークン:', hint_zipall: 'ロスターの全トークンを、それぞれの構図・名前・バッジ付きで1つのZIPに。', b_close: '閉じる',
       tag: 'トークンメーカー', tag_alt: '残響を呼べ',
     },
     zh: {
@@ -452,7 +452,7 @@
       s_pimported: '已导入 {n} 个预设',
       s_pimportfail: '不是预设文件',
       s_pnamereq: '请输入预设名称',
-      b_batch: '批量导出…', l_zipall: '// 全部令牌:', hint_zipall: '列表中的每个令牌（各自的构图、名称和徽标）打包成一个 ZIP。', b_close: '关闭',
+      b_batch: '批量导出', l_zipall: '// 全部令牌:', hint_zipall: '列表中的每个令牌（各自的构图、名称和徽标）打包成一个 ZIP。', b_close: '关闭',
       tag: '令牌制作器', tag_alt: '召唤你的回响',
     },
   };
