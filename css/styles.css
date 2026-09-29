@@ -286,6 +286,20 @@
   /* the real colour input is off-screen; the swatch opens it via showPicker() */
   .fill-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 
+  /* colour-source chooser (LABEL): FR / AC / BG / custom (/ AUTO) chips, each
+     painted in the colour it resolves to; the active one gets a yellow ring */
+  .src-group { display: flex; gap: 5px; flex-shrink: 0; }
+  .src-chip {
+    width: 26px; height: 26px; padding: 0; cursor: pointer; flex: none;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: 0;
+    border: 1px solid rgba(255,255,255,0.25); transition: box-shadow .12s, border-color .12s;
+  }
+  .src-chip:hover { border-color: var(--main); }
+  .src-chip.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 0 8px rgba(var(--accent-rgb),0.6); }
+  .src-chip svg { width: 14px; height: 14px; display: block; pointer-events: none; }
+  .src-chip.auto { background: linear-gradient(135deg, #050507 50%, #e8e8ee 50%); }
+
   /* quick palette chips: click = frame colour, right-click = accent colour */
   .palette { display: flex; gap: 6px; margin-top: 12px; }
   .palette .chip {

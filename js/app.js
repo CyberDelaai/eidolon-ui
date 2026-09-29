@@ -857,6 +857,44 @@
     syncFx();
   }
 
+  // ---- colour-source choosers (LABEL): <span class="src-group" data-src="plateFrom"
+  // data-custom="plateColor" data-opts="frame,accent,bg,custom">. Each chip is
+  // painted in the colour it resolves to; the custom chip opens the picker. ----
+  const SRC_TAG = { frame: 'FR', accent: 'AC', bg: 'BG', auto: '' };
+  const PICK_ICON = '<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-80q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 32.5-156t88-127Q256-817 330-848.5T488-880q80 0 151 27.5t124.5 76q53.5 48.5 85 115T880-518q0 115-70 176.5T640-280h-74q-9 0-12.5 5t-3.5 11q0 12 15 34.5t15 51.5q0 50-27.5 74T480-80Zm-177-377q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm120-160q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm200 0q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm120 160q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Z"/></svg>';
+  function buildSrcGroups() {
+    document.querySelectorAll('.src-group').forEach((grp) => {
+      grp.textContent = '';
+      grp.dataset.opts.split(',').forEach((v) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'src-chip' + (v === 'auto' ? ' auto' : ''); b.dataset.v = v;
+        b.setAttribute('role', 'radio');
+        if (v === 'custom') b.innerHTML = PICK_ICON; else b.textContent = SRC_TAG[v];
+        b.addEventListener('click', () => {
+          S.style[grp.dataset.src] = v;
+          styleChanged();
+          if (v === 'custom') openPicker($(grp.dataset.custom));
+        });
+        grp.appendChild(b);
+      });
+    });
+    syncSrcGroups();
+  }
+  function syncSrcGroups() {
+    document.querySelectorAll('.src-group').forEach((grp) => {
+      const from = S.style[grp.dataset.src], custom = S.style[grp.dataset.custom];
+      grp.querySelectorAll('.src-chip').forEach((b) => {
+        const v = b.dataset.v, on = v === from;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-checked', on ? 'true' : 'false');
+        b.title = t('t_src_' + v);
+        if (v === 'auto') return;
+        const col = EIDOLON.colorFrom(v, custom);
+        b.style.background = col; b.style.color = EIDOLON.ink(col);
+      });
+    });
+  }
+
   // ---- frame grid + palette ----
   const PALETTE = ['#00f0ff', '#fcee0a', '#ff003c', '#39ff14', '#b026ff', '#ff7a00', '#e8e8ee', '#050507'];
   function frameKeys() { return EIDOLON.frameOrder.concat(S.customFrame ? ['custom'] : []); }
@@ -1055,7 +1093,7 @@
       el.textContent = (VAL_FMT[p] || String)(v);
     });
     $('resetTfBtn').disabled = !it; $('resetAdjBtn').disabled = !it;
-    syncPop();
+    syncPop(); syncSrcGroups();
   }
   function updateButtons() {
     const it = cur();
@@ -1154,6 +1192,7 @@
   function init() {
     restore();
     buildPalette();
+    buildSrcGroups();
     setupRefBar();
     setupPopout();
     setupPresets();
@@ -1173,7 +1212,7 @@
     if (document.fonts && document.fonts.load) {
       document.fonts.load('700 32px "JetBrains Mono"').then(() => { requestDraw(); rosterChanged(); }).catch(() => {});
     }
-    document.addEventListener('eidolon:lang', () => { updateTexts(); buildRoster(); syncRef(); presetsChanged(); });
+    document.addEventListener('eidolon:lang', () => { syncSrcGroups(); updateTexts(); buildRoster(); syncRef(); presetsChanged(); });
   }
 
   document.addEventListener('DOMContentLoaded', init);

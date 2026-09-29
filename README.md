@@ -33,7 +33,9 @@ client-side; your images are never uploaded.
   blurred into the empty space, like GRIDMAP's VIBRANT fill), or transparent.
 - **Adjustments** — per-token brightness / contrast / saturation / hue.
 - **Labels** — the token's name as a clipped name PLATE or ARC text, and a corner
-  **badge** (number / letter) at any corner.
+  **badge** (number / letter) at any corner. Plate, name text, badge and badge
+  text colours each take the frame / accent / background colour or a custom
+  one (badge text can also pick dark or light automatically for contrast).
 - **Pop-out brush** — per token: PAINT POP-OUT, then paint over whatever should
   break out over the frame (a head, horns, a blade) — works on any portrait, no
   background removal needed. While painting, a faint ghost shows the part of

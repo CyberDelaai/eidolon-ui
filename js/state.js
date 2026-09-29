@@ -49,7 +49,12 @@ EIDOLON.state = {
     bgMode: 'color',        // 'color' | 'extend' | 'transparent'
     bgColor: '#0b0b10',
     labelStyle: 'none',     // 'none' | 'plate' | 'arc'
-    labelColor: '#050507',
+    // label + badge colours: *From picks the source — 'frame' | 'accent' | 'bg'
+    // | 'custom' (then *Color is used) | 'auto' (badge text: dark or light for contrast)
+    plateFrom: 'frame', plateColor: '#00f0ff',        // name plate / arc band fill
+    labelFrom: 'custom', labelColor: '#050507',       // name text
+    badgeFrom: 'accent', badgeColor: '#fcee0a',       // badge disc
+    badgeTextFrom: 'auto', badgeTextColor: '#050507', // badge text
     badgePos: 'br',         // 'tl' | 'tr' | 'bl' | 'br'
   },
 

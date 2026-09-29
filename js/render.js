@@ -51,6 +51,18 @@
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
   }
+  // Resolve a label / badge colour source. 'accent' follows the ACCENT switch:
+  // with accent OFF there is no accent colour anywhere, so it falls back to the
+  // frame colour. 'auto' returns null (the caller picks an ink for contrast).
+  function colorFrom(from, custom) {
+    const st = S.style;
+    if (from === 'frame') return st.frameColor;
+    if (from === 'accent') return st.accent ? st.accentColor : st.frameColor;
+    if (from === 'bg') return st.bgColor;
+    if (from === 'auto') return null;
+    return custom;
+  }
+  EIDOLON.colorFrom = colorFrom;
   const font = (px) => `700 ${px}px "JetBrains Mono", monospace`;
   function setSpacing(ctx, px) { if ('letterSpacing' in ctx) ctx.letterSpacing = px + 'px'; }
 
@@ -351,9 +363,9 @@
       ctx.beginPath();
       ctx.moveTo(x0 + k, y0); ctx.lineTo(x0 + pw, y0); ctx.lineTo(x0 + pw, y0 + h - k);
       ctx.lineTo(x0 + pw - k, y0 + h); ctx.lineTo(x0, y0 + h); ctx.lineTo(x0, y0 + k); ctx.closePath();
-      ctx.fillStyle = st.frameColor; ctx.fill();
+      ctx.fillStyle = colorFrom(st.plateFrom, st.plateColor); ctx.fill();
       if (st.accent) { ctx.lineWidth = Math.max(1, N * 0.004); ctx.strokeStyle = st.accentColor; ctx.stroke(); }
-      ctx.fillStyle = st.labelColor;
+      ctx.fillStyle = colorFrom(st.labelFrom, st.labelColor);
       ctx.fillText(text, g.cx, yc + fs * 0.04);
     } else if (st.labelStyle === 'arc') {
       let fs = N * 0.062;
@@ -366,9 +378,9 @@
       const maxSpan = (150 * Math.PI) / 180;
       while (m.total / r > maxSpan && fs > N * 0.02) { fs *= 0.92; m = fit(); r = g.R - fs * 0.8; }
       const span = m.total / r, pad = (fs * 0.9) / r;
-      ctx.strokeStyle = st.frameColor; ctx.lineWidth = fs * 1.6; ctx.lineCap = 'butt';
+      ctx.strokeStyle = colorFrom(st.plateFrom, st.plateColor); ctx.lineWidth = fs * 1.6; ctx.lineCap = 'butt';
       ctx.beginPath(); ctx.arc(g.cx, g.cy, r, Math.PI / 2 - span / 2 - pad, Math.PI / 2 + span / 2 + pad); ctx.stroke();
-      ctx.fillStyle = st.labelColor;
+      ctx.fillStyle = colorFrom(st.labelFrom, st.labelColor);
       let acc = 0;
       [...text].forEach((ch, i) => {
         const th = Math.PI / 2 + span / 2 - (acc + m.ws[i] / 2) / r;
@@ -391,14 +403,14 @@
     const r = N * 0.088;
     ctx.save();
     ctx.beginPath(); ctx.arc(bx, by, r, 0, Math.PI * 2);
-    const fill = st.accent ? st.accentColor : st.frameColor; // no accent -> badge in the frame colour
+    const fill = colorFrom(st.badgeFrom, st.badgeColor);
     ctx.fillStyle = fill; ctx.fill();
     ctx.lineWidth = N * 0.012; ctx.strokeStyle = st.bgMode === 'color' ? st.bgColor : '#050507'; ctx.stroke();
     let fs = r * 1.1;
     ctx.font = font(fs);
     const w = ctx.measureText(text).width;
     if (w > r * 1.55) { fs *= (r * 1.55) / w; ctx.font = font(fs); }
-    ctx.fillStyle = ink(fill); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = colorFrom(st.badgeTextFrom, st.badgeTextColor) || ink(fill); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText(text, bx, by + fs * 0.05);
     ctx.restore();
   }

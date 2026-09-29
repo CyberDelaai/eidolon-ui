@@ -1,4 +1,4 @@
-<!-- EIDOLON v1.4.0 -->
+<!-- EIDOLON v1.4.1 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -76,7 +76,7 @@
         <a class="app-menu-item current" href="https://cyberdeck.tools/eidolon-ui/" aria-current="page">&gt; EIDOLON_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.4.0</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.4.1</span></span></div>
     <select class="lang-select" id="uiLangSel" aria-label="interface language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </header>
 
@@ -263,9 +263,14 @@
         </select>
       </div>
       <div class="fx-toggle">
+        <span class="fx-label" data-i18n="l_plate">// PLATE:</span>
+        <span class="src-group" data-src="plateFrom" data-custom="plateColor" data-opts="frame,accent,bg,custom" role="radiogroup" aria-label="name plate colour"></span>
+        <input type="color" id="plateColor" class="fill-input" data-style="plateColor" aria-label="name plate colour" />
+      </div>
+      <div class="fx-toggle">
         <span class="fx-label" data-i18n="l_ltext">// TEXT:</span>
-        <span class="fill-group"><button class="fill-swatch" type="button" data-augmented-ui="tl-clip br-clip border" data-for="labelColor"></button></span>
-        <input type="color" id="labelColor" class="fill-input" data-style="labelColor" aria-label="label text colour" />
+        <span class="src-group" data-src="labelFrom" data-custom="labelColor" data-opts="frame,accent,bg,custom" role="radiogroup" aria-label="name text colour"></span>
+        <input type="color" id="labelColor" class="fill-input" data-style="labelColor" aria-label="name text colour" />
       </div>
       <div class="fx-toggle">
         <span class="fx-label" data-i18n="l_bpos">// BADGE AT:</span>
@@ -275,6 +280,16 @@
           <option value="bl" data-i18n="o_bl">BOTTOM LEFT</option>
           <option value="br" data-i18n="o_br">BOTTOM RIGHT</option>
         </select>
+      </div>
+      <div class="fx-toggle">
+        <span class="fx-label" data-i18n="l_badgecol">// BADGE:</span>
+        <span class="src-group" data-src="badgeFrom" data-custom="badgeColor" data-opts="frame,accent,bg,custom" role="radiogroup" aria-label="badge colour"></span>
+        <input type="color" id="badgeColor" class="fill-input" data-style="badgeColor" aria-label="badge colour" />
+      </div>
+      <div class="fx-toggle">
+        <span class="fx-label" data-i18n="l_badgetext">// BADGE TEXT:</span>
+        <span class="src-group" data-src="badgeTextFrom" data-custom="badgeTextColor" data-opts="auto,frame,accent,bg,custom" role="radiogroup" aria-label="badge text colour"></span>
+        <input type="color" id="badgeTextColor" class="fill-input" data-style="badgeTextColor" aria-label="badge text colour" />
       </div>
 
     </aside>
