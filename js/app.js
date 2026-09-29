@@ -196,7 +196,7 @@
   // ---- roster ----
   function select(i) {
     S.current = S.items.length ? clamp(i, 0, S.items.length - 1) : -1;
-    syncControls(); requestDraw(); rosterChanged(); updateButtons();
+    syncControls(); requestDraw(); rosterChanged(); updateButtons(); presetsChanged();
   }
   function removeItem(i) {
     const it = S.items[i];
@@ -280,7 +280,7 @@
     syncControls(); requestDraw(); persistItem(item); rosterChanged();
   }
   function styleChanged() {
-    syncControls(); saveStyle(); requestDraw(); drawFrameThumbs(); rosterChanged();
+    syncControls(); saveStyle(); requestDraw(); drawFrameThumbs(); rosterChanged(); markActivePreset();
   }
 
   // Zoom by factor k keeping the token-space point (px, py) (fractions of N,
@@ -460,6 +460,164 @@
     $('refOpacity').addEventListener('input', (e) => { S.ref.opacity = +e.target.value; saveRef(); syncRef(); });
     $('refInput').addEventListener('change', (e) => { if (e.target.files[0]) setCustomRef(e.target.files[0]); e.target.value = ''; });
     buildRefBar();
+  }
+
+  // ---- presets: named snapshots of the global look (S.style, optionally
+  // S.out), in a COMMLINK-style slide-out side panel. Stored as
+  // eidolon:presets = { NAME: { style, out?, savedAt } }. Per-token data
+  // (portrait, transform, name, badge) is never part of a preset. ----
+  function loadPresets() {
+    try { return JSON.parse(localStorage.getItem('eidolon:presets') || '{}') || {}; } catch (e) { return {}; }
+  }
+  const savePresets = (p) => EIDOLON.save('eidolon:presets', JSON.stringify(p));
+  const styleKey = (st) => JSON.stringify(Object.keys(S.style).map((k) => st[k]));
+  function presetStamp(ms) {
+    const d = new Date(ms || 0);
+    if (isNaN(d.getTime())) return '';
+    const p2 = (n) => String(n).padStart(2, '0');
+    return `${p2(d.getDate())}.${p2(d.getMonth() + 1)}.${p2(d.getFullYear() % 100)} ${p2(d.getHours())}:${p2(d.getMinutes())}`;
+  }
+  // Draw the current token (or the empty frame) as it would look with `style`.
+  function renderPresetThumb(canvas, style) {
+    const N = Math.round(56 * dpr());
+    canvas.width = N; canvas.height = N;
+    const keep = S.style;
+    S.style = Object.assign({}, keep, style);
+    try { EIDOLON.render(canvas.getContext('2d'), N, cur()); } finally { S.style = keep; }
+  }
+  function buildPresetList() {
+    const box = $('presetList'), presets = loadPresets();
+    box.textContent = '';
+    const names = Object.keys(presets).sort((a, b) => (presets[b].savedAt || 0) - (presets[a].savedAt || 0));
+    if (!names.length) {
+      const e = document.createElement('div');
+      e.className = 'preset-empty'; e.textContent = t('p_empty');
+      box.appendChild(e);
+      return;
+    }
+    const nowKey = styleKey(S.style);
+    names.forEach((name) => {
+      const p = presets[name];
+      const item = document.createElement('div');
+      item.className = 'preset-item';
+      item.dataset.key = styleKey(Object.assign({}, S.style, p.style));
+      item.classList.toggle('active', item.dataset.key === nowKey);
+      const c = document.createElement('canvas');
+      c.className = 'preset-thumb'; c.title = t('b_apply');
+      renderPresetThumb(c, p.style);
+      c.addEventListener('click', () => applyPreset(name));
+      const body = document.createElement('div');
+      body.className = 'preset-body';
+      const nm = document.createElement('div');
+      nm.className = 'preset-name'; nm.textContent = name;
+      const meta = document.createElement('div');
+      meta.className = 'preset-meta';
+      meta.textContent = '// ' + [presetStamp(p.savedAt), String(p.style.frame || '').toUpperCase(), p.out ? '+OUT' : '']
+        .filter(Boolean).join(' · ');
+      const acts = document.createElement('div');
+      acts.className = 'preset-actions';
+      const mk = (cls, attr, text, title) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'btn ' + cls; b.setAttribute(attr, '');
+        b.setAttribute('data-augmented-ui', 'tl-clip br-clip border');
+        b.textContent = text;
+        if (title) b.title = title;
+        acts.appendChild(b);
+        return b;
+      };
+      mk('btn-alt', 'data-apply', t('b_apply')).addEventListener('click', () => applyPreset(name));
+      mk('', 'data-override', '⇪', t('t_poverride')).addEventListener('click', () => {
+        if (!confirm(t('c_poverwrite', { n: name }))) return;
+        storePreset(name);
+      });
+      mk('btn-warn', 'data-del', '✕', t('t_pdelete')).addEventListener('click', () => {
+        if (!confirm(t('c_pdelete', { n: name }))) return;
+        const all = loadPresets();
+        delete all[name];
+        savePresets(all);
+        buildPresetList();
+        setStatus(t('s_pdeleted', { n: name }));
+      });
+      body.append(nm, meta, acts);
+      item.append(c, body);
+      box.appendChild(item);
+    });
+  }
+  const presetsChanged = debounce(() => { if ($('sidePresets').classList.contains('open')) buildPresetList(); }, 200);
+  // Cheap highlight refresh on every style change (no thumbnail re-render).
+  function markActivePreset() {
+    const nowKey = styleKey(S.style);
+    document.querySelectorAll('.preset-item').forEach((el) => el.classList.toggle('active', el.dataset.key === nowKey));
+  }
+  function storePreset(name) {
+    const all = loadPresets();
+    all[name] = { style: JSON.parse(JSON.stringify(S.style)), savedAt: Date.now() };
+    if ($('presetWithOut').checked) all[name].out = JSON.parse(JSON.stringify(S.out));
+    savePresets(all);
+    buildPresetList();
+    setStatus(t('s_psaved', { n: name }), 'ok');
+  }
+  function savePresetFromInput() {
+    const input = $('presetName'), name = input.value.trim().toUpperCase();
+    if (!name) { setStatus(t('s_pnamereq'), 'warn'); input.focus(); return; }
+    if (loadPresets()[name] && !confirm(t('c_poverwrite', { n: name }))) return;
+    storePreset(name);
+    input.value = '';
+  }
+  function applyPreset(name) {
+    const p = loadPresets()[name];
+    if (!p || !p.style) return;
+    mergeInto(S.style, p.style);
+    if (S.style.frame !== 'custom' && !EIDOLON.frames[S.style.frame]) S.style.frame = 'ring';
+    if (p.out) { mergeInto(S.out, p.out); saveOut(); updateTexts(); }
+    styleChanged();
+    setStatus(t('s_papplied', { n: name }), 'ok');
+  }
+  function exportPresets() {
+    const body = JSON.stringify({ app: 'eidolon', kind: 'presets', version: 1, presets: loadPresets() }, null, 2);
+    download(new Blob([body], { type: 'application/json' }), 'eidolon_presets.json');
+  }
+  function importPresets(file) {
+    file.text().then((txt) => {
+      const data = JSON.parse(txt), src = data && (data.presets || data);
+      const all = loadPresets();
+      let n = 0;
+      Object.keys(src || {}).forEach((name) => {
+        const p = src[name];
+        if (!p || !p.style || typeof p.style !== 'object') return;
+        const key = String(name).trim().toUpperCase().slice(0, 24);
+        if (!key) return;
+        all[key] = { style: p.style, savedAt: p.savedAt || Date.now() };
+        if (p.out && typeof p.out === 'object') all[key].out = p.out;
+        n++;
+      });
+      if (!n) throw new Error('empty');
+      savePresets(all);
+      buildPresetList();
+      setStatus(t('s_pimported', { n }), 'ok');
+    }).catch(() => setStatus(t('s_pimportfail'), 'warn'));
+  }
+  function setPresetsOpen(open) {
+    $('sidePresets').classList.toggle('open', open);
+    $('presetsToggle').setAttribute('aria-expanded', open ? 'true' : 'false');
+    $('presetsArrow').textContent = open ? '<' : '>';
+    EIDOLON.save('eidolon:panel', open ? 'presets' : '');
+    if (open) buildPresetList();
+  }
+  function setupPresets() {
+    $('presetsToggle').addEventListener('click', () => setPresetsOpen(!$('sidePresets').classList.contains('open')));
+    $('presetSave').addEventListener('click', savePresetFromInput);
+    $('presetName').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); savePresetFromInput(); } });
+    $('presetWithOut').checked = (() => { try { return localStorage.getItem('eidolon:presetOut') === '1'; } catch (e) { return false; } })();
+    $('presetWithOut').addEventListener('change', (e) => EIDOLON.save('eidolon:presetOut', e.target.checked ? '1' : '0'));
+    $('presetExport').addEventListener('click', exportPresets);
+    $('presetImport').addEventListener('click', () => $('presetFile').click());
+    $('presetFile').addEventListener('change', (e) => { if (e.target.files[0]) importPresets(e.target.files[0]); e.target.value = ''; });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && $('sidePresets').classList.contains('open')) setPresetsOpen(false);
+    });
+    const was = (() => { try { return localStorage.getItem('eidolon:panel'); } catch (e) { return ''; } })();
+    setPresetsOpen(was === 'presets');
   }
 
   // ---- frame grid + palette ----
@@ -754,6 +912,7 @@
     restore();
     buildPalette();
     setupRefBar();
+    setupPresets();
     buildFrameGrid();
     bindControls();
     setupStage();
@@ -767,7 +926,7 @@
     if (document.fonts && document.fonts.load) {
       document.fonts.load('700 32px "JetBrains Mono"').then(() => { requestDraw(); rosterChanged(); }).catch(() => {});
     }
-    document.addEventListener('eidolon:lang', () => { updateTexts(); buildRoster(); syncRef(); });
+    document.addEventListener('eidolon:lang', () => { updateTexts(); buildRoster(); syncRef(); presetsChanged(); });
   }
 
   document.addEventListener('DOMContentLoaded', init);

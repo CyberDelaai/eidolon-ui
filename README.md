@@ -38,6 +38,12 @@ client-side; your images are never uploaded.
   the frame.
 - **Margin** — 0% (the token fills the whole image) up to 10% empty space on
   each side.
+- **Presets** — a slide-out PRESETS tab on the left edge: name the current look
+  (ENEMIES, PCs, NPCs…) and save it, then re-apply it in one click. Presets hold
+  the global look (frame, colours, glow, margin, background, label and badge
+  style — optionally the output settings too), never portraits, names or
+  badges. Each card shows a live mini-token; overwrite, delete, and EXPORT /
+  IMPORT all presets as JSON to share them.
 - **Export** — PNG or WebP at 256 / 280 (Roll20) / 400 (Foundry) / 512 / 1024 /
   2048 px, copy to clipboard, **export all** tokens as one ZIP, or a **numbered
   set** (the same token ×N with badges 1…N — minions, mooks) as a ZIP.

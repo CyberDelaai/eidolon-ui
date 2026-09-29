@@ -1,4 +1,4 @@
-<!-- EIDOLON v1.1.1 -->
+<!-- EIDOLON v1.2.0 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -76,7 +76,7 @@
         <a class="app-menu-item current" href="https://cyberdeck.tools/eidolon-ui/" aria-current="page">&gt; EIDOLON_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.1.1</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.2.0</span></span></div>
     <select class="lang-select" id="uiLangSel" aria-label="interface language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </header>
 
@@ -304,6 +304,33 @@
     </aside>
   </div>
 </div>
+
+<!-- PRESETS: slide-out side panel with a vertical edge tab (the COMMLINK
+     side-panel pattern). Saves / applies the global look by name. -->
+<aside class="side-panel" id="sidePresets" aria-label="presets">
+  <button class="side-toggle" id="presetsToggle" type="button" aria-expanded="false" aria-controls="sidePresets" data-augmented-ui="tr-clip br-clip border">
+    <span class="label" data-i18n="panel_presets">PRESETS</span>
+    <span class="arrow" id="presetsArrow">&gt;</span>
+  </button>
+  <div class="side-inner">
+    <h2 data-i18n="h_presets">// PRESETS</h2>
+    <div class="preset-save">
+      <input type="text" id="presetName" maxlength="24" data-i18n-ph="ph_preset" placeholder="PRESET NAME…" aria-label="preset name" />
+      <button id="presetSave" class="btn btn-sm" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_save">SAVE</button>
+    </div>
+    <label class="check-toggle">
+      <input type="checkbox" id="presetWithOut" />
+      <span data-i18n="l_without">+ OUTPUT SETTINGS</span>
+    </label>
+    <div class="preset-list" id="presetList"></div>
+    <p class="hint preset-hint" data-i18n="hint_presets">A preset stores the global look — frame, colours, glow, margin, background, label and badge style. Never portraits, names or badges.</p>
+    <div class="btn-row preset-io">
+      <button id="presetExport" class="btn btn-sm btn-alt" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_pexport">EXPORT</button>
+      <button id="presetImport" class="btn btn-sm btn-alt" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_pimport">IMPORT</button>
+    </div>
+    <input type="file" id="presetFile" accept="application/json,.json" hidden />
+  </div>
+</aside>
 
 <div class="footer-stamp" aria-hidden="true">EIDOLON (c) // 2026 // CYBERDELAAI // MIT</div>
 
