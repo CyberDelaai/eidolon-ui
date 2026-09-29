@@ -7,12 +7,35 @@ Build cyberpunk-styled character tokens for your virtual tabletop and export the
 as PNG. No build step, no backend — just open `index.html`. Everything runs
 client-side; your images are never uploaded.
 
-> **Status: compiling.** EIDOLON is in early development — the feature set below
-> will be filled in as it's built.
-
 ## Features
 
-_Coming soon._
+- **Any source** — drop files, paste from the clipboard (Ctrl+V), load several at
+  once, drag an image straight from another tab, or fetch it by URL (when the host
+  allows CORS).
+- **Roster** — every loaded image becomes its own token with its own framing,
+  colour adjustments, name and badge. Click a thumbnail to edit it; the roster,
+  your custom frame/mask and all settings survive a reload (IndexedDB +
+  localStorage, never uploaded).
+- **Framing** — drag to pan, Ctrl+wheel to zoom (around the cursor), Shift+wheel to
+  rotate, mirror, arrow keys to nudge, `[` `]` to rotate, `0` to reset.
+- **12 procedural frames** — RING, DOUBLE, SEGMENT, GLITCH, CIRCUIT, SQUARE,
+  BOX, CLIP (augmented-ui corners), HEX, OCTA, DIAMOND, NONE. Vector-drawn, so they
+  stay crisp at any size, tinted with a **frame** + optional **accent** colour (ON/OFF, quick
+  palette, swap), adjustable **thickness**, **opacity** and neon **glow** (INNER / OUTER / ALL / OFF).
+- **Custom frame & mask** — upload a black & white transparent PNG frame (tinted
+  like the built-ins; white tint keeps its colours) and/or a greyscale mask
+  (white keeps, black cuts) for any cut-out shape.
+- **Background** — solid colour, a blurred copy of the portrait, or transparent.
+- **Effects** — per-token brightness / contrast / saturation / hue, a tinted
+  vignette overlay and scanlines.
+- **Labels** — the token's name as a clipped name PLATE or ARC text, and a corner
+  **badge** (number / letter) at any corner.
+- **Pop-out** — the top half of a transparent-background portrait breaks out over
+  the frame.
+- **Export** — PNG or WebP at 256 / 280 (Roll20) / 400 (Foundry) / 512 / 1024 /
+  2048 px, copy to clipboard, **export all** tokens as one ZIP, or a **numbered
+  set** (the same token ×N with badges 1…N — minions, mooks) as a ZIP.
+- **8 interface languages** — EN / RU / FR / DE / ES / IT / JP / CN.
 
 ## Running
 

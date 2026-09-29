@@ -1,4 +1,4 @@
-<!-- EIDOLON v0.1.0 -->
+<!-- EIDOLON v1.0.0 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -77,33 +77,227 @@
         <a class="app-menu-item current" href="https://cyberdeck.tools/eidolon-ui/" aria-current="page">&gt; EIDOLON_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">0.1.0</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.0.0</span></span></div>
     <select class="lang-select" id="uiLangSel" aria-label="interface language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </header>
 
   <div class="layout">
-    <!-- LEFT config -->
+    <!-- LEFT config: source, frame, background + effects (global style) -->
     <aside class="config config-left" data-augmented-ui="tl-clip br-clip border">
-      <h2 data-i18n="h_controls">// CONTROLS</h2>
-      <p class="hint" data-i18n="hint_controls">Token controls will live here.</p>
+      <h2 data-i18n="h_source">// SOURCE</h2>
+      <div class="btn-row">
+        <button id="loadBtn" class="btn btn-sm" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_load">LOAD</button>
+        <button id="clearBtn" class="btn btn-sm btn-warn" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_clear">CLEAR</button>
+      </div>
+      <div class="url-row" id="urlRow">
+        <input type="text" id="urlInput" data-i18n-ph="ph_url" placeholder="https://… image link" aria-label="image URL" />
+        <button id="urlGo" class="btn btn-sm" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_go">GO</button>
+      </div>
+      <p class="hint" data-i18n="hint_source">Drop, paste (Ctrl+V) or load images — each one becomes a token in the roster.</p>
+      <input type="file" id="fileInput" accept="image/*" multiple hidden />
+
+      <hr class="divider" />
+      <h2 data-i18n="h_frame">// FRAME</h2>
+      <div class="frame-grid" id="frameGrid" role="radiogroup" aria-label="frame"></div>
+      <div class="btn-row">
+        <button id="cframeBtn" class="btn btn-sm" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_cframe">CUSTOM FRAME</button>
+        <button id="cmaskBtn" class="btn btn-sm" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_cmask">CUSTOM MASK</button>
+      </div>
+      <p class="hint" data-i18n="hint_custom">Frame: transparent black &amp; white PNG, tinted by the frame colour (white = original colours). Mask: greyscale — white keeps, black cuts.</p>
+      <input type="file" id="frameInput" accept="image/png,image/webp,image/svg+xml,image/gif" hidden />
+      <input type="file" id="maskInput" accept="image/*" hidden />
+      <div class="fx-toggle">
+        <span class="fx-label" data-i18n="l_fcolor">// FRAME:</span>
+        <span class="fill-group"><button class="fill-swatch" type="button" data-augmented-ui="tl-clip br-clip border" data-for="frameColor"></button></span>
+        <input type="color" id="frameColor" class="fill-input" data-style="frameColor" aria-label="frame colour" />
+      </div>
+      <div class="fx-toggle">
+        <span class="fx-label" data-i18n="l_accent">// ACCENT:</span>
+        <button class="side-switch" type="button" data-style="accent" data-pos="left" aria-label="accent details">
+          <span class="thumb"></span><span class="lab l" data-i18n="b_off">OFF</span><span class="lab r" data-i18n="b_on">ON</span>
+        </button>
+      </div>
+      <div class="fx-toggle" id="accentColorRow">
+        <span class="fx-label" data-i18n="l_acolor">// ACCENT TINT:</span>
+        <span class="fill-group">
+          <button class="fill-swap" id="swapBtn" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n-title="t_swap" title="swap frame / accent">⇅</button>
+          <button class="fill-swatch" type="button" data-augmented-ui="tl-clip br-clip border" data-for="accentColor"></button>
+        </span>
+        <input type="color" id="accentColor" class="fill-input" data-style="accentColor" aria-label="accent colour" />
+      </div>
+      <div class="palette" id="palette" data-i18n-title="t_palette" title="click = frame colour · right-click = accent colour"></div>
+      <div class="fx-toggle">
+        <span class="fx-label"><span data-i18n="l_thick">// THICKNESS:</span> <b class="val" data-val="thickness"></b></span>
+        <input type="range" class="potency-slider" data-style="thickness" min="2" max="25" step="1" aria-label="frame thickness" />
+      </div>
+      <div class="fx-toggle">
+        <span class="fx-label"><span data-i18n="l_opacity">// OPACITY:</span> <b class="val" data-val="frameOpacity"></b></span>
+        <input type="range" class="potency-slider" data-style="frameOpacity" min="0" max="100" step="1" aria-label="frame opacity" />
+      </div>
+      <div class="fx-toggle">
+        <span class="fx-label" data-i18n="l_glow">// GLOW:</span>
+        <button class="side-switch multi" type="button" data-style="glow" data-opts="inner,outer,all,off" aria-label="frame glow">
+          <span class="thumb"></span><span class="lab" data-i18n="b_inner">INNER</span><span class="lab" data-i18n="b_outer">OUTER</span><span class="lab" data-i18n="b_all">ALL</span><span class="lab" data-i18n="b_off">OFF</span>
+        </button>
+      </div>
+
+      <hr class="divider" />
+      <h2 data-i18n="h_bg">// BACKGROUND</h2>
+      <div class="fx-toggle">
+        <span class="fx-label" data-i18n="l_fill">// FILL:</span>
+        <span class="fill-group">
+          <button class="fill-swatch" type="button" data-augmented-ui="tl-clip br-clip border" data-for="bgColor" data-bg="color" data-i18n-title="t_fillswatch" title="solid colour — click to pick"></button>
+          <button class="fill-blur" type="button" data-augmented-ui="tl-clip br-clip border" data-bg="blur" data-i18n-title="t_fillblur" title="blurred copy of the portrait"></button>
+          <button class="fill-transparent" type="button" data-augmented-ui="tl-clip br-clip border" data-bg="transparent" data-i18n-title="t_filltransp" title="transparent (PNG alpha)"></button>
+        </span>
+        <input type="color" id="bgColor" class="fill-input" data-style="bgColor" aria-label="background colour" />
+      </div>
+      <div class="fx-toggle">
+        <span class="fx-label" data-i18n="l_overlay">// OVERLAY:</span>
+        <span class="fill-group"><button class="fill-swatch" type="button" data-augmented-ui="tl-clip br-clip border" data-for="overlayColor"></button></span>
+        <input type="color" id="overlayColor" class="fill-input" data-style="overlayColor" aria-label="overlay colour" />
+      </div>
+      <div class="fx-toggle">
+        <span class="fx-label"><span data-i18n="l_strength">// STRENGTH:</span> <b class="val" data-val="overlayOpacity"></b></span>
+        <input type="range" class="potency-slider" data-style="overlayOpacity" min="0" max="100" step="1" aria-label="overlay strength" />
+      </div>
+      <div class="fx-toggle">
+        <span class="fx-label" data-i18n="l_scan">// SCANLINES:</span>
+        <button class="side-switch" type="button" data-style="scanlines" data-pos="left" aria-label="scanlines">
+          <span class="thumb"></span><span class="lab l" data-i18n="b_off">OFF</span><span class="lab r" data-i18n="b_on">ON</span>
+        </button>
+      </div>
     </aside>
 
     <!-- CENTER working area -->
     <main class="workspace">
       <div class="stage" id="stage">
-        <div class="placeholder" id="placeholder">
-          <b data-i18n="ph_title">NO TOKEN LOADED</b><br />
-          <span data-i18n="ph_body">EIDOLON is compiling — the token workspace goes here.</span>
+        <div class="token-wrap" id="tokenWrap">
+          <canvas id="tokenCanvas" tabindex="0" aria-label="token preview"></canvas>
+          <div class="placeholder" id="placeholder">
+            <b data-i18n="ph_title">NO TOKEN LOADED</b><br />
+            <span data-i18n="ph_body">Drop, paste or load a portrait to start.</span>
+          </div>
         </div>
       </div>
+      <div class="canvas-footer"><span class="canvas-hint" data-i18n="hint_stage">DRAG pan · CTRL+WHEEL zoom · SHIFT+WHEEL rotate · ARROWS nudge · 0 reset</span></div>
+      <div class="roster" id="roster" aria-label="token roster"></div>
     </main>
 
-    <!-- RIGHT output -->
+    <!-- RIGHT config: the selected token, label style, output -->
     <aside class="config config-right" data-augmented-ui="tl-clip br-clip border">
+      <h2 data-i18n="h_token">// TOKEN</h2>
+      <div class="row">
+        <div class="field field-grow">
+          <label for="nameInput" data-i18n="l_name">NAME</label>
+          <input type="text" id="nameInput" data-item="label" maxlength="40" data-i18n-ph="ph_name" placeholder="CHARACTER NAME" />
+        </div>
+        <div class="field field-badge">
+          <label for="badgeInput" data-i18n="l_badge">BADGE</label>
+          <input type="text" id="badgeInput" data-item="badge" maxlength="4" data-i18n-ph="ph_badge" placeholder="1" />
+        </div>
+      </div>
+      <div class="fx-toggle">
+        <span class="fx-label"><span data-i18n="l_zoom">// ZOOM:</span> <b class="val" data-val="tf.zoom"></b></span>
+        <input type="range" class="potency-slider" data-tf="zoom" min="10" max="400" step="1" aria-label="zoom" />
+      </div>
+      <div class="fx-toggle">
+        <span class="fx-label"><span data-i18n="l_rot">// ROTATE:</span> <b class="val" data-val="tf.rot"></b></span>
+        <input type="range" class="potency-slider" data-tf="rot" min="-180" max="180" step="1" aria-label="rotation" />
+      </div>
+      <div class="fx-toggle">
+        <span class="fx-label" data-i18n="l_flip">// MIRROR:</span>
+        <button class="side-switch" type="button" data-tf="flip" data-pos="left" aria-label="mirror portrait">
+          <span class="thumb"></span><span class="lab l" data-i18n="b_off">OFF</span><span class="lab r" data-i18n="b_on">ON</span>
+        </button>
+      </div>
+      <div class="fx-toggle">
+        <span class="fx-label"><span data-i18n="l_bright">// BRIGHTNESS:</span> <b class="val" data-val="adj.bright"></b></span>
+        <input type="range" class="potency-slider" data-adj="bright" min="0" max="200" step="1" aria-label="brightness" />
+      </div>
+      <div class="fx-toggle">
+        <span class="fx-label"><span data-i18n="l_contrast">// CONTRAST:</span> <b class="val" data-val="adj.contrast"></b></span>
+        <input type="range" class="potency-slider" data-adj="contrast" min="0" max="200" step="1" aria-label="contrast" />
+      </div>
+      <div class="fx-toggle">
+        <span class="fx-label"><span data-i18n="l_sat">// SATURATION:</span> <b class="val" data-val="adj.sat"></b></span>
+        <input type="range" class="potency-slider" data-adj="sat" min="0" max="200" step="1" aria-label="saturation" />
+      </div>
+      <div class="fx-toggle">
+        <span class="fx-label"><span data-i18n="l_hue">// HUE:</span> <b class="val" data-val="adj.hue"></b></span>
+        <input type="range" class="potency-slider" data-adj="hue" min="-180" max="180" step="1" aria-label="hue" />
+      </div>
+      <div class="btn-row">
+        <button id="resetTfBtn" class="btn btn-sm" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_reset">RESET POSITION</button>
+        <button id="resetAdjBtn" class="btn btn-sm" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_resetadj">RESET LOOK</button>
+      </div>
+      <p class="hint" data-i18n="hint_token">Everything in // TOKEN belongs to the selected token only.</p>
+
+      <hr class="divider" />
+      <h2 data-i18n="h_label">// LABEL</h2>
+      <div class="fx-toggle">
+        <span class="fx-label" data-i18n="l_lstyle">// NAME STYLE:</span>
+        <select class="scale-select" data-style="labelStyle" aria-label="name style">
+          <option value="none" data-i18n="o_hidden">HIDDEN</option>
+          <option value="plate" data-i18n="o_plate">PLATE</option>
+          <option value="arc" data-i18n="o_arc">ARC</option>
+        </select>
+      </div>
+      <div class="fx-toggle">
+        <span class="fx-label" data-i18n="l_ltext">// TEXT:</span>
+        <span class="fill-group"><button class="fill-swatch" type="button" data-augmented-ui="tl-clip br-clip border" data-for="labelColor"></button></span>
+        <input type="color" id="labelColor" class="fill-input" data-style="labelColor" aria-label="label text colour" />
+      </div>
+      <div class="fx-toggle">
+        <span class="fx-label" data-i18n="l_bpos">// BADGE AT:</span>
+        <select class="scale-select" data-style="badgePos" aria-label="badge position">
+          <option value="tl" data-i18n="o_tl">TOP LEFT</option>
+          <option value="tr" data-i18n="o_tr">TOP RIGHT</option>
+          <option value="bl" data-i18n="o_bl">BOTTOM LEFT</option>
+          <option value="br" data-i18n="o_br">BOTTOM RIGHT</option>
+        </select>
+      </div>
+      <div class="fx-toggle">
+        <span class="fx-label" data-i18n="l_popout">// POP-OUT:</span>
+        <button class="side-switch" type="button" data-style="popout" data-pos="left" aria-label="pop-out">
+          <span class="thumb"></span><span class="lab l" data-i18n="b_off">OFF</span><span class="lab r" data-i18n="b_on">ON</span>
+        </button>
+      </div>
+      <p class="hint" data-i18n="hint_popout">Pop-out draws the top half of a transparent-background PNG over the frame.</p>
+
+      <hr class="divider" />
       <h2 data-i18n="h_output">// OUTPUT</h2>
-      <p class="hint" data-i18n="hint_output">Export settings will live here.</p>
-      <button id="exportBtn" class="btn btn-block" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_export" disabled>EXPORT PNG</button>
-      <div class="status" id="status"></div>
+      <div class="fx-toggle">
+        <span class="fx-label" data-i18n="l_size">// SIZE:</span>
+        <select class="scale-select" id="sizeSel" data-out="size" aria-label="export size">
+          <option value="256">256 PX</option>
+          <option value="280">280 · ROLL20</option>
+          <option value="400">400 · FOUNDRY</option>
+          <option value="512">512 PX</option>
+          <option value="1024">1024 PX</option>
+          <option value="2048">2048 PX</option>
+        </select>
+      </div>
+      <div class="fx-toggle">
+        <span class="fx-label" data-i18n="l_format">// FORMAT:</span>
+        <select class="scale-select" id="formatSel" data-out="format" aria-label="export format">
+          <option value="png">PNG</option>
+          <option value="webp">WEBP</option>
+        </select>
+      </div>
+      <button id="exportBtn" class="btn btn-block" type="button" data-augmented-ui="tl-clip br-clip border" disabled>EXPORT PNG</button>
+      <button id="copyBtn" class="btn btn-block btn-alt" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_copy" disabled>COPY TO CLIPBOARD</button>
+
+      <hr class="divider" />
+      <h2 data-i18n="h_batch">// BATCH</h2>
+      <button id="zipAllBtn" class="btn btn-block btn-alt" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_zipall" disabled>EXPORT ALL · ZIP</button>
+      <div class="fx-toggle">
+        <span class="fx-label" data-i18n="l_setcount">// SET OF:</span>
+        <input type="number" id="setCount" class="set-count" data-out="setCount" min="2" max="99" step="1" inputmode="numeric" aria-label="numbered set size" />
+      </div>
+      <button id="zipSetBtn" class="btn btn-block btn-alt" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_zipset" disabled>NUMBERED SET · ZIP</button>
+      <p class="hint hint-gap" data-i18n="hint_set">A numbered set exports the selected token N times with badges 1…N — for minions and mooks.</p>
+      <div class="status" id="status" role="status"></div>
     </aside>
   </div>
 </div>
@@ -113,6 +307,10 @@
 <script defer src="js/state.js"></script>
 <script defer src="js/i18n.js"></script>
 <script defer src="js/header.js"></script>
+<script defer src="js/idb.js"></script>
+<script defer src="js/zip.js"></script>
+<script defer src="js/frames.js"></script>
+<script defer src="js/render.js"></script>
 <script defer src="js/app.js"></script>
 </body>
 </html>
