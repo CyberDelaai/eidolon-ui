@@ -505,7 +505,9 @@
   const savePresets = (p) => EIDOLON.save('eidolon:presets', JSON.stringify(p));
   // Identity of a look (style + fx) — used to highlight the preset matching the current settings.
   const lookKey = (st, fx) => JSON.stringify([Object.keys(S.style).map((k) => st[k]), Object.keys(S.fx).map((k) => fx[k])]);
-  const presetLook = (p) => [Object.assign({}, S.style, p.style), Object.assign({}, S.fx, p.fx || {})];
+  // A preset saved before FX existed carries no fx: it means "no effects", so
+  // it resolves to the defaults (master switch off), not to whatever is on now.
+  const presetLook = (p) => [Object.assign({}, S.style, p.style), Object.assign(EIDOLON.newFx(), p.fx || {})];
   function presetStamp(ms) {
     const d = new Date(ms || 0);
     if (isNaN(d.getTime())) return '';
@@ -605,7 +607,9 @@
     mergeInto(S.style, p.style);
     if (S.style.frame !== 'custom' && !EIDOLON.frames[S.style.frame]) S.style.frame = 'ring';
     if (p.out) { mergeInto(S.out, p.out); saveOut(); updateTexts(); }
-    if (p.fx) { mergeInto(S.fx, p.fx); saveFx(); syncFx(); }
+    S.fx = EIDOLON.newFx();
+    if (p.fx) mergeInto(S.fx, p.fx);
+    saveFx(); syncFx();
     styleChanged();
     setStatus(t('s_papplied', { n: name }), 'ok');
   }

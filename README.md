@@ -45,7 +45,7 @@ client-side; your images are never uploaded.
 - **Presets** — a slide-out PRESETS tab on the left edge: name the current look
   (ENEMIES, PCs, NPCs…) and save it, then re-apply it in one click. Presets hold
   the global look (frame, colours, glow, margin, background, label and badge
-  style — optionally the output settings too), never portraits, names or
+  style, and all EFFECTS — optionally the output settings too), never portraits, names or
   badges. Each card shows a live mini-token; overwrite, delete, and EXPORT /
   IMPORT all presets as JSON to share them.
 - **Export** — PNG or WebP at 256 / 280 (Roll20) / 400 (Foundry) / 512 / 1024 /
