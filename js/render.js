@@ -10,7 +10,7 @@
   //   B  frame layer    — built-in frame or tinted custom PNG (+ opacity)
   //   G  glow halo      — B's blur minus B itself, optionally split at the frame's outer edge
   //   then pop-out (top half of U over the frame), label, badge. ----
-  const S = EIDOLON.state, C = EIDOLON.const;
+  const S = EIDOLON.state;
 
   // Reusable scratch canvases (render is synchronous, so sharing them is safe).
   const pool = {};
@@ -43,7 +43,8 @@
   function setSpacing(ctx, px) { if ('letterSpacing' in ctx) ctx.letterSpacing = px + 'px'; }
 
   function geom(N) {
-    const R = (N / 2) * C.OUTER;
+    // outer radius: half the edge minus the empty margin on each side
+    const R = N / 2 - (N * Math.min(10, Math.max(0, S.style.margin))) / 100;
     return { N, cx: N / 2, cy: N / 2, R, t: (R * S.style.thickness) / 100, u: N / 512 };
   }
   function frameDef() {

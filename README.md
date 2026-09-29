@@ -32,6 +32,8 @@ client-side; your images are never uploaded.
   **badge** (number / letter) at any corner.
 - **Pop-out** — the top half of a transparent-background portrait breaks out over
   the frame.
+- **Margin** — 0% (the token fills the whole image) up to 10% empty space on
+  each side.
 - **Export** — PNG or WebP at 256 / 280 (Roll20) / 400 (Foundry) / 512 / 1024 /
   2048 px, copy to clipboard, **export all** tokens as one ZIP, or a **numbered
   set** (the same token ×N with badges 1…N — minions, mooks) as a ZIP.

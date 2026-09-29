@@ -130,6 +130,8 @@
     --aug-tl: 12px; --aug-br: 12px;
     align-self: flex-start;
   }
+  /* third column (OUTPUT / BATCH) holds less, so it runs narrower */
+  .config-out { width: 290px; }
   .config h2 {
     font-size: 13px; letter-spacing: 2px; color: var(--dim);
     text-transform: uppercase; font-weight: 700; margin-bottom: 12px;
@@ -376,7 +378,7 @@
   }
   .roster-add:hover { border-color: var(--accent); color: var(--accent); }
 
-  @media (max-width: 1100px) {
+  @media (max-width: 1280px) {
     .layout { flex-wrap: wrap; }
     .config { width: 100%; }
     .workspace { order: -1; width: 100%; }

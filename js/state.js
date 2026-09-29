@@ -8,7 +8,6 @@ EIDOLON.const = {
   EXPORT_SIZE: 512,    // default exported token edge, in px
   MAX_SOURCE: 2048,    // loaded images are downscaled to this longest edge
   PREVIEW_MAX: 560,    // max CSS size of the stage preview canvas
-  OUTER: 0.92,         // outer frame radius as a fraction of half the token edge
 };
 
 // Silent localStorage setter — blocked storage (private mode, file:// quirks)
@@ -33,6 +32,7 @@ EIDOLON.state = {
     accent: true,           // draw the accent details at all
     accentColor: '#fcee0a', // secondary tint (ticks, nodes, badge)
     thickness: 8,           // frame thickness, % of the outer radius
+    margin: 4,              // empty space on each side, % of the token edge (0 = full bleed, max 10)
     frameOpacity: 100,      // %
     glow: 'all',            // neon bloom: 'inner' | 'outer' | 'all' | 'off'
     bgMode: 'color',        // 'color' | 'blur' | 'transparent'

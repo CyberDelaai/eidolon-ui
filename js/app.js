@@ -519,7 +519,7 @@
   }
 
   const VAL_FMT = {
-    thickness: (v) => v + '%', frameOpacity: (v) => v + '%', overlayOpacity: (v) => v + '%',
+    thickness: (v) => v + '%', margin: (v) => v + '%', frameOpacity: (v) => v + '%', overlayOpacity: (v) => v + '%',
     'tf.zoom': (v) => Math.round(v * 100) + '%', 'tf.rot': (v) => Math.round(v) + '°',
     'adj.bright': (v) => v + '%', 'adj.contrast': (v) => v + '%', 'adj.sat': (v) => v + '%', 'adj.hue': (v) => v + '°',
   };
