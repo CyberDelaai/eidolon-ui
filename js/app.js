@@ -670,6 +670,12 @@
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && document.querySelector('.side-panel.open')) setOpenPanel('');
     });
+    // a press anywhere outside the open panel (its tab is inside it) closes it;
+    // the press still goes through to whatever was under the pointer
+    document.addEventListener('pointerdown', (e) => {
+      const open = document.querySelector('.side-panel.open');
+      if (open && !open.contains(e.target)) setOpenPanel('');
+    });
     const was = (() => { try { return localStorage.getItem('eidolon:panel'); } catch (e) { return ''; } })();
     setOpenPanel(PANEL_OPEN[was] ? was : '');
   }
