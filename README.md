@@ -55,7 +55,16 @@ client-side; your images are never uploaded.
   the global look (frame, colours, glow, margin, background, label and badge
   style, and all EFFECTS — optionally the output settings too), never portraits, names or
   badges. Each card shows a live mini-token; overwrite, delete, and EXPORT /
-  IMPORT all presets as JSON to share them.
+  IMPORT all presets as JSON to share them. Read-only **example presets** (PC,
+  NPC, ENEMY, BOSS, NETRUNNER) are built in; SHOW EXAMPLES hides them. An
+  example is a whole demo token: after a warning, APPLY replaces the selected
+  token's picture, framing, name and badge with the C-DOGGO dressed in that
+  look (ENEMY: red badge 8), and its thumbnail shows exactly that.
+- **Starter token** — on the very first run the roster starts with the C-DOGGO
+  (`examples/`, with a ready pop-out mask for its ears) dressed as the ENEMY
+  example; CLEAR pulses until you change anything, clear it or load your own
+  images. Delete it
+  and it stays gone (applying an example preset brings it back on purpose).
 - **Export** — PNG or WebP at 256 / 280 (Roll20) / 400 (Foundry) / 512 / 1024 /
   2048 px, copy to clipboard, and a **BATCH EXPORT** dialog: **export all**
   tokens as one ZIP, or a **numbered

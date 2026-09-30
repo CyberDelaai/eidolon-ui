@@ -126,7 +126,7 @@
       const had = S.items.length;
       S.items = items.concat(S.items); // images added before the DB answered go last
       select(had ? items.length + S.current : 0);
-    }).catch(() => {});
+    }).catch(() => {}).then(seedDefaultToken);
     EIDOLON.idb.get('assets', 'frame').then((b) => b && decode(b).then((img) => {
       S.customFrame = toSource(img, 1024); buildFrameGrid(); updateButtons(); styleChanged();
     })).catch(() => {});
@@ -136,6 +136,66 @@
     EIDOLON.idb.get('assets', 'mask').then((b) => b && decode(b).then((img) => {
       S.customMask = maskFrom(img); updateButtons(); styleChanged();
     })).catch(() => {});
+  }
+
+  // The bundled C-DOGGO example token: picture, framing, pop-out mask for the
+  // ears. Added on the very first run (eidolon:seeded is set
+  // once the roster has anything, so deleting it never brings it back), and
+  // every EXAMPLE preset turns the selected token into it. Opened from file://
+  // the fetch fails and we just skip.
+  const DOGGO_SRC = { img: 'examples/cyber-doggo.webp', mask: 'examples/cyber-doggo-pop-out-mask.webp', name: 'cyber-doggo.webp', tf: { zoom: 1, y: 0.02 } };
+  let doggoAssets = null, doggoPending = null, doggoFailed = false;
+  // -> Promise<{ blob, img, mask }>, fetched once and shared
+  function getDoggo() {
+    if (doggoAssets) return Promise.resolve(doggoAssets);
+    if (!doggoPending) {
+      const get = (url) => fetch(url).then((r) => (r.ok ? r.blob() : Promise.reject(new Error(url))));
+      doggoPending = Promise.all([get(DOGGO_SRC.img), get(DOGGO_SRC.mask).then(decode).catch(() => null)])
+        .then(([raw, mask]) => {
+          // some static servers send .webp as octet-stream
+          const blob = /^image[/]/.test(raw.type) ? raw : new Blob([raw], { type: 'image/webp' });
+          return decode(blob).then((img) => (doggoAssets = { blob, img, mask }));
+        })
+        .catch((e) => { doggoFailed = true; throw e; })
+        .finally(() => { doggoPending = null; });
+    }
+    return doggoPending;
+  }
+  // Turn a token into the doggo (in place, nothing persisted): picture, framing,
+  // look, pop-out. tk = { label?, badge?, tf? } — name, badge and framing
+  // overrides (an example's `token`).
+  function dressAsDoggo(it, a, tk) {
+    tk = tk || {};
+    it.blob = a.blob; it.name = DOGGO_SRC.name; it.src = toSource(a.img); it.hash = '';
+    it.tf = Object.assign(EIDOLON.newTransform(), DOGGO_SRC.tf, tk.tf); it.adj = EIDOLON.newAdjust();
+    it.label = tk.label || ''; it.badge = tk.badge || '';
+    it.popMask = null; it.popOn = false;
+    if (a.mask) buildPopMask(it, a.mask);
+    return it;
+  }
+  // The selected token becomes the doggo (a new one on an empty roster).
+  function doggoToken(tk) {
+    return getDoggo().then((a) => {
+      let it = cur();
+      if (!it) { it = newItem(a.blob, a.img); S.items.push(it); select(S.items.length - 1); }
+      dressAsDoggo(it, a, tk);
+      ensureHash(it); itemChanged(it);
+      return it;
+    });
+  }
+  function seedDefaultToken() {
+    const seeded = (() => { try { return localStorage.getItem('eidolon:seeded'); } catch (e) { return null; } })();
+    if (seeded) return;
+    if (S.items.length) { EIDOLON.save('eidolon:seeded', '1'); return; }
+    getDoggo().then(() => {
+      if (S.items.length) return; // the user got there first — never dress their token
+      // the starter is the ENEMY example: its doggo + look, no confirm (nothing to replace)
+      return doggoToken(EXAMPLES.ENEMY.token).then(() => {
+        applyStyleOf('ENEMY', EXAMPLES.ENEMY);
+        EIDOLON.save('eidolon:seeded', '1');
+        nudgeClear(true);
+      });
+    }).catch(() => {});
   }
 
   // ---- image loading ----
@@ -175,6 +235,14 @@
   }
 
   let orderSeq = Date.now();
+  function newItem(blob, img) {
+    return {
+      id: 'tk' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+      name: blob.name || 'token', blob, order: orderSeq++, src: toSource(img),
+      tf: EIDOLON.newTransform(), adj: EIDOLON.newAdjust(), label: '', badge: '',
+      popOn: false, popMask: null, hash: '',
+    };
+  }
   function addBlobs(list) {
     const blobs = [...list].filter((b) => b && /^image\//.test(b.type || 'image/'));
     if (!blobs.length) return Promise.resolve(0);
@@ -182,16 +250,12 @@
       .then((res) => {
         const ok = res.filter(Boolean);
         ok.forEach(({ blob, img }) => {
-          const item = {
-            id: 'tk' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
-            name: blob.name || 'token', blob, order: orderSeq++, src: toSource(img),
-            tf: EIDOLON.newTransform(), adj: EIDOLON.newAdjust(), label: '', badge: '',
-            popOn: false, popMask: null, hash: '',
-          };
+          const item = newItem(blob, img);
           S.items.push(item);
           ensureHash(item); // persists once the id is known
         });
         if (ok.length) {
+          nudgeClear(false);
           select(S.items.length - ok.length);
           setStatus(t('s_loaded', { n: ok.length }), 'ok');
         } else {
@@ -238,6 +302,10 @@
     EIDOLON.idb.del('items', it.id).catch(() => {});
     select(i >= S.current ? Math.min(S.current, S.items.length - 1) : S.current - 1);
   }
+  // CLEAR pulses while an untouched example doggo is on stage ("clear it, load
+  // your own"); any change (style, FX, token edit), a clear or loading images
+  // stops it — so it's switched on only after an apply's own change calls.
+  const nudgeClear = (on) => $('clearBtn').classList.toggle('nudge', !!on);
   let clearArmed = 0;
   function clearAll() {
     if (!S.items.length) return;
@@ -251,6 +319,7 @@
     S.items.forEach((it) => EIDOLON.idb.del('items', it.id).catch(() => {}));
     S.items = [];
     select(-1);
+    nudgeClear(false);
     setStatus(t('s_cleared'));
   }
   const thumbs = new Map(); // item.id -> thumbnail canvas
@@ -310,9 +379,11 @@
   function itemChanged(item) {
     item = item || cur();
     if (!item) return;
+    nudgeClear(false); // any edit makes the example the user's own
     syncControls(); requestDraw(); persistItem(item); rosterChanged();
   }
   function styleChanged() {
+    nudgeClear(false);
     syncControls(); saveStyle(); requestDraw(); drawFrameThumbs(); rosterChanged(); markActivePreset();
   }
 
@@ -549,6 +620,36 @@
     try { return JSON.parse(localStorage.getItem('eidolon:presets') || '{}') || {}; } catch (e) { return {}; }
   }
   const savePresets = (p) => EIDOLON.save('eidolon:presets', JSON.stringify(p));
+  // Built-in EXAMPLE presets (the COMMLINK EXAMPLE_* idea): defined here, never
+  // stored, so they're read-only, stay current and never reach an export.
+  // Full styles over the pristine defaults, so applying one is deterministic.
+  const DEFAULT_STYLE = JSON.parse(JSON.stringify(S.style)); // captured before restore()
+  const DOGGO = '匚-刀口厶厶口'; // the starter token's name, in ASCII-art style
+  const EXAMPLES = (() => {
+    // token: the example's name / badge / framing (tf overrides) — APPLY puts
+    // them on the C-DOGGO it makes of the selected token (absent = empty / default).
+    const ex = (style, fx, token) => ({ style: Object.assign({}, DEFAULT_STYLE, style), fx: Object.assign(EIDOLON.newFx(), fx || {}), token: token || null, example: true });
+    return {
+      PC: ex({ frame: 'ring', frameColor: '#00f0ff', accent: true, accentColor: '#fcee0a', glow: 'all', labelStyle: 'arc' },
+        null, { label: DOGGO }),
+      ENEMY: ex({ frame: 'ring', frameColor: '#ff003c', glow: 'outer', bgColor: '#14050a', labelStyle: 'none',
+        badgeFrom: 'custom', badgeColor: '#ff003c', badgePos: 'br' },
+        null, { badge: '8' }),
+      NPC: ex({ frame: 'hex', frameColor: '#e8e8ee', thickness: 6, glow: 'off', labelStyle: 'plate' }),
+      BOSS: ex({ frame: 'segment', frameColor: '#fcee0a', accent: true, accentColor: '#ff003c', thickness: 11, glow: 'all', labelStyle: 'arc' },
+        { on: true, vig: true, vigColor: '#ff003c', vigAmt: 45 }),
+      NETRUNNER: ex({ frame: 'clip', frameColor: '#39ff14', accent: true, accentColor: '#00f0ff', glow: 'inner', labelStyle: 'plate' },
+        { on: true, tone: 'neon', toneMix: 35, scan: true, scanAmt: 30, scanGap: 4 }, { label: DOGGO }),
+    };
+  })();
+  const showExamples = () => { try { return localStorage.getItem('eidolon:showExamples') !== '0'; } catch (e) { return true; } };
+  // User presets first (they win a name clash), then the examples.
+  function allPresets() {
+    const own = loadPresets(), out = {};
+    Object.keys(own).forEach((n) => { if (own[n] && own[n].style) out[n] = own[n]; });
+    if (showExamples()) Object.keys(EXAMPLES).forEach((n) => { if (!out[n]) out[n] = EXAMPLES[n]; });
+    return out;
+  }
   // Identity of a look (style + fx) — used to highlight the preset matching the current settings.
   const lookKey = (st, fx) => JSON.stringify([Object.keys(S.style).map((k) => st[k]), Object.keys(S.fx).map((k) => fx[k])]);
   // A preset saved before FX existed carries no fx: it means "no effects", so
@@ -560,18 +661,30 @@
     const p2 = (n) => String(n).padStart(2, '0');
     return `${p2(d.getDate())}.${p2(d.getMonth() + 1)}.${p2(d.getFullYear() % 100)} ${p2(d.getHours())}:${p2(d.getMinutes())}`;
   }
+  // Example thumbnails show what APPLY makes: the doggo with the example's name / badge.
+  let doggoDemo = null;
+  function thumbItem(p) {
+    if (!p.example) return cur();
+    if (!doggoDemo) return null;
+    const tk = p.token || {};
+    return Object.assign({}, doggoDemo, { label: tk.label || '', badge: tk.badge || '', tf: Object.assign({}, doggoDemo.tf, tk.tf) });
+  }
   // Draw the current token (or the empty frame) as it would look with a preset.
   function renderPresetThumb(canvas, p) {
     const N = Math.round(56 * dpr());
     canvas.width = N; canvas.height = N;
     const keepStyle = S.style, keepFx = S.fx;
     [S.style, S.fx] = presetLook(p);
-    try { EIDOLON.render(canvas.getContext('2d'), N, cur()); } finally { S.style = keepStyle; S.fx = keepFx; }
+    try { EIDOLON.render(canvas.getContext('2d'), N, thumbItem(p)); } finally { S.style = keepStyle; S.fx = keepFx; }
   }
   function buildPresetList() {
-    const box = $('presetList'), presets = loadPresets();
+    const box = $('presetList'), presets = allPresets();
     box.textContent = '';
-    const names = Object.keys(presets).sort((a, b) => (presets[b].savedAt || 0) - (presets[a].savedAt || 0));
+    if (!doggoDemo && !doggoFailed && showExamples()) {
+      getDoggo().then((a) => { doggoDemo = dressAsDoggo({ id: 'doggo-demo' }, a); buildPresetList(); }).catch(() => {});
+    }
+    const names = Object.keys(presets).sort((a, b) => (!!presets[a].example - !!presets[b].example)
+      || (presets[b].savedAt || 0) - (presets[a].savedAt || 0));
     if (!names.length) {
       const e = document.createElement('div');
       e.className = 'preset-empty'; e.textContent = t('p_empty');
@@ -582,7 +695,7 @@
     names.forEach((name) => {
       const p = presets[name];
       const item = document.createElement('div');
-      item.className = 'preset-item';
+      item.className = 'preset-item' + (p.example ? ' example' : '');
       item.dataset.key = lookKey(...presetLook(p));
       item.classList.toggle('active', item.dataset.key === nowKey);
       const c = document.createElement('canvas');
@@ -595,7 +708,7 @@
       nm.className = 'preset-name'; nm.textContent = name;
       const meta = document.createElement('div');
       meta.className = 'preset-meta';
-      meta.textContent = '// ' + [presetStamp(p.savedAt), String(p.style.frame || '').toUpperCase(), p.fx && p.fx.on ? '+FX' : '', p.out ? '+OUT' : '']
+      meta.textContent = '// ' + [p.example ? t('p_example') : presetStamp(p.savedAt), String(p.style.frame || '').toUpperCase(), p.fx && p.fx.on ? '+FX' : '', p.out ? '+OUT' : '']
         .filter(Boolean).join(' · ');
       const acts = document.createElement('div');
       acts.className = 'preset-actions';
@@ -609,6 +722,7 @@
         return b;
       };
       mk('btn-alt', 'data-apply', t('b_apply')).addEventListener('click', () => applyPreset(name));
+      if (p.example) { body.append(nm, meta, acts); item.append(c, body); box.appendChild(item); return; } // read-only
       mk('', 'data-override', '⇪', t('t_poverride')).addEventListener('click', () => {
         if (!confirm(t('c_poverwrite', { n: name }))) return;
         storePreset(name);
@@ -648,8 +762,20 @@
     input.value = '';
   }
   function applyPreset(name) {
-    const p = loadPresets()[name];
+    const p = allPresets()[name];
     if (!p || !p.style) return;
+    // an EXAMPLE replaces the selected token with its C-DOGGO — ask first
+    if (p.example) {
+      if (!confirm(t('c_example', { n: name }))) return;
+      doggoToken(p.token).then(() => true, () => false).then((ok) => {
+        applyStyleOf(name, p);
+        if (ok) nudgeClear(true); // after the apply's own change calls
+      });
+      return;
+    }
+    applyStyleOf(name, p);
+  }
+  function applyStyleOf(name, p) {
     mergeInto(S.style, p.style);
     if (S.style.frame !== 'custom' && !EIDOLON.frames[S.style.frame]) S.style.frame = 'ring';
     if (p.out) { mergeInto(S.out, p.out); saveOut(); updateTexts(); }
@@ -689,6 +815,8 @@
     $('presetName').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); savePresetFromInput(); } });
     $('presetWithOut').checked = (() => { try { return localStorage.getItem('eidolon:presetOut') === '1'; } catch (e) { return false; } })();
     $('presetWithOut').addEventListener('change', (e) => EIDOLON.save('eidolon:presetOut', e.target.checked ? '1' : '0'));
+    $('presetShowEx').checked = showExamples();
+    $('presetShowEx').addEventListener('change', (e) => { EIDOLON.save('eidolon:showExamples', e.target.checked ? '1' : '0'); buildPresetList(); });
     $('presetExport').addEventListener('click', exportPresets);
     $('presetImport').addEventListener('click', () => $('presetFile').click());
     $('presetFile').addEventListener('change', (e) => { if (e.target.files[0]) importPresets(e.target.files[0]); e.target.value = ''; });
@@ -791,22 +919,28 @@
     const it = cur();
     if (!it) return;
     decode(file).then((img) => {
-      const m = ensureMask(it), x = m.getContext('2d', { willReadFrequently: true });
-      x.globalCompositeOperation = 'source-over';
-      x.clearRect(0, 0, m.width, m.height);
-      x.drawImage(img, 0, 0, m.width, m.height);
-      const d = x.getImageData(0, 0, m.width, m.height), p = d.data;
-      let alpha = false;
-      for (let i = 3; i < p.length; i += 4) if (p[i] < 250) { alpha = true; break; }
-      for (let i = 0; i < p.length; i += 4) {
-        const a = alpha ? p[i + 3] : 0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2];
-        p[i] = p[i + 1] = p[i + 2] = 255; p[i + 3] = a;
-      }
-      x.putImageData(d, 0, 0);
-      it.popOn = true;
-      itemChanged(it);
+      setPopMask(it, img);
       setStatus(t('s_popmask'), 'ok');
     }).catch(() => setStatus(t('s_loadfail'), 'warn'));
+  }
+  function setPopMask(it, img) {
+    buildPopMask(it, img);
+    itemChanged(it);
+  }
+  function buildPopMask(it, img) {
+    const m = ensureMask(it), x = m.getContext('2d', { willReadFrequently: true });
+    x.globalCompositeOperation = 'source-over';
+    x.clearRect(0, 0, m.width, m.height);
+    x.drawImage(img, 0, 0, m.width, m.height);
+    const d = x.getImageData(0, 0, m.width, m.height), p = d.data;
+    let alpha = false;
+    for (let i = 3; i < p.length; i += 4) if (p[i] < 250) { alpha = true; break; }
+    for (let i = 0; i < p.length; i += 4) {
+      const a = alpha ? p[i + 3] : 0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2];
+      p[i] = p[i + 1] = p[i + 2] = 255; p[i + 3] = a;
+    }
+    x.putImageData(d, 0, 0);
+    it.popOn = true;
   }
   function setupPopout() {
     $('popLoadBtn').addEventListener('click', () => $('popMaskInput').click());
@@ -876,6 +1010,7 @@
     return f.on && (f.tone !== 'none' || f.glitch || f.rgb || f.grain || f.vig || f.scan);
   }
   function fxChanged() {
+    nudgeClear(false);
     syncFx(); saveFx(); requestDraw(); rosterChanged(); markActivePreset();
   }
   function syncFx() {
@@ -1194,7 +1329,7 @@
   //   preset — the saved preset matching the current look, if any
   //   badge  — the badge (numbered sets pad it: b01…b12)
   function activePresetName() {
-    const all = loadPresets(), nowKey = lookKey(S.style, S.fx);
+    const all = allPresets(), nowKey = lookKey(S.style, S.fx);
     return Object.keys(all).find((n) => all[n] && all[n].style && lookKey(...presetLook(all[n])) === nowKey) || '';
   }
   function baseName(it) {
