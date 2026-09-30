@@ -40,7 +40,7 @@ EIDOLON.state = {
   style: {
     frame: 'ring',          // key into EIDOLON.frames (or 'custom')
     frameColor: '#00f0ff',  // main frame tint
-    accent: true,           // draw the accent details at all
+    accent: false,          // draw the accent details at all (off by default)
     accentColor: '#fcee0a', // secondary tint (ticks, nodes, badge)
     thickness: 8,           // frame thickness, % of the outer radius
     margin: 4,              // empty space on each side, % of the token edge (0 = full bleed, max 10)

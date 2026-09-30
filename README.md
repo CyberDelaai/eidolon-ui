@@ -26,7 +26,7 @@ client-side; your images are never uploaded.
   rotate, mirror (around the token centre, so the framing stays put), arrow keys to nudge, `[` `]` to rotate, `0` to reset.
 - **12 procedural frames** — RING, DOUBLE, SEGMENT, GLITCH, CIRCUIT, SQUARE,
   BOX, CLIP (augmented-ui corners), HEX, OCTA, DIAMOND, NONE. Vector-drawn, so they
-  stay crisp at any size, tinted with a **frame** + optional **accent** colour (ON/OFF, quick
+  stay crisp at any size, tinted with a **frame** + optional **accent** colour (ON/OFF, off by default, quick
   palette, swap), adjustable **thickness**, **opacity** and neon **glow** (INNER / OUTER / ALL / OFF).
 - **Custom frame & mask** — upload a black & white transparent PNG frame (tinted
   like the built-ins; white tint keeps its colours) and/or a greyscale mask
