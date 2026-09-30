@@ -60,6 +60,14 @@ client-side; your images are never uploaded.
   2048 px, copy to clipboard, and a **BATCH EXPORT** dialog: **export all**
   tokens as one ZIP, or a **numbered
   set** (the same token ×N with badges 1…N — minions, mooks) as a ZIP.
+- **File names that never clash** — `token_<name>_<id>_<preset>_b<badge>_<size>.png`,
+  e.g. `token_ghost-runner_a3f9c2_enemies_b03_280.png`. The `<id>` is a 6-character
+  fingerprint of the source image, so tokens from different portraits never
+  overwrite each other, and re-exporting the same one replaces its own file.
+  Parts with nothing to say are left out: no name, no matching saved preset, or no
+  badge. Search `token_` for every export, the name for one character, or the id
+  for every export of one portrait. Batch ZIPs are timestamped
+  (`tokens_20260930-1542_280.zip`).
 - **8 interface languages** — EN / RU / FR / DE / ES / IT / JP / CN.
 
 ## Running

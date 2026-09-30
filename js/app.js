@@ -32,9 +32,27 @@
     let id = 0;
     return (...a) => { clearTimeout(id); id = setTimeout(() => fn(...a), ms); };
   }
+  // Filename-safe part: letters/digits (any script) joined by '-', '' when empty,
+  // so '_' stays free to separate the fields of an export name.
   function slug(s) {
-    return String(s || 'token').replace(/\.[a-z0-9]+$/i, '').toLowerCase()
-      .replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, '').slice(0, 48) || 'token';
+    return String(s || '').toLowerCase()
+      .replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, '').slice(0, 40).replace(/-+$/, '');
+  }
+  // 6-hex content id of the source image (FNV-1a over its bytes): the same
+  // portrait gets the same id on any machine, so re-exports replace their own
+  // file and never another character's that happens to share a name.
+  function hashBlob(blob) {
+    return blob.arrayBuffer().then((buf) => {
+      const b = new Uint8Array(buf);
+      let h = 0x811c9dc5;
+      for (let i = 0; i < b.length; i++) { h ^= b[i]; h = Math.imul(h, 0x01000193); }
+      return (h >>> 0).toString(16).padStart(8, '0').slice(0, 6);
+    });
+  }
+  function ensureHash(item) {
+    if (item.hash) return Promise.resolve(item.hash);
+    return hashBlob(item.blob).catch(() => item.id.slice(-6))
+      .then((h) => { item.hash = h; persistItem(item); return h; });
   }
   function download(blob, name) {
     const a = document.createElement('a');
@@ -63,7 +81,7 @@
     clearTimeout(persistTimers[item.id]);
     persistTimers[item.id] = setTimeout(() => {
       const rec = {
-        id: item.id, name: item.name, blob: item.blob, order: item.order,
+        id: item.id, name: item.name, blob: item.blob, order: item.order, hash: item.hash || '',
         tf: item.tf, adj: item.adj, label: item.label, badge: item.badge, popOn: !!item.popOn,
       };
       const put = (mask) => EIDOLON.idb.put('items', item.id, Object.assign(rec, { popMask: mask || null })).catch(() => {});
@@ -97,7 +115,7 @@
         decode(r.blob),
         r.popMask ? decode(r.popMask).catch(() => null) : null,
       ]).then(([img, mask]) => ({
-        id: r.id, name: r.name, blob: r.blob, order: r.order, src: toSource(img),
+        id: r.id, name: r.name, blob: r.blob, order: r.order, hash: r.hash || '', src: toSource(img),
         tf: Object.assign(EIDOLON.newTransform(), r.tf), adj: Object.assign(EIDOLON.newAdjust(), r.adj),
         label: r.label || '', badge: r.badge || '',
         popOn: !!r.popOn, popMask: mask ? toSource(mask, 512) : null,
@@ -168,10 +186,10 @@
             id: 'tk' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
             name: blob.name || 'token', blob, order: orderSeq++, src: toSource(img),
             tf: EIDOLON.newTransform(), adj: EIDOLON.newAdjust(), label: '', badge: '',
-            popOn: false, popMask: null,
+            popOn: false, popMask: null, hash: '',
           };
           S.items.push(item);
-          persistItem(item);
+          ensureHash(item); // persists once the id is known
         });
         if (ok.length) {
           select(S.items.length - ok.length);
@@ -1170,13 +1188,32 @@
     if (!on) updateButtons();
     else ['exportBtn', 'copyBtn', 'zipAllBtn', 'zipSetBtn'].forEach((id) => { $(id).disabled = true; });
   }
-  function baseName(it) { return slug(it.label || it.name); }
+  // Export names: token[_name]_<id6>[_preset][_b<badge>]_<size>.<ext>
+  //   name   — the token's NAME field (skipped when empty; never the source filename)
+  //   id6    — content hash of the source image (ensureHash)
+  //   preset — the saved preset matching the current look, if any
+  //   badge  — the badge (numbered sets pad it: b01…b12)
+  function activePresetName() {
+    const all = loadPresets(), nowKey = lookKey(S.style, S.fx);
+    return Object.keys(all).find((n) => all[n] && all[n].style && lookKey(...presetLook(all[n])) === nowKey) || '';
+  }
+  function baseName(it) {
+    return ['token', slug(it.label), it.hash, slug(activePresetName())].filter(Boolean).join('_');
+  }
+  function tokenFile(it, N, ext, badge) {
+    const b = slug(badge);
+    return [baseName(it), b && 'b' + b, N].filter(Boolean).join('_') + '.' + ext;
+  }
+  function stamp() {
+    const d = new Date(), p2 = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}${p2(d.getMonth() + 1)}${p2(d.getDate())}-${p2(d.getHours())}${p2(d.getMinutes())}`;
+  }
   function exportCurrent() {
     const it = cur();
     if (!it || busy) return;
     const N = S.out.size;
-    toBlob(EIDOLON.renderCanvas(it, N), MIME[S.out.format]).then((b) => {
-      const name = `${baseName(it)}_${N}.${extOf(b)}`;
+    Promise.all([toBlob(EIDOLON.renderCanvas(it, N), MIME[S.out.format]), ensureHash(it)]).then(([b]) => {
+      const name = tokenFile(it, N, extOf(b), it.badge);
       download(b, name);
       setStatus(t('s_saved', { f: name }), 'ok');
     }).catch(() => setStatus(t('s_fail'), 'warn'));
@@ -1220,16 +1257,24 @@
     next();
   }
   function zipAll() {
-    const N = S.out.size, ext = S.out.format;
-    zipJobs(S.items.map((it) => ({ item: it, name: `${baseName(it)}_${N}.${ext}` })), `eidolon_tokens_${N}.zip`);
+    if (busy) return;
+    const N = S.out.size, ext = S.out.format, items = S.items.slice();
+    Promise.all(items.map(ensureHash)).then(() => {
+      zipJobs(items.map((it) => ({ item: it, name: tokenFile(it, N, ext, it.badge) })), `tokens_${stamp()}_${N}.zip`);
+    });
   }
   function zipSet() {
     const it = cur();
-    if (!it) return;
+    if (!it || busy) return;
     const N = S.out.size, ext = S.out.format, n = clamp(S.out.setCount, 2, 99), pad = String(n).length;
-    const jobs = [];
-    for (let k = 1; k <= n; k++) jobs.push({ item: it, opts: { badge: String(k) }, name: `${baseName(it)}_${String(k).padStart(pad, '0')}_${N}.${ext}` });
-    zipJobs(jobs, `${baseName(it)}_set${n}_${N}.zip`);
+    ensureHash(it).then(() => {
+      const jobs = [];
+      for (let k = 1; k <= n; k++) {
+        const badge = String(k).padStart(pad, '0');
+        jobs.push({ item: it, opts: { badge: String(k) }, name: tokenFile(it, N, ext, badge) });
+      }
+      zipJobs(jobs, `${baseName(it)}_set${n}_${N}.zip`);
+    });
   }
 
   // ---- init ----
