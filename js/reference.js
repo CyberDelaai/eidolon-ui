@@ -40,15 +40,18 @@
     ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
     ctx.clearRect(0, 0, N, N);
     const kind = S.ref.kind, a = S.ref.opacity / 100;
-    if (kind === 'off' || a <= 0) return;
-    if (kind === 'custom') {
-      if (!S.customRef) return;
+    if (a <= 0) return;
+    if (kind === 'custom' && S.customRef) {
       ctx.globalAlpha = a;
       ctx.drawImage(S.customRef, 0, 0, N, N); // same square as the exported image
-      ctx.globalAlpha = 1;
-      return; // custom art is shown whole (it may include its own frame)
+      ctx.globalAlpha = 1; // custom art is shown whole (it may include its own frame)
+    } else if (SHAPES[kind]) {
+      drawShape(ctx, N, kind, a);
     }
-    if (!SHAPES[kind]) return;
+    if (S.ref.guides) drawGuides(ctx, N, a);
+  };
+
+  function drawShape(ctx, N, kind, a) {
     const g = EIDOLON.geom(N), k = g.R / 100;
     ctx.save();
     ctx.translate(g.cx, g.cy); ctx.scale(k, k);
@@ -60,5 +63,22 @@
     ctx.stroke(p);
     ctx.restore();
     EIDOLON.applyCutout(ctx, N);
-  };
+  }
+
+  // Centre guides: a dashed cross through the token centre spanning the frame,
+  // with a small ring on the centre point. Drawn over (not clipped by) the cut-out.
+  function drawGuides(ctx, N, a) {
+    const g = EIDOLON.geom(N), u = g.u;
+    ctx.save();
+    ctx.lineWidth = 1.4 * u;
+    ctx.strokeStyle = `rgba(0,240,255,${Math.min(1, a * 1.6)})`;
+    ctx.setLineDash([8 * u, 5 * u]);
+    ctx.beginPath();
+    ctx.moveTo(g.cx, g.cy - g.R); ctx.lineTo(g.cx, g.cy + g.R);
+    ctx.moveTo(g.cx - g.R, g.cy); ctx.lineTo(g.cx + g.R, g.cy);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.beginPath(); ctx.arc(g.cx, g.cy, 6 * u, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+  }
 })(window.EIDOLON);

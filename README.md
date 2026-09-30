@@ -18,10 +18,12 @@ client-side; your images are never uploaded.
   localStorage, never uploaded).
 - **Reference overlay** — a bar above the preview with person silhouettes (head &
   shoulders, close-up head, full body, profile) or your own reference image,
-  laid over the token at adjustable opacity to line portraits up consistently.
+  laid over the token at adjustable opacity to line portraits up consistently,
+  plus a **centre guides** toggle (a cross through the token centre) that
+  combines with any of them.
   Preview only — it never appears in exported images.
 - **Framing** — drag to pan, Ctrl+wheel to zoom (around the cursor), Shift+wheel to
-  rotate, mirror, arrow keys to nudge, `[` `]` to rotate, `0` to reset.
+  rotate, mirror (around the token centre, so the framing stays put), arrow keys to nudge, `[` `]` to rotate, `0` to reset.
 - **12 procedural frames** — RING, DOUBLE, SEGMENT, GLITCH, CIRCUIT, SQUARE,
   BOX, CLIP (augmented-ui corners), HEX, OCTA, DIAMOND, NONE. Vector-drawn, so they
   stay crisp at any size, tinted with a **frame** + optional **accent** colour (ON/OFF, quick

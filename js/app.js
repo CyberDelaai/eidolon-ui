@@ -402,7 +402,11 @@
     };
     const add = (tag, attrs) => svg.appendChild(make(tag, attrs));
     const ring = { cx: 0, cy: 0, r: 100, fill: 'none', stroke: 'currentColor', 'stroke-width': 7, opacity: 0.45 };
-    if (kind === 'off') {
+    if (kind === 'guides') {
+      add('circle', ring);
+      add('path', { d: 'M 0 -100 L 0 100 M -100 0 L 100 0', stroke: 'currentColor', 'stroke-width': 9, 'stroke-dasharray': '24 14' });
+      add('circle', { cx: 0, cy: 0, r: 20, fill: 'none', stroke: 'currentColor', 'stroke-width': 9 });
+    } else if (kind === 'off') {
       add('circle', ring);
       add('line', { x1: -70, y1: 70, x2: 70, y2: -70, stroke: 'currentColor', 'stroke-width': 12 });
     } else if (kind === 'custom') {
@@ -452,9 +456,13 @@
       const x = b.querySelector('.roster-x');
       if (x) x.title = t('t_ref_clear');
     });
+    const gb = $('refGuides');
+    gb.classList.toggle('active', !!S.ref.guides);
+    gb.setAttribute('aria-pressed', S.ref.guides ? 'true' : 'false');
+    gb.title = t('t_ref_guides');
     $('refOpacity').value = S.ref.opacity;
     $('refOpVal').textContent = S.ref.opacity + '%';
-    $('refOpacity').disabled = S.ref.kind === 'off';
+    $('refOpacity').disabled = S.ref.kind === 'off' && !S.ref.guides;
     drawRef();
   }
   function drawRef() {
@@ -481,6 +489,9 @@
   function setupRefBar() {
     $('refOpacity').addEventListener('input', (e) => { S.ref.opacity = +e.target.value; saveRef(); syncRef(); });
     $('refInput').addEventListener('change', (e) => { if (e.target.files[0]) setCustomRef(e.target.files[0]); e.target.value = ''; });
+    const gb = $('refGuides');
+    gb.appendChild(refIcon('guides'));
+    gb.addEventListener('click', () => { S.ref.guides = !S.ref.guides; saveRef(); syncRef(); });
     buildRefBar();
   }
 
@@ -1042,7 +1053,11 @@
       const apply = () => {
         const it = cur();
         if (!it) return;
-        if (el.classList.contains('side-switch')) it[grp][k] = !it[grp][k];
+        if (k === 'flip') {
+          // mirror about the token's vertical centre line, not the image's own
+          // centre: reflecting the whole placement negates pan-x and rotation too
+          it.tf.flip = !it.tf.flip; it.tf.x = -it.tf.x; it.tf.rot = -it.tf.rot;
+        } else if (el.classList.contains('side-switch')) it[grp][k] = !it[grp][k];
         else it[grp][k] = k === 'zoom' ? +el.value / 100 : +el.value;
         itemChanged(it);
       };

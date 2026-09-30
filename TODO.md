@@ -10,11 +10,10 @@ Items are removed from the list once they are implemented / resolved (no archive
 
 ## SMALL (Z version bump)
 
-1. Center referense lines
-2. Make accent color disabled by default
-3. Saved files' names
-4. Default character / example presets
-5. Per-language SEO URLs: read `?lang=xx` on load (overrides the saved
+1. Make accent color disabled by default
+2. Saved files' names
+3. Default character / example presets
+4. Per-language SEO URLs: read `?lang=xx` on load (overrides the saved
    language), add `<link rel="alternate" hreflang>` for all 8 languages +
    `x-default`, per-language `<loc>` entries in `sitemap.xml`, and a matching
    canonical per variant, so crawlers index the localized title/description

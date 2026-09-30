@@ -402,6 +402,8 @@
     border-color: var(--accent); color: var(--accent); background: rgba(var(--accent-rgb),0.08);
     box-shadow: 0 0 8px rgba(var(--accent-rgb),0.45);
   }
+  .ref-guides { margin-left: -4px; }
+  .ref-guides::before { content: ''; position: absolute; left: -10px; top: 6px; bottom: 6px; border-left: 1px solid rgba(var(--main-rgb),0.25); }
   .ref-tile .roster-x { width: 14px; height: 14px; line-height: 13px; font-size: 12px; }
   .ref-tile:hover .roster-x { opacity: 1; }
   .ref-op { display: flex; align-items: center; gap: 12px; margin-left: auto; }
