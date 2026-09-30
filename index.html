@@ -4,9 +4,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>EIDOLON — cyberdeck.tools</title>
-<meta name="description" content="EIDOLON is a free in-browser token / avatar maker for TTRPG characters from cyberdeck.tools. Runs entirely client-side — no backend, no build step." />
-<meta name="keywords" content="cyberpunk, eidolon, token maker, avatar, ttrpg, vtt, roll20, foundry, gm tools, cyberdeck" />
+<title>EIDOLON — Cyberpunk TTRPG Token &amp; Avatar Maker for Roll20 &amp; Foundry VTT</title>
+
+<!-- SEO: description, keywords, canonical, robots -->
+<meta name="description" content="EIDOLON is a free in-browser token maker for TTRPG characters. Frame portraits in 12 cyberpunk frames, add name plates, numbered badges, pop-out and glitch FX, then batch-export PNG / WebP tokens for Roll20, Foundry VTT and other VTTs. No signup, no upload." />
+<meta name="keywords" content="token maker, token stamp, vtt token, character token, avatar maker, portrait frame, roll20 token, foundry vtt token, owlbear rodeo, ttrpg, tabletop rpg, dnd token, pathfinder, cyberpunk, cyberpunk red, cyberpunk 2020, shadowrun, game master tools, gm tools, minion tokens, numbered tokens, png export, конструктор токенов, créateur de jetons, token erstellen, creador de tokens, creatore di token, トークンメーカー, 令牌制作器" />
 <meta name="author" content="CyberDelaai" />
 <meta name="robots" content="index, follow" />
 <meta name="theme-color" content="#050507" />
@@ -16,37 +18,64 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 <link rel="apple-touch-icon" href="favicon-192.png" />
 
-<!-- Open Graph / Twitter -->
+<!-- Open Graph (Facebook, Discord, Slack, Telegram, LinkedIn) -->
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="EIDOLON" />
-<meta property="og:title" content="EIDOLON — cyberdeck.tools" />
-<meta property="og:description" content="A free in-browser token / avatar maker for TTRPG characters. Runs entirely client-side." />
+<meta property="og:title" content="EIDOLON — Cyberpunk TTRPG Token Maker" />
+<meta property="og:description" content="Turn any portrait into a VTT token in your browser: 12 cyberpunk frames, name plates, numbered badges, pop-out and glitch FX, batch ZIP export for Roll20 / Foundry. 8 languages, no signup." />
 <meta property="og:url" content="https://cyberdeck.tools/eidolon-ui/" />
 <meta property="og:image" content="https://cyberdeck.tools/eidolon-ui/eidolon_thumbnail.png" />
 <meta property="og:image:type" content="image/png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta property="og:image:alt" content="EIDOLON — cyberpunk TTRPG token maker preview" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:locale:alternate" content="ru_RU" />
+<meta property="og:locale:alternate" content="fr_FR" />
+<meta property="og:locale:alternate" content="de_DE" />
+<meta property="og:locale:alternate" content="es_ES" />
+<meta property="og:locale:alternate" content="it_IT" />
+<meta property="og:locale:alternate" content="ja_JP" />
+<meta property="og:locale:alternate" content="zh_CN" />
+
+<!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="EIDOLON — cyberdeck.tools" />
-<meta name="twitter:description" content="A free in-browser token / avatar maker for TTRPG characters." />
+<meta name="twitter:title" content="EIDOLON — Cyberpunk TTRPG Token Maker" />
+<meta name="twitter:description" content="Turn any portrait into a VTT token: cyberpunk frames, name plates, numbered badges, pop-out and glitch FX, batch export for Roll20 / Foundry." />
 <meta name="twitter:image" content="https://cyberdeck.tools/eidolon-ui/eidolon_thumbnail.png" />
 
+<!-- Schema.org structured data -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
   "name": "EIDOLON",
-  "description": "A free in-browser token / avatar maker for TTRPG characters from cyberdeck.tools. Runs entirely client-side with no backend or build step.",
+  "alternateName": ["EIDOLON Token Maker", "Конструктор токенов EIDOLON", "EIDOLON créateur de jetons", "EIDOLON Token-Ersteller", "EIDOLON creador de tokens", "EIDOLON creatore di token", "EIDOLON トークンメーカー", "EIDOLON 令牌制作器"],
+  "description": "Cyberpunk TTRPG token maker — turn character portraits into virtual-tabletop tokens in the browser. 12 procedural frames plus custom frame and mask upload, name plates and arc text, numbered corner badges, a pop-out brush that lets heads and weapons break out of the frame, colour adjustments, glitch / RGB split / grain / scanline FX, reusable style presets, and PNG / WebP export at Roll20 and Foundry VTT sizes, including batch ZIP export of a whole roster or a numbered set of minions. Useful for game masters running Shadowrun, Cyberpunk RED, Cyberpunk 2020, D&D or Pathfinder. Runs entirely client-side: images are never uploaded.",
   "applicationCategory": "DesignApplication",
+  "applicationSubCategory": "Token Maker",
   "operatingSystem": "Any (browser-based)",
-  "browserRequirements": "Modern desktop browser",
+  "browserRequirements": "Modern desktop browser with HTML5 Canvas + IndexedDB",
   "url": "https://cyberdeck.tools/eidolon-ui/",
+  "image": "https://cyberdeck.tools/eidolon-ui/eidolon_thumbnail.png",
+  "keywords": "token maker, vtt token, character token, avatar maker, roll20, foundry vtt, ttrpg, cyberpunk, shadowrun, cyberpunk red, game master tools, png export",
+  "featureList": [
+    "12 procedural token frames plus custom frame and mask upload",
+    "Name plate or arc text and numbered corner badges",
+    "Pop-out brush: parts of the portrait break out over the frame",
+    "Per-token pan, zoom, rotate, mirror and colour adjustments",
+    "Glitch, RGB split, grain, vignette, scanline and tone effects",
+    "Reusable style presets with JSON import / export",
+    "PNG / WebP export from 256 to 2048 px, copy to clipboard",
+    "Batch ZIP export of the roster or a numbered minion set"
+  ],
   "author": {
     "@type": "Person",
     "name": "CyberDelaai"
   },
   "license": "https://opensource.org/licenses/MIT",
+  "inLanguage": ["en", "ru", "fr", "de", "es", "it", "ja", "zh"],
+  "isAccessibleForFree": true,
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -65,7 +94,7 @@
 <body>
 <div class="app">
   <header class="top">
-    <h1 class="sr-only">EIDOLON — cyberdeck.tools token maker</h1>
+    <h1 class="sr-only">EIDOLON — cyberpunk TTRPG token &amp; avatar maker</h1>
     <div class="logo-menu">
       <button class="logo" id="logoBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="appMenu"><span class="chev" aria-hidden="true">&gt;</span> EIDOLON_</button>
       <nav class="app-menu" id="appMenu" data-augmented-ui="tl-clip br-clip border" aria-label="cyberdeck.tools navigation" hidden>
