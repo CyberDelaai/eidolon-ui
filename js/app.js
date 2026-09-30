@@ -125,7 +125,9 @@
       if (!items.length) return;
       const had = S.items.length;
       S.items = items.concat(S.items); // images added before the DB answered go last
-      select(had ? items.length + S.current : 0);
+      let saved = -1;
+      try { saved = items.findIndex((it) => it.id === localStorage.getItem('eidolon:selected')); } catch (e) {}
+      select(had ? items.length + S.current : Math.max(saved, 0));
     }).catch(() => {}).then(seedDefaultToken);
     EIDOLON.idb.get('assets', 'frame').then((b) => b && decode(b).then((img) => {
       S.customFrame = toSource(img, 1024); buildFrameGrid(); updateButtons(); styleChanged();
@@ -292,6 +294,7 @@
   // ---- roster ----
   function select(i) {
     S.current = S.items.length ? clamp(i, 0, S.items.length - 1) : -1;
+    if (cur()) EIDOLON.save('eidolon:selected', cur().id);
     if (brush.on && !cur()) setBrush(false);
     syncControls(); requestDraw(); rosterChanged(); updateButtons(); presetsChanged();
   }

@@ -13,8 +13,8 @@ client-side; your images are never uploaded.
   once, drag an image straight from another tab, or fetch it by URL (when the host
   allows CORS).
 - **Roster** — every loaded image becomes its own token with its own framing,
-  colour adjustments, name and badge. Click a thumbnail to edit it; the roster,
-  your custom frame/mask and all settings survive a reload (IndexedDB +
+  colour adjustments, name and badge. Click a thumbnail to edit it; the roster
+  (and which token is selected), your custom frame/mask and all settings survive a reload (IndexedDB +
   localStorage, never uploaded).
 - **Reference overlay** — a bar above the preview with person silhouettes (head &
   shoulders, close-up head, full body, profile) or your own reference image,
