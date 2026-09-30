@@ -17,7 +17,8 @@ client-side; your images are never uploaded.
   (and which token is selected), your custom frame/mask and all settings survive a reload (IndexedDB +
   localStorage, never uploaded).
 - **Reference overlay** — a bar above the preview with person silhouettes (head &
-  shoulders, close-up head, full body, profile) or your own reference image,
+  shoulders, close-up head, full body, profile) or your own reference image —
+  or any roster token (the ◎ corner button on its thumbnail),
   laid over the token at adjustable opacity to line portraits up consistently,
   plus a **centre guides** toggle (a cross through the token centre) that
   combines with any of them.

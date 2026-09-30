@@ -344,6 +344,10 @@
       x.className = 'roster-x'; x.textContent = '×'; x.title = t('t_remove');
       x.addEventListener('click', (e) => { e.stopPropagation(); removeItem(i); });
       b.appendChild(x);
+      const r = document.createElement('span');
+      r.className = 'roster-ref'; r.textContent = '◎'; r.title = t('t_as_ref');
+      r.addEventListener('click', (e) => { e.stopPropagation(); tokenAsRef(it); });
+      b.appendChild(r);
       b.addEventListener('click', () => select(i));
       box.appendChild(b);
     });
@@ -571,6 +575,13 @@
       buildRefBar();
       setStatus(t('s_ref'), 'ok');
     }).catch(() => setStatus(t('s_loadfail'), 'warn'));
+  }
+  // A roster token, rendered as it would export, becomes the custom reference.
+  function tokenAsRef(it) {
+    const c = document.createElement('canvas');
+    c.width = c.height = 1024;
+    EIDOLON.render(c.getContext('2d'), 1024, it);
+    c.toBlob((blob) => { if (blob) setCustomRef(blob); }, 'image/png');
   }
   function clearCustomRef() {
     S.customRef = null;

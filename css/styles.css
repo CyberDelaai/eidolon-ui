@@ -436,7 +436,13 @@
     font-size: 15px; color: var(--bg); background: var(--magenta); text-align: center;
     opacity: 0; transition: opacity .12s;
   }
-  .roster-item:hover .roster-x, .roster-item:focus-visible .roster-x { opacity: 1; }
+  .roster-ref {
+    position: absolute; top: -1px; left: -1px; width: 20px; height: 20px; line-height: 18px;
+    font-size: 14px; color: var(--bg); background: var(--main); text-align: center;
+    opacity: 0; transition: opacity .12s;
+  }
+  .roster-item:hover .roster-x, .roster-item:focus-visible .roster-x,
+  .roster-item:hover .roster-ref, .roster-item:focus-visible .roster-ref { opacity: 1; }
   .roster-add {
     font-family: 'JetBrains Mono', monospace; font-size: 30px; color: var(--main);
     border-style: dashed; background: transparent;
