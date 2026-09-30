@@ -1,4 +1,4 @@
-<!-- EIDOLON v1.5.2 -->
+<!-- EIDOLON v1.5.3 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -106,7 +106,7 @@
         <a class="app-menu-item current" href="https://cyberdeck.tools/eidolon-ui/" aria-current="page">&gt; EIDOLON_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.5.2</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.5.3</span></span></div>
     <select class="lang-select" id="uiLangSel" aria-label="interface language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </header>
 
@@ -228,7 +228,7 @@
 
     <!-- RIGHT config: the selected token + label style -->
     <aside class="config config-right" data-augmented-ui="tl-clip br-clip border">
-      <h2 data-i18n="h_token">// TOKEN</h2>
+      <h2 data-i18n="h_token">// TOKEN (SELECTED ONLY)</h2>
       <div class="row">
         <div class="field field-grow">
           <label for="nameInput" data-i18n="l_name">NAME</label>
@@ -269,6 +269,12 @@
         <span class="fx-label"><span data-i18n="l_hue">// HUE:</span> <b class="val" data-val="adj.hue"></b></span>
         <input type="range" class="potency-slider" data-adj="hue" min="-180" max="180" step="1" aria-label="hue" />
       </div>
+      <div class="btn-row">
+        <button id="resetTfBtn" class="btn btn-sm btn-warn" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_reset">RESET POSITION</button>
+        <button id="resetAdjBtn" class="btn btn-sm btn-warn" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_resetadj">RESET LOOK</button>
+      </div>
+
+      <hr class="divider" />
       <div class="fx-toggle">
         <span class="fx-label" data-i18n="l_popout">// POP-OUT:</span>
         <button class="side-switch" id="popToggle" type="button" data-pos="left" aria-label="pop-out">
@@ -281,11 +287,6 @@
       </div>
       <input type="file" id="popMaskInput" accept="image/*" hidden />
       <p class="hint" data-i18n="hint_popout">Paint what should break out over the frame — a head, horns, a blade. Works on any portrait.</p>
-      <div class="btn-row">
-        <button id="resetTfBtn" class="btn btn-sm btn-warn" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_reset">RESET POSITION</button>
-        <button id="resetAdjBtn" class="btn btn-sm btn-warn" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_resetadj">RESET LOOK</button>
-      </div>
-      <p class="hint" data-i18n="hint_token">Everything in // TOKEN belongs to the selected token only.</p>
 
       <hr class="divider" />
       <h2 data-i18n="h_label">// LABEL</h2>
