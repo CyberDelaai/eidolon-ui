@@ -119,6 +119,7 @@
     if (ref && typeof ref.guides === 'boolean') ref.guides = ref.guides ? 'cross' : 'off'; // the old on/off guides became a 3-way cycle
     mergeInto(S.ref, ref);
     mergeInto(S.fx, read('eidolon:fx'));
+    mergeInto(S.colors, read('eidolon:colors'));
     if (!['none', 'mono', 'neon', 'holo'].includes(S.fx.tone)) S.fx.tone = 'none';
     if (!['off', 'custom'].concat(EIDOLON.refOrder).includes(S.ref.kind)) S.ref.kind = 'off';
     if (!GUIDES.includes(S.ref.guides)) S.ref.guides = 'off';
@@ -1244,8 +1245,14 @@
     });
   }
 
-  // ---- frame grid + palette ----
-  const PALETTE = ['#00f0ff', '#fcee0a', '#ff003c', '#39ff14', '#b026ff', '#ff7a00', '#e8e8ee', '#050507'];
+  // ---- frame grid + colour grids ----
+  // The COMMLINK accent palette: a neon row (+ the saved custom swatch and
+  // picker), then a row of softer tones.
+  const PALETTE = [
+    ['#fcee0a', '#00f0ff', '#ff003c', '#39ff14', '#ff8800', '#c800ff', '#00ff9d', '#ff10f0'],
+    ['#ff6b6b', '#ff9f43', '#feca57', '#1dd1a1', '#00d2d3', '#54a0ff', '#a29bfe', '#cd84f1', '#ff9ff3', '#ee5a9b'],
+  ];
+  const saveColors = () => EIDOLON.save('eidolon:colors', JSON.stringify(S.colors));
   function frameKeys() { return EIDOLON.frameOrder.concat(S.customFrame ? ['custom'] : []); }
   function buildFrameGrid() {
     const grid = $('frameGrid');
@@ -1283,15 +1290,56 @@
       b.setAttribute('aria-checked', on ? 'true' : 'false');
     });
   }
-  function buildPalette() {
-    const box = $('palette');
-    PALETTE.forEach((hex) => {
-      const b = document.createElement('button');
-      b.type = 'button'; b.className = 'chip'; b.style.background = hex;
-      b.setAttribute('aria-label', hex);
-      b.addEventListener('click', () => { S.style.frameColor = hex; styleChanged(); });
-      b.addEventListener('contextmenu', (e) => { e.preventDefault(); S.style.accentColor = hex; styleChanged(); });
-      box.appendChild(b);
+  // Fill every [data-swatches="k"] grid; a swatch sets S.style[k], the picker
+  // sets it and remembers it as the grid's saved custom swatch (S.colors[k]).
+  function buildSwatches() {
+    document.querySelectorAll('[data-swatches]').forEach((box) => {
+      const k = box.dataset.swatches;
+      const swatch = (hex, cls, aug) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = cls;
+        if (aug) b.setAttribute('data-augmented-ui', aug);
+        if (hex) b.dataset.color = hex;
+        b.addEventListener('click', () => { S.style[k] = b.dataset.color; styleChanged(); });
+        return b;
+      };
+      const row = (hexes) => hexes.forEach((hex) => box.appendChild(swatch(hex, 'swatch')));
+      row(PALETTE[0]);
+      const group = document.createElement('div');
+      group.className = 'custom-color-group';
+      group.setAttribute('data-augmented-ui', 'tl-clip br-clip border');
+      group.appendChild(swatch('', 'swatch swatch-saved', 'tl-clip border'));
+      const pick = document.createElement('label');
+      pick.className = 'swatch-pick-btn';
+      pick.setAttribute('data-augmented-ui', 'br-clip border');
+      pick.innerHTML = '<input type="color" />' + PICK_ICON;
+      pick.firstChild.addEventListener('input', (e) => {
+        S.style[k] = S.colors[k] = e.target.value; saveColors(); styleChanged();
+      });
+      group.appendChild(pick);
+      box.appendChild(group);
+      const brk = document.createElement('div');
+      brk.className = 'grid-break';
+      box.appendChild(brk);
+      row(PALETTE[1]);
+    });
+    swatchTitles();
+  }
+  function swatchTitles() {
+    document.querySelectorAll('.color-grid .swatch-pick-btn').forEach((l) => { l.title = t('t_pick'); });
+  }
+  function syncSwatches() {
+    document.querySelectorAll('[data-swatches]').forEach((box) => {
+      const k = box.dataset.swatches, v = String(S.style[k]).toLowerCase();
+      const saved = box.querySelector('.swatch-saved');
+      saved.dataset.color = saved.style.background = saved.style.color = S.colors[k];
+      saved.setAttribute('aria-label', S.colors[k]);
+      box.querySelectorAll('.swatch').forEach((sw) => {
+        sw.classList.toggle('active', sw.dataset.color.toLowerCase() === v);
+        if (sw !== saved) { sw.style.background = sw.style.color = sw.dataset.color; sw.setAttribute('aria-label', sw.dataset.color); }
+      });
+      const input = box.querySelector('input[type="color"]');
+      if (input.value !== v) input.value = v;
     });
   }
 
@@ -1445,6 +1493,7 @@
       else if (String(el.value) !== String(v)) el.value = v;
     });
     document.querySelectorAll('[data-for]').forEach((b) => { b.style.background = st[b.dataset.for]; });
+    syncSwatches();
     document.querySelectorAll('[data-bg]').forEach((b) => b.classList.toggle('active', st.bgMode === b.dataset.bg));
     $('accentColorRow').classList.toggle('disabled', !st.accent);
     [['.label-param', st.labelOn], ['.badge-param', st.badgeOn]].forEach(([sel, on]) => {
@@ -1600,7 +1649,7 @@
   // ---- init ----
   function init() {
     restore();
-    buildPalette();
+    buildSwatches();
     buildSrcGroups();
     setupRefBar();
     setupPopout();
@@ -1623,7 +1672,7 @@
     if (document.fonts && document.fonts.load) {
       document.fonts.load('700 32px "JetBrains Mono"').then(() => { requestDraw(); rosterChanged(); }).catch(() => {});
     }
-    document.addEventListener('eidolon:lang', () => { syncSrcGroups(); updateTexts(); buildRoster(); syncRef(); presetsChanged(); });
+    document.addEventListener('eidolon:lang', () => { syncSrcGroups(); swatchTitles(); updateTexts(); buildRoster(); syncRef(); presetsChanged(); });
   }
 
   document.addEventListener('DOMContentLoaded', init);

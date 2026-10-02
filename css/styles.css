@@ -280,7 +280,7 @@
     --aug-tl: 8px; --aug-br: 8px;
   }
   .fill-swap {
-    flex: 0 0 30px; background: var(--panel); color: var(--main);
+    flex: 0 0 30px; width: 30px; background: var(--panel); color: var(--main);
     font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700;
     --aug-border-bg: rgba(var(--main-rgb),0.4);
   }
@@ -318,13 +318,52 @@
   .src-chip svg { width: 14px; height: 14px; display: block; pointer-events: none; }
   .src-chip.auto { background: linear-gradient(135deg, #050507 50%, #e8e8ee 50%); }
 
-  /* quick palette chips: click = frame colour, right-click = accent colour */
-  .palette { display: flex; gap: 6px; margin-top: 12px; }
-  .palette .chip {
-    flex: 1; height: 14px; border: 1px solid rgba(255,255,255,0.18); cursor: pointer; padding: 0;
-    transition: transform .1s, box-shadow .1s;
+  /* colour grids (ported from commlink-ui's accent picker): a row of neon
+     presets + the saved custom swatch & picker, then a row of softer tones.
+     Ten equal columns stretch across the whole row; the custom group spans
+     two, so the neon row (8 + group) and the soft row (10) line up. */
+  .color-grid {
+    display: grid; grid-template-columns: repeat(10, 1fr); grid-auto-rows: 26px;
+    gap: 6px; margin-top: 10px;
   }
-  .palette .chip:hover { transform: translateY(-1px); box-shadow: 0 0 8px rgba(var(--main-rgb),0.5); }
+  .color-grid .grid-break { display: none; } /* the 10 columns wrap the rows by themselves */
+  #accentColorRow.disabled { opacity: .4; pointer-events: none; }
+  .custom-color-group {
+    grid-column: span 2; display: flex; align-items: stretch; gap: 3px; padding: 3px;
+    margin: -3px 0; /* spill the padding into the row gap so its swatches stay full height */
+    background: transparent;
+    --aug-border-all: 1px; --aug-border-bg: rgba(var(--main-rgb),0.45);
+    --aug-inlay-all: 0px; --aug-inlay-bg: transparent;
+    --aug-tl: 8px; --aug-br: 8px;
+  }
+  .swatch {
+    width: 100%; height: 100%; min-width: 0; padding: 0;
+    border: 1px solid var(--dim); cursor: pointer;
+    transition: transform 0.1s, border-color 0.1s;
+  }
+  .swatch:hover { transform: scale(1.1); }
+  .swatch.active { border-color: #fff; box-shadow: 0 0 8px currentColor; }
+  .swatch-saved {
+    border: none !important;
+    --aug-border-all: 1px; --aug-border-bg: var(--dim); --aug-inlay-all: 0px; --aug-tl: 7px;
+  }
+  .swatch-saved.active { --aug-border-bg: #fff; }
+  .custom-color-group .swatch { flex: 1; width: auto; }
+  .swatch-pick-btn {
+    position: relative; flex: 1; min-width: 0; height: 100%; margin: 0; padding: 0;
+    color: var(--cyan); cursor: pointer; display: inline-block;
+    background: transparent; transition: background 0.15s; border: none;
+    --aug-border-all: 1px; --aug-border-bg: var(--cyan);
+    --aug-inlay-all: 0px; --aug-inlay-bg: transparent; --aug-br: 7px;
+  }
+  .swatch-pick-btn:hover { background: color-mix(in srgb, var(--cyan) 18%, transparent); }
+  .swatch-pick-btn svg {
+    position: absolute; inset: 0; margin: auto; width: 16px; height: 16px; pointer-events: none;
+  }
+  .swatch-pick-btn input[type="color"] {
+    position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%;
+    cursor: pointer; border: none; padding: 0;
+  }
 
   /* range sliders — cyan thumb on a dim track (ported from gridmap-ui POTENCY) */
   .potency-slider {

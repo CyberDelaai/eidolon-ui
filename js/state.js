@@ -70,6 +70,10 @@ EIDOLON.state = {
   // -- reference overlay: preview-only guide, never exported (persisted as eidolon:ref) --
   ref: { kind: 'off', opacity: 40, guides: 'off' }, // kind: 'off' | EIDOLON.refOrder key | 'custom'; guides: 'off' | 'cross' (centre lines) | 'grid' (thirds)
 
+  // -- saved custom swatch of each colour grid, last colour picked with its
+  //    picker (persisted as eidolon:colors; UI memory, not part of the style) --
+  colors: { frameColor: '#00aaff', accentColor: '#ff5ec4' },
+
   // -- output prefs (persisted as eidolon:out) --
   out: { size: 512, format: 'png', setCount: 4 },
 

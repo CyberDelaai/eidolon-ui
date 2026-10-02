@@ -30,8 +30,8 @@ client-side; your images are never uploaded.
   the token centre, so the framing stays put) and a red reset-position button.
 - **12 procedural frames** — RING, DOUBLE, SEGMENT, GLITCH, CIRCUIT, SQUARE,
   BOX, CLIP (augmented-ui corners), HEX, OCTA, DIAMOND, NONE. Vector-drawn, so they
-  stay crisp at any size, tinted with a **frame** + optional **accent** colour (ON/OFF, off by default, quick
-  palette, swap), adjustable **thickness**, **opacity** and neon **glow** (INNER / OUTER / ALL / OFF).
+  stay crisp at any size, tinted with a **frame** + optional **accent** colour (ON/OFF, off by default, swap),
+  each picked from a grid of 18 preset swatches plus a free picker whose last colour is kept as a saved swatch, adjustable **thickness**, **opacity** and neon **glow** (INNER / OUTER / ALL / OFF).
 - **Custom frame & mask** — upload a black & white transparent PNG frame (tinted
   like the built-ins; white tint keeps its colours) and/or a greyscale mask
   (white keeps, black cuts) for any cut-out shape.
