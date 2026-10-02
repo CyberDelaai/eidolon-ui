@@ -96,9 +96,18 @@
       if (k in raw && typeof raw[k] === typeof target[k]) target[k] = raw[k];
     });
   }
+  // The old NAME STYLE 'none' (HIDDEN) became the LABEL on/off switch.
+  function upgradeLabel(st) {
+    if (st && typeof st === 'object' && typeof st.labelOn !== 'boolean' && 'labelStyle' in st) {
+      st.labelOn = st.labelStyle !== 'none';
+      if (st.labelStyle === 'none') st.labelStyle = 'plate';
+    }
+    return st;
+  }
   function restore() {
     const read = (k) => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
-    mergeInto(S.style, read('eidolon:style'));
+    mergeInto(S.style, upgradeLabel(read('eidolon:style')));
+    if (!['plate', 'arc'].includes(S.style.labelStyle)) S.style.labelStyle = 'plate';
     mergeInto(S.out, read('eidolon:out'));
     mergeInto(S.ref, read('eidolon:ref'));
     mergeInto(S.fx, read('eidolon:fx'));
@@ -631,7 +640,10 @@
   // eidolon:presets = { NAME: { style, out?, savedAt } }. Per-token data
   // (portrait, transform, name, badge) is never part of a preset. ----
   function loadPresets() {
-    try { return JSON.parse(localStorage.getItem('eidolon:presets') || '{}') || {}; } catch (e) { return {}; }
+    let all;
+    try { all = JSON.parse(localStorage.getItem('eidolon:presets') || '{}') || {}; } catch (e) { return {}; }
+    Object.keys(all).forEach((n) => { if (all[n]) upgradeLabel(all[n].style); });
+    return all;
   }
   const savePresets = (p) => EIDOLON.save('eidolon:presets', JSON.stringify(p));
   // Built-in EXAMPLE presets (the COMMLINK EXAMPLE_* idea): defined here, never
@@ -644,15 +656,15 @@
     // them on the C-DOGGO it makes of the selected token (absent = empty / default).
     const ex = (style, fx, token) => ({ style: Object.assign({}, DEFAULT_STYLE, style), fx: Object.assign(EIDOLON.newFx(), fx || {}), token: token || null, example: true });
     return {
-      PC: ex({ frame: 'ring', frameColor: '#00f0ff', accent: true, accentColor: '#fcee0a', glow: 'all', labelStyle: 'arc' },
+      PC: ex({ frame: 'ring', frameColor: '#00f0ff', accent: true, accentColor: '#fcee0a', glow: 'all', labelOn: true, labelStyle: 'arc' },
         null, { label: DOGGO }),
-      ENEMY: ex({ frame: 'ring', frameColor: '#ff003c', glow: 'outer', bgColor: '#14050a', labelStyle: 'none',
+      ENEMY: ex({ frame: 'ring', frameColor: '#ff003c', glow: 'outer', bgColor: '#14050a', labelOn: false,
         badgeFrom: 'custom', badgeColor: '#ff003c', badgePos: 'br' },
         null, { badge: '8' }),
-      NPC: ex({ frame: 'hex', frameColor: '#e8e8ee', thickness: 6, glow: 'off', labelStyle: 'plate' }),
-      BOSS: ex({ frame: 'segment', frameColor: '#fcee0a', accent: true, accentColor: '#ff003c', thickness: 11, glow: 'all', labelStyle: 'arc' },
+      NPC: ex({ frame: 'hex', frameColor: '#e8e8ee', thickness: 6, glow: 'off', labelOn: true, labelStyle: 'plate' }),
+      BOSS: ex({ frame: 'segment', frameColor: '#fcee0a', accent: true, accentColor: '#ff003c', thickness: 11, glow: 'all', labelOn: true, labelStyle: 'arc' },
         { on: true, vig: true, vigColor: '#ff003c', vigAmt: 45 }),
-      NETRUNNER: ex({ frame: 'clip', frameColor: '#39ff14', accent: true, accentColor: '#00f0ff', glow: 'inner', labelStyle: 'plate' },
+      NETRUNNER: ex({ frame: 'clip', frameColor: '#39ff14', accent: true, accentColor: '#00f0ff', glow: 'inner', labelOn: true, labelStyle: 'plate' },
         { on: true, tone: 'neon', toneMix: 35, scan: true, scanAmt: 30, scanGap: 4 }, { label: DOGGO }),
     };
   })();
@@ -792,6 +804,7 @@
   function applyStyleOf(name, p) {
     mergeInto(S.style, p.style);
     if (S.style.frame !== 'custom' && !EIDOLON.frames[S.style.frame]) S.style.frame = 'ring';
+    if (!['plate', 'arc'].includes(S.style.labelStyle)) S.style.labelStyle = 'plate';
     if (p.out) { mergeInto(S.out, p.out); saveOut(); updateTexts(); }
     S.fx = EIDOLON.newFx();
     if (p.fx) mergeInto(S.fx, p.fx);
@@ -1287,6 +1300,12 @@
     document.querySelectorAll('[data-for]').forEach((b) => { b.style.background = st[b.dataset.for]; });
     document.querySelectorAll('[data-bg]').forEach((b) => b.classList.toggle('active', st.bgMode === b.dataset.bg));
     $('accentColorRow').classList.toggle('disabled', !st.accent);
+    [['.label-param', st.labelOn], ['.badge-param', st.badgeOn]].forEach(([sel, on]) => {
+      document.querySelectorAll(sel).forEach((row) => {
+        row.classList.toggle('disabled', !on);
+        row.querySelectorAll('select, button, input').forEach((c) => { c.disabled = !on; });
+      });
+    });
     document.querySelectorAll('[data-tf], [data-adj]').forEach((el) => {
       const grp = el.dataset.tf ? 'tf' : 'adj', k = el.dataset[grp], v = (grp === 'tf' ? tf : adj)[k];
       el.disabled = !it;
@@ -1362,7 +1381,7 @@
     if (!it || busy) return;
     const N = S.out.size;
     Promise.all([toBlob(EIDOLON.renderCanvas(it, N), MIME[S.out.format]), ensureHash(it)]).then(([b]) => {
-      const name = tokenFile(it, N, extOf(b), it.badge);
+      const name = tokenFile(it, N, extOf(b), S.style.badgeOn ? it.badge : '');
       download(b, name);
       setStatus(t('s_saved', { f: name }), 'ok');
     }).catch(() => setStatus(t('s_fail'), 'warn'));
@@ -1409,7 +1428,7 @@
     if (busy) return;
     const N = S.out.size, ext = S.out.format, items = S.items.slice();
     Promise.all(items.map(ensureHash)).then(() => {
-      zipJobs(items.map((it) => ({ item: it, name: tokenFile(it, N, ext, it.badge) })), `tokens_${stamp()}_${N}.zip`);
+      zipJobs(items.map((it) => ({ item: it, name: tokenFile(it, N, ext, S.style.badgeOn ? it.badge : '') })), `tokens_${stamp()}_${N}.zip`);
     });
   }
   function zipSet() {

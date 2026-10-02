@@ -432,8 +432,9 @@
     ctx.globalAlpha = 1;
     if (U && item.popOn && item.popMask) ctx.drawImage(popLayer(item, U, g), 0, 0);
     const label = item && item.label ? item.label.trim().toUpperCase() : '';
-    if (label && st.labelStyle !== 'none') drawLabel(ctx, label, g);
-    const badge = String(opts.badge != null ? opts.badge : (item && item.badge) || '').trim().toUpperCase();
+    if (label && st.labelOn) drawLabel(ctx, label, g);
+    // numbered sets stamp their badge even with the switch off
+    const badge = String(opts.badge != null ? opts.badge : (st.badgeOn && item && item.badge) || '').trim().toUpperCase();
     if (badge) drawBadge(ctx, badge, g);
     ctx.restore();
   };

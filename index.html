@@ -1,4 +1,4 @@
-<!-- EIDOLON v1.5.5 -->
+<!-- EIDOLON v1.5.6 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -106,7 +106,7 @@
         <a class="app-menu-item current" href="https://cyberdeck.tools/eidolon-ui/" aria-current="page">&gt; EIDOLON_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.5.5</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.5.6</span></span></div>
     <select class="lang-select" id="uiLangSel" aria-label="interface language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </header>
 
@@ -240,6 +240,56 @@
         </div>
       </div>
       <div class="fx-toggle">
+        <span class="fx-label" data-i18n="l_label">// NAME LABEL:</span>
+        <button class="side-switch" type="button" data-style="labelOn" data-pos="left" aria-label="name label">
+          <span class="thumb"></span><span class="lab l" data-i18n="b_off">OFF</span><span class="lab r" data-i18n="b_on">ON</span>
+        </button>
+      </div>
+      <div class="fx-toggle label-param">
+        <span class="fx-label" data-i18n="l_lstyle">// NAME STYLE:</span>
+        <select class="scale-select" data-style="labelStyle" aria-label="name style">
+          <option value="plate" data-i18n="o_plate">PLATE</option>
+          <option value="arc" data-i18n="o_arc">ARC</option>
+        </select>
+      </div>
+      <div class="fx-toggle label-param">
+        <span class="fx-label" data-i18n="l_plate">// PLATE:</span>
+        <span class="src-group" data-src="plateFrom" data-custom="plateColor" data-opts="frame,accent,bg,custom" role="radiogroup" aria-label="name plate colour"></span>
+        <input type="color" id="plateColor" class="fill-input" data-style="plateColor" aria-label="name plate colour" />
+      </div>
+      <div class="fx-toggle label-param">
+        <span class="fx-label" data-i18n="l_ltext">// TEXT:</span>
+        <span class="src-group" data-src="labelFrom" data-custom="labelColor" data-opts="frame,accent,bg,custom" role="radiogroup" aria-label="name text colour"></span>
+        <input type="color" id="labelColor" class="fill-input" data-style="labelColor" aria-label="name text colour" />
+      </div>
+      <hr class="divider" />
+      <div class="fx-toggle">
+        <span class="fx-label" data-i18n="l_badgeon">// BADGE:</span>
+        <button class="side-switch" type="button" data-style="badgeOn" data-pos="left" aria-label="badge">
+          <span class="thumb"></span><span class="lab l" data-i18n="b_off">OFF</span><span class="lab r" data-i18n="b_on">ON</span>
+        </button>
+      </div>
+      <div class="fx-toggle badge-param">
+        <span class="fx-label" data-i18n="l_bpos">// BADGE AT:</span>
+        <select class="scale-select" data-style="badgePos" aria-label="badge position">
+          <option value="tl" data-i18n="o_tl">TOP LEFT</option>
+          <option value="tr" data-i18n="o_tr">TOP RIGHT</option>
+          <option value="bl" data-i18n="o_bl">BOTTOM LEFT</option>
+          <option value="br" data-i18n="o_br">BOTTOM RIGHT</option>
+        </select>
+      </div>
+      <div class="fx-toggle badge-param">
+        <span class="fx-label" data-i18n="l_badgecol">// BADGE FILL:</span>
+        <span class="src-group" data-src="badgeFrom" data-custom="badgeColor" data-opts="frame,accent,bg,custom" role="radiogroup" aria-label="badge colour"></span>
+        <input type="color" id="badgeColor" class="fill-input" data-style="badgeColor" aria-label="badge colour" />
+      </div>
+      <div class="fx-toggle badge-param">
+        <span class="fx-label" data-i18n="l_badgetext">// BADGE TEXT:</span>
+        <span class="src-group" data-src="badgeTextFrom" data-custom="badgeTextColor" data-opts="auto,frame,accent,bg,custom" role="radiogroup" aria-label="badge text colour"></span>
+        <input type="color" id="badgeTextColor" class="fill-input" data-style="badgeTextColor" aria-label="badge text colour" />
+      </div>
+      <hr class="divider" />
+      <div class="fx-toggle">
         <span class="fx-label"><span data-i18n="l_zoom">// ZOOM:</span> <b class="val" data-val="tf.zoom"></b></span>
         <input type="range" class="potency-slider" data-tf="zoom" min="10" max="400" step="1" aria-label="zoom" />
       </div>
@@ -287,46 +337,6 @@
       </div>
       <input type="file" id="popMaskInput" accept="image/*" hidden />
       <p class="hint" data-i18n="hint_popout">Paint what should break out over the frame — a head, horns, a blade. Works on any portrait.</p>
-
-      <hr class="divider" />
-      <h2 data-i18n="h_label">// LABEL</h2>
-      <div class="fx-toggle">
-        <span class="fx-label" data-i18n="l_lstyle">// NAME STYLE:</span>
-        <select class="scale-select" data-style="labelStyle" aria-label="name style">
-          <option value="none" data-i18n="o_hidden">HIDDEN</option>
-          <option value="plate" data-i18n="o_plate">PLATE</option>
-          <option value="arc" data-i18n="o_arc">ARC</option>
-        </select>
-      </div>
-      <div class="fx-toggle">
-        <span class="fx-label" data-i18n="l_plate">// PLATE:</span>
-        <span class="src-group" data-src="plateFrom" data-custom="plateColor" data-opts="frame,accent,bg,custom" role="radiogroup" aria-label="name plate colour"></span>
-        <input type="color" id="plateColor" class="fill-input" data-style="plateColor" aria-label="name plate colour" />
-      </div>
-      <div class="fx-toggle">
-        <span class="fx-label" data-i18n="l_ltext">// TEXT:</span>
-        <span class="src-group" data-src="labelFrom" data-custom="labelColor" data-opts="frame,accent,bg,custom" role="radiogroup" aria-label="name text colour"></span>
-        <input type="color" id="labelColor" class="fill-input" data-style="labelColor" aria-label="name text colour" />
-      </div>
-      <div class="fx-toggle">
-        <span class="fx-label" data-i18n="l_bpos">// BADGE AT:</span>
-        <select class="scale-select" data-style="badgePos" aria-label="badge position">
-          <option value="tl" data-i18n="o_tl">TOP LEFT</option>
-          <option value="tr" data-i18n="o_tr">TOP RIGHT</option>
-          <option value="bl" data-i18n="o_bl">BOTTOM LEFT</option>
-          <option value="br" data-i18n="o_br">BOTTOM RIGHT</option>
-        </select>
-      </div>
-      <div class="fx-toggle">
-        <span class="fx-label" data-i18n="l_badgecol">// BADGE:</span>
-        <span class="src-group" data-src="badgeFrom" data-custom="badgeColor" data-opts="frame,accent,bg,custom" role="radiogroup" aria-label="badge colour"></span>
-        <input type="color" id="badgeColor" class="fill-input" data-style="badgeColor" aria-label="badge colour" />
-      </div>
-      <div class="fx-toggle">
-        <span class="fx-label" data-i18n="l_badgetext">// BADGE TEXT:</span>
-        <span class="src-group" data-src="badgeTextFrom" data-custom="badgeTextColor" data-opts="auto,frame,accent,bg,custom" role="radiogroup" aria-label="badge text colour"></span>
-        <input type="color" id="badgeTextColor" class="fill-input" data-style="badgeTextColor" aria-label="badge text colour" />
-      </div>
 
     </aside>
 

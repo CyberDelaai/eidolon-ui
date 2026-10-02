@@ -48,13 +48,15 @@ EIDOLON.state = {
     glow: 'all',            // neon bloom: 'inner' | 'outer' | 'all' | 'off'
     bgMode: 'color',        // 'color' | 'extend' | 'transparent'
     bgColor: '#0b0b10',
-    labelStyle: 'none',     // 'none' | 'plate' | 'arc'
+    labelOn: false,         // draw the name label at all
+    labelStyle: 'plate',    // 'plate' | 'arc'
     // label + badge colours: *From picks the source — 'frame' | 'accent' | 'bg'
     // | 'custom' (then *Color is used) | 'auto' (badge text: dark or light for contrast)
     plateFrom: 'frame', plateColor: '#00f0ff',        // name plate / arc band fill
     labelFrom: 'custom', labelColor: '#050507',       // name text
     badgeFrom: 'accent', badgeColor: '#fcee0a',       // badge disc
     badgeTextFrom: 'auto', badgeTextColor: '#050507', // badge text
+    badgeOn: true,          // draw the badge at all
     badgePos: 'br',         // 'tl' | 'tr' | 'bl' | 'br'
   },
 
