@@ -48,7 +48,7 @@
     } else if (SHAPES[kind]) {
       drawShape(ctx, N, kind, a);
     }
-    if (S.ref.guides) drawGuides(ctx, N, a);
+    if (S.ref.guides !== 'off') drawGuides(ctx, N, a, S.ref.guides);
   };
 
   function drawShape(ctx, N, kind, a) {
@@ -65,20 +65,24 @@
     EIDOLON.applyCutout(ctx, N);
   }
 
-  // Centre guides: a dashed cross through the token centre spanning the frame,
-  // with a small ring on the centre point. Drawn over (not clipped by) the cut-out.
-  function drawGuides(ctx, N, a) {
-    const g = EIDOLON.geom(N), u = g.u;
+  // Guides, drawn over (not clipped by) the cut-out, spanning the frame's box:
+  // 'cross' = a dashed cross through the token centre with a small ring on the
+  // centre point; 'grid' = the camera-app rule-of-thirds grid (2 + 2 lines).
+  function drawGuides(ctx, N, a, mode) {
+    const g = EIDOLON.geom(N), u = g.u, R = g.R;
     ctx.save();
     ctx.lineWidth = 1.4 * u;
     ctx.strokeStyle = `rgba(0,240,255,${Math.min(1, a * 1.6)})`;
     ctx.setLineDash([8 * u, 5 * u]);
     ctx.beginPath();
-    ctx.moveTo(g.cx, g.cy - g.R); ctx.lineTo(g.cx, g.cy + g.R);
-    ctx.moveTo(g.cx - g.R, g.cy); ctx.lineTo(g.cx + g.R, g.cy);
+    const offs = mode === 'grid' ? [-R / 3, R / 3] : [0];
+    offs.forEach((o) => {
+      ctx.moveTo(g.cx + o, g.cy - R); ctx.lineTo(g.cx + o, g.cy + R);
+      ctx.moveTo(g.cx - R, g.cy + o); ctx.lineTo(g.cx + R, g.cy + o);
+    });
     ctx.stroke();
     ctx.setLineDash([]);
-    ctx.beginPath(); ctx.arc(g.cx, g.cy, 6 * u, 0, Math.PI * 2); ctx.stroke();
+    if (mode === 'cross') { ctx.beginPath(); ctx.arc(g.cx, g.cy, 6 * u, 0, Math.PI * 2); ctx.stroke(); }
     ctx.restore();
   }
 })(window.EIDOLON);

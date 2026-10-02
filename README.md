@@ -20,7 +20,8 @@ client-side; your images are never uploaded.
   shoulders, close-up head, full body, profile) or your own reference image —
   or any roster token (the ◎ corner button on its thumbnail),
   laid over the token at adjustable opacity to line portraits up consistently,
-  plus a **centre guides** toggle (a cross through the token centre) that
+  plus a **guides** icon in the preview's top-left corner that clicks through
+  off → centre cross → rule-of-thirds grid (the 4-line camera-app grid) and
   combines with any of them.
   Preview only — it never appears in exported images.
 - **Framing** — drag to pan, Ctrl+wheel to zoom (around the cursor), Shift+wheel to

@@ -76,6 +76,7 @@
   const saveStyle = debounce(() => EIDOLON.save('eidolon:style', JSON.stringify(S.style)), 150);
   const saveOut = () => EIDOLON.save('eidolon:out', JSON.stringify(S.out));
   const saveRef = () => EIDOLON.save('eidolon:ref', JSON.stringify(S.ref));
+  const GUIDES = ['off', 'cross', 'grid']; // S.ref.guides click-through order
   const persistTimers = {};
   function persistItem(item) {
     clearTimeout(persistTimers[item.id]);
@@ -114,10 +115,13 @@
     mergeInto(S.style, upgradeLabel(read('eidolon:style')));
     if (!['plate', 'arc'].includes(S.style.labelStyle)) S.style.labelStyle = 'plate';
     mergeInto(S.out, read('eidolon:out'));
-    mergeInto(S.ref, read('eidolon:ref'));
+    const ref = read('eidolon:ref');
+    if (ref && typeof ref.guides === 'boolean') ref.guides = ref.guides ? 'cross' : 'off'; // the old on/off guides became a 3-way cycle
+    mergeInto(S.ref, ref);
     mergeInto(S.fx, read('eidolon:fx'));
     if (!['none', 'mono', 'neon', 'holo'].includes(S.fx.tone)) S.fx.tone = 'none';
     if (!['off', 'custom'].concat(EIDOLON.refOrder).includes(S.ref.kind)) S.ref.kind = 'off';
+    if (!GUIDES.includes(S.ref.guides)) S.ref.guides = 'off';
     if (S.style.frame !== 'custom' && !EIDOLON.frames[S.style.frame]) S.style.frame = 'ring';
     if (S.style.bgMode === 'blur') S.style.bgMode = 'extend'; // the old BLUR fill became EXTEND
   }
@@ -552,11 +556,7 @@
     };
     const add = (tag, attrs) => svg.appendChild(make(tag, attrs));
     const ring = { cx: 0, cy: 0, r: 100, fill: 'none', stroke: 'currentColor', 'stroke-width': 7, opacity: 0.45 };
-    if (kind === 'guides') {
-      add('circle', ring);
-      add('path', { d: 'M 0 -100 L 0 100 M -100 0 L 100 0', stroke: 'currentColor', 'stroke-width': 9, 'stroke-dasharray': '24 14' });
-      add('circle', { cx: 0, cy: 0, r: 20, fill: 'none', stroke: 'currentColor', 'stroke-width': 9 });
-    } else if (kind === 'off') {
+    if (kind === 'off') {
       add('circle', ring);
       add('line', { x1: -70, y1: 70, x2: 70, y2: -70, stroke: 'currentColor', 'stroke-width': 12 });
     } else if (kind === 'custom') {
@@ -606,13 +606,12 @@
       const x = b.querySelector('.roster-x');
       if (x) x.title = t('t_ref_clear');
     });
-    const gb = $('refGuides');
-    gb.classList.toggle('active', !!S.ref.guides);
-    gb.setAttribute('aria-pressed', S.ref.guides ? 'true' : 'false');
-    gb.title = t('t_ref_guides');
+    const gb = $('guidesBtn');
+    gb.dataset.mode = S.ref.guides;
+    gb.setAttribute('aria-pressed', S.ref.guides !== 'off' ? 'true' : 'false');
     $('refOpacity').value = S.ref.opacity;
     $('refOpVal').textContent = S.ref.opacity + '%';
-    $('refOpacity').disabled = S.ref.kind === 'off' && !S.ref.guides;
+    $('refOpacity').disabled = S.ref.kind === 'off' && S.ref.guides === 'off';
     drawRef();
   }
   function drawRef() {
@@ -647,9 +646,9 @@
   function setupRefBar() {
     $('refOpacity').addEventListener('input', (e) => { S.ref.opacity = +e.target.value; saveRef(); syncRef(); });
     $('refInput').addEventListener('change', (e) => { if (e.target.files[0]) setCustomRef(e.target.files[0]); e.target.value = ''; });
-    const gb = $('refGuides');
-    gb.appendChild(refIcon('guides'));
-    gb.addEventListener('click', () => { S.ref.guides = !S.ref.guides; saveRef(); syncRef(); });
+    $('guidesBtn').addEventListener('click', () => {
+      S.ref.guides = GUIDES[(GUIDES.indexOf(S.ref.guides) + 1) % GUIDES.length]; saveRef(); syncRef();
+    });
     buildRefBar();
   }
 

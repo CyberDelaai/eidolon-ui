@@ -68,7 +68,7 @@ EIDOLON.state = {
   fx: EIDOLON.newFx(),
 
   // -- reference overlay: preview-only guide, never exported (persisted as eidolon:ref) --
-  ref: { kind: 'off', opacity: 40, guides: false }, // kind: 'off' | EIDOLON.refOrder key | 'custom'; guides = centre lines
+  ref: { kind: 'off', opacity: 40, guides: 'off' }, // kind: 'off' | EIDOLON.refOrder key | 'custom'; guides: 'off' | 'cross' (centre lines) | 'grid' (thirds)
 
   // -- output prefs (persisted as eidolon:out) --
   out: { size: 512, format: 'png', setCount: 4 },
