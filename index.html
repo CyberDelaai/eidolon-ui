@@ -1,4 +1,4 @@
-<!-- EIDOLON v1.6.3 -->
+<!-- EIDOLON v1.6.4 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -106,7 +106,7 @@
         <a class="app-menu-item current" href="https://cyberdeck.tools/eidolon-ui/" aria-current="page">&gt; EIDOLON_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.6.3</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.6.4</span></span></div>
     <select class="lang-select" id="uiLangSel" aria-label="interface language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </header>
 
@@ -315,7 +315,8 @@
       <div class="roster" id="roster" aria-label="token roster"></div>
     </main>
 
-    <!-- RIGHT config: the selected token + label style -->
+    <!-- RIGHT column: the selected token + label style, then output + batch export -->
+    <div class="config-col">
     <aside class="config config-right" data-augmented-ui="tl-clip br-clip border">
       <h2 data-i18n="h_token">// TOKEN (SELECTED ONLY)</h2>
       <div class="row">
@@ -366,7 +367,6 @@
 
     </aside>
 
-    <!-- FAR-RIGHT config: output + batch export -->
     <aside class="config config-out" data-augmented-ui="tl-clip br-clip border">
       <h2 data-i18n="h_output">// OUTPUT</h2>
       <div class="fx-toggle">
@@ -397,6 +397,7 @@
 
       <button id="batchBtn" class="btn btn-block btn-alt" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_batch" aria-haspopup="dialog" aria-controls="batchModal" disabled>BATCH EXPORT</button>
     </aside>
+    </div>
   </div>
 </div>
 

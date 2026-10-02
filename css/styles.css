@@ -130,8 +130,8 @@
     --aug-tl: 12px; --aug-br: 12px;
     align-self: flex-start;
   }
-  /* third column (OUTPUT / BATCH) holds less, so it runs narrower */
-  .config-out { width: 290px; }
+  /* right column: TOKEN panel with the OUTPUT panel stacked under it */
+  .config-col { display: flex; flex-direction: column; gap: 22px; flex-shrink: 0; align-self: flex-start; }
   .config h2, .side-inner h2 {
     font-size: 13px; letter-spacing: 2px; color: var(--dim);
     text-transform: uppercase; font-weight: 700; margin-bottom: 12px;
@@ -517,7 +517,7 @@
 
   @media (max-width: 1280px) {
     .layout { flex-wrap: wrap; }
-    .config { width: 100%; }
+    .config, .config-col { width: 100%; }
     .workspace { order: -1; width: 100%; }
     /* no column to the right of the stage: drop the window inside it, under the icon */
     .config.adj-pop { top: 134px; left: auto; right: 8px; width: min(340px, calc(100% - 16px)); }
