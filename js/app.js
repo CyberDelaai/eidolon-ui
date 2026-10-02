@@ -440,17 +440,18 @@
     cv.addEventListener('pointerup', end);
     cv.addEventListener('pointercancel', end);
     // Ctrl+wheel zooms (also trackpad pinch, which arrives as ctrlKey wheel),
-    // Shift+wheel rotates; a plain wheel is left alone so the page scrolls.
+    // Shift+wheel rotates; +Alt makes either one finer. A plain wheel is left
+    // alone so the page scrolls.
     stage.addEventListener('wheel', (e) => {
       const it = cur();
       if (!it || !(e.ctrlKey || e.metaKey || e.shiftKey)) return;
       e.preventDefault();
       const dy = e.deltaY || e.deltaX;
       if (e.shiftKey) {
-        it.tf.rot = ((Math.round(it.tf.rot + Math.sign(dy) * 5) + 540) % 360) - 180;
+        it.tf.rot = ((Math.round(it.tf.rot + Math.sign(dy) * (e.altKey ? 1 : 5)) + 540) % 360) - 180;
       } else {
         const r = cv.getBoundingClientRect();
-        zoomAt(it, Math.exp(-dy * 0.0015), (e.clientX - r.left) / r.width - 0.5, (e.clientY - r.top) / r.height - 0.5);
+        zoomAt(it, Math.exp(-dy * (e.altKey ? 0.0003 : 0.0015)), (e.clientX - r.left) / r.width - 0.5, (e.clientY - r.top) / r.height - 0.5);
       }
       itemChanged(it);
     }, { passive: false });
@@ -996,6 +997,22 @@
     syncPop();
   }
 
+  // ---- COLOUR window: the stage's corner icon opens the selected token's
+  // colour adjustments in a window floating to the right of the canvas ----
+  function setAdjOpen(on) {
+    $('adjPop').hidden = !on;
+    $('adjBtn').setAttribute('aria-expanded', on ? 'true' : 'false');
+  }
+  function setupAdjPop() {
+    $('adjBtn').addEventListener('click', () => setAdjOpen($('adjPop').hidden));
+    $('adjClose').addEventListener('click', () => { setAdjOpen(false); $('adjBtn').focus(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('adjPop').hidden) setAdjOpen(false); });
+    // stays open while working on the canvas; a press anywhere else closes it
+    document.addEventListener('pointerdown', (e) => {
+      if (!$('adjPop').hidden && !$('stageShell').contains(e.target)) setAdjOpen(false);
+    });
+  }
+
   // ---- side panels (PRESETS, FX): fixed, slide in from the left edge, one
   // open at a time (COMMLINK pattern). Each is <aside class="side-panel"
   // data-panel="name"> with a .side-toggle tab inside. ----
@@ -1233,11 +1250,7 @@
       const apply = () => {
         const it = cur();
         if (!it) return;
-        if (k === 'flip') {
-          // mirror about the token's vertical centre line, not the image's own
-          // centre: reflecting the whole placement negates pan-x and rotation too
-          it.tf.flip = !it.tf.flip; it.tf.x = -it.tf.x; it.tf.rot = -it.tf.rot;
-        } else if (el.classList.contains('side-switch')) it[grp][k] = !it[grp][k];
+        if (el.classList.contains('side-switch')) it[grp][k] = !it[grp][k];
         else it[grp][k] = k === 'zoom' ? +el.value / 100 : +el.value;
         itemChanged(it);
       };
@@ -1257,6 +1270,14 @@
       const s = S.style;
       [s.frameColor, s.accentColor] = [s.accentColor, s.frameColor];
       styleChanged();
+    });
+    $('flipBtn').addEventListener('click', () => {
+      const it = cur();
+      if (!it) return;
+      // mirror about the token's vertical centre line, not the image's own
+      // centre: reflecting the whole placement negates pan-x and rotation too
+      it.tf.flip = !it.tf.flip; it.tf.x = -it.tf.x; it.tf.rot = -it.tf.rot;
+      itemChanged(it);
     });
     $('resetTfBtn').addEventListener('click', () => { const it = cur(); if (it) { it.tf = EIDOLON.newTransform(); itemChanged(it); } });
     $('resetAdjBtn').addEventListener('click', () => { const it = cur(); if (it) { it.adj = EIDOLON.newAdjust(); itemChanged(it); } });
@@ -1279,7 +1300,6 @@
 
   const VAL_FMT = {
     thickness: (v) => v + '%', margin: (v) => v + '%', frameOpacity: (v) => v + '%',
-    'tf.zoom': (v) => Math.round(v * 100) + '%', 'tf.rot': (v) => Math.round(v) + '°',
     'fx.toneMix': (v) => v + '%', 'fx.glitchAmt': (v) => v + '%', 'fx.rgbAmt': (v) => v + 'px',
     'fx.grainAmt': (v) => v + '%', 'fx.vigAmt': (v) => v + '%', 'fx.scanAmt': (v) => v + '%', 'fx.scanGap': (v) => v + 'px',
     'adj.bright': (v) => v + '%', 'adj.contrast': (v) => v + '%', 'adj.sat': (v) => v + '%', 'adj.hue': (v) => v + '°',
@@ -1323,6 +1343,7 @@
       el.textContent = (VAL_FMT[p] || String)(v);
     });
     $('resetTfBtn').disabled = !it; $('resetAdjBtn').disabled = !it;
+    $('flipBtn').disabled = !it; $('flipBtn').setAttribute('aria-pressed', tf.flip ? 'true' : 'false');
     syncPop(); syncSrcGroups();
   }
   function updateButtons() {
@@ -1455,6 +1476,7 @@
     setupPresets();
     setupFx();
     setupPanels();
+    setupAdjPop();
     setupBatch();
     buildFrameGrid();
     bindControls();

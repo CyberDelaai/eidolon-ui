@@ -24,7 +24,9 @@ client-side; your images are never uploaded.
   combines with any of them.
   Preview only — it never appears in exported images.
 - **Framing** — drag to pan, Ctrl+wheel to zoom (around the cursor), Shift+wheel to
-  rotate, mirror (around the token centre, so the framing stays put), arrow keys to nudge, `[` `]` to rotate, `0` to reset.
+  rotate (hold Alt as well for fine steps), arrow keys to nudge, `[` `]` to rotate,
+  `0` to reset. Corner buttons on the preview, under the COLOUR icon: mirror (around
+  the token centre, so the framing stays put) and a red reset-position button.
 - **12 procedural frames** — RING, DOUBLE, SEGMENT, GLITCH, CIRCUIT, SQUARE,
   BOX, CLIP (augmented-ui corners), HEX, OCTA, DIAMOND, NONE. Vector-drawn, so they
   stay crisp at any size, tinted with a **frame** + optional **accent** colour (ON/OFF, off by default, quick
@@ -34,7 +36,8 @@ client-side; your images are never uploaded.
   (white keeps, black cuts) for any cut-out shape.
 - **Background** — solid colour, EXTEND (the portrait's edges stretched and
   blurred into the empty space, like GRIDMAP's VIBRANT fill), or transparent.
-- **Adjustments** — per-token brightness / contrast / saturation / hue.
+- **Adjustments** — per-token brightness / contrast / saturation / hue, in a
+  COLOUR window opened from the icon in the preview's top-right corner.
 - **Labels** — the token's name as a clipped name PLATE or ARC text (NAME LABEL
   ON/OFF switch; OFF hides the name and dims its settings), and a corner
   **badge** (number / letter) at any corner (BADGE ON/OFF switch; numbered

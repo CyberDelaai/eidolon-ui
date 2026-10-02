@@ -377,6 +377,41 @@
   }
   .token-wrap .placeholder b { color: var(--main); font-size: 17px; letter-spacing: 3px; }
   .stage.has-image .placeholder { display: none; }
+  /* COLOUR window: the corner icon on the stage opens it; it floats over the
+     column to the right of the stage (same width as the right panel) */
+  .stage-shell { position: relative; }
+  .stage-tool {
+    position: absolute; top: 8px; right: 8px; z-index: 2;
+    width: 34px; height: 34px; padding: 6px; line-height: 0; cursor: pointer;
+    background: var(--panel); color: var(--main); border: 1px solid rgba(var(--main-rgb),0.35);
+    transition: border-color .12s, box-shadow .12s, color .12s;
+  }
+  .stage-tool svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: square; }
+  .stage-tool svg circle { fill: var(--panel); }
+  .stage-tool:hover { border-color: rgba(var(--main-rgb),0.8); }
+  .stage-tool:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
+  .stage-tool-2 { top: 50px; }
+  .stage-tool-3 { top: 92px; }
+  .stage-tool-warn { color: var(--magenta); border-color: rgba(255,0,60,0.45); }
+  .stage-tool-warn:hover { border-color: var(--magenta); box-shadow: 0 0 8px rgba(255,0,60,0.45); }
+  .stage-tool:disabled { opacity: .35; cursor: not-allowed; }
+  .stage-tool[aria-expanded="true"], .stage-tool[aria-pressed="true"] {
+    color: var(--accent); border-color: var(--accent); box-shadow: 0 0 8px rgba(var(--accent-rgb),0.45);
+  }
+  .adj-pop {
+    position: absolute; top: 0; left: calc(100% + 22px); z-index: 40;
+    --aug-border-bg: rgba(var(--accent-rgb),0.45);
+    box-shadow: 0 0 30px rgba(0,0,0,0.6);
+  }
+  .adj-pop[hidden] { display: none; }
+  .adj-pop .modal-head { margin-bottom: 12px; }
+  .adj-pop .modal-head h2 { margin: 0; }
+  .adj-close {
+    background: none; border: none; cursor: pointer; padding: 0 4px;
+    color: var(--dim); font-family: 'JetBrains Mono', monospace; font-size: 20px; line-height: 1;
+  }
+  .adj-close:hover { color: var(--magenta); }
+  .adj-pop .btn-row { margin-top: 12px; }
   .canvas-footer { text-align: center; margin-top: -4px; }
   .canvas-hint { font-size: 10px; letter-spacing: 1.5px; color: var(--dim); text-transform: uppercase; }
 
@@ -453,6 +488,8 @@
     .layout { flex-wrap: wrap; }
     .config { width: 100%; }
     .workspace { order: -1; width: 100%; }
+    /* no column to the right of the stage: drop the window inside it, under the icon */
+    .config.adj-pop { top: 134px; left: auto; right: 8px; width: min(340px, calc(100% - 16px)); }
   }
 
   /* ---------- Side panels (ported from commlink-ui): fixed, slide in from

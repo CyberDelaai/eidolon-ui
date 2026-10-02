@@ -1,4 +1,4 @@
-<!-- EIDOLON v1.5.6 -->
+<!-- EIDOLON v1.6.0 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -106,7 +106,7 @@
         <a class="app-menu-item current" href="https://cyberdeck.tools/eidolon-ui/" aria-current="page">&gt; EIDOLON_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.5.6</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.6.0</span></span></div>
     <select class="lang-select" id="uiLangSel" aria-label="interface language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </header>
 
@@ -212,7 +212,19 @@
           <button id="popDone" class="btn btn-sm" type="button" data-augmented-ui="tl-clip br-clip border"><span class="lbl-full" data-i18n="b_bdone">DONE</span><span class="lbl-short">OK</span></button>
         </span>
       </div>
+      <!-- the stage + its COLOUR window (opened by the corner icon, floats
+           to the right of the canvas) -->
+      <div class="stage-shell" id="stageShell">
       <div class="stage" id="stage">
+        <button class="stage-tool" id="adjBtn" type="button" aria-expanded="false" aria-controls="adjPop" data-i18n-title="t_adj" title="colour adjustments — selected token">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1" /><circle cx="15" cy="6" r="2" /><circle cx="9" cy="12" r="2" /><circle cx="17" cy="18" r="2" /></svg>
+        </button>
+        <button class="stage-tool stage-tool-2" id="flipBtn" type="button" aria-pressed="false" data-i18n-title="t_flip" title="mirror portrait">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M9 6L3 18h6zM15 6l6 12h-6z" /></svg>
+        </button>
+        <button class="stage-tool stage-tool-3 stage-tool-warn" id="resetTfBtn" type="button" data-i18n-title="t_reset" title="reset position">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v5h5" /></svg>
+        </button>
         <div class="token-wrap" id="tokenWrap">
           <canvas id="tokenCanvas" tabindex="0" aria-label="token preview"></canvas>
           <canvas id="refCanvas" class="ref-canvas" aria-hidden="true"></canvas>
@@ -222,7 +234,33 @@
           </div>
         </div>
       </div>
-      <div class="canvas-footer"><span class="canvas-hint" data-i18n="hint_stage">DRAG pan · CTRL+WHEEL zoom · SHIFT+WHEEL rotate · ARROWS nudge · 0 reset</span></div>
+      <div class="adj-pop config" id="adjPop" role="dialog" aria-labelledby="adjTitle" data-augmented-ui="tl-clip br-clip border" hidden>
+        <div class="modal-head">
+          <h2 id="adjTitle" data-i18n="h_adj">// COLOUR</h2>
+          <button class="adj-close" id="adjClose" type="button" aria-label="close">&times;</button>
+        </div>
+        <div class="fx-toggle">
+          <span class="fx-label"><span data-i18n="l_bright">// BRIGHTNESS:</span> <b class="val" data-val="adj.bright"></b></span>
+          <input type="range" class="potency-slider" data-adj="bright" min="0" max="200" step="1" aria-label="brightness" />
+        </div>
+        <div class="fx-toggle">
+          <span class="fx-label"><span data-i18n="l_contrast">// CONTRAST:</span> <b class="val" data-val="adj.contrast"></b></span>
+          <input type="range" class="potency-slider" data-adj="contrast" min="0" max="200" step="1" aria-label="contrast" />
+        </div>
+        <div class="fx-toggle">
+          <span class="fx-label"><span data-i18n="l_sat">// SATURATION:</span> <b class="val" data-val="adj.sat"></b></span>
+          <input type="range" class="potency-slider" data-adj="sat" min="0" max="200" step="1" aria-label="saturation" />
+        </div>
+        <div class="fx-toggle">
+          <span class="fx-label"><span data-i18n="l_hue">// HUE:</span> <b class="val" data-val="adj.hue"></b></span>
+          <input type="range" class="potency-slider" data-adj="hue" min="-180" max="180" step="1" aria-label="hue" />
+        </div>
+        <div class="btn-row">
+          <button id="resetAdjBtn" class="btn btn-sm btn-warn" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_resetadj">RESET LOOK</button>
+        </div>
+      </div>
+      </div>
+      <div class="canvas-footer"><span class="canvas-hint" data-i18n="hint_stage">DRAG pan · CTRL+WHEEL zoom · SHIFT+WHEEL rotate · +ALT fine · ARROWS nudge · 0 reset</span></div>
       <div class="roster" id="roster" aria-label="token roster"></div>
     </main>
 
@@ -288,42 +326,6 @@
         <span class="src-group" data-src="badgeTextFrom" data-custom="badgeTextColor" data-opts="auto,frame,accent,bg,custom" role="radiogroup" aria-label="badge text colour"></span>
         <input type="color" id="badgeTextColor" class="fill-input" data-style="badgeTextColor" aria-label="badge text colour" />
       </div>
-      <hr class="divider" />
-      <div class="fx-toggle">
-        <span class="fx-label"><span data-i18n="l_zoom">// ZOOM:</span> <b class="val" data-val="tf.zoom"></b></span>
-        <input type="range" class="potency-slider" data-tf="zoom" min="10" max="400" step="1" aria-label="zoom" />
-      </div>
-      <div class="fx-toggle">
-        <span class="fx-label"><span data-i18n="l_rot">// ROTATE:</span> <b class="val" data-val="tf.rot"></b></span>
-        <input type="range" class="potency-slider" data-tf="rot" min="-180" max="180" step="1" aria-label="rotation" />
-      </div>
-      <div class="fx-toggle">
-        <span class="fx-label" data-i18n="l_flip">// MIRROR:</span>
-        <button class="side-switch" type="button" data-tf="flip" data-pos="left" aria-label="mirror portrait">
-          <span class="thumb"></span><span class="lab l" data-i18n="b_off">OFF</span><span class="lab r" data-i18n="b_on">ON</span>
-        </button>
-      </div>
-      <div class="fx-toggle">
-        <span class="fx-label"><span data-i18n="l_bright">// BRIGHTNESS:</span> <b class="val" data-val="adj.bright"></b></span>
-        <input type="range" class="potency-slider" data-adj="bright" min="0" max="200" step="1" aria-label="brightness" />
-      </div>
-      <div class="fx-toggle">
-        <span class="fx-label"><span data-i18n="l_contrast">// CONTRAST:</span> <b class="val" data-val="adj.contrast"></b></span>
-        <input type="range" class="potency-slider" data-adj="contrast" min="0" max="200" step="1" aria-label="contrast" />
-      </div>
-      <div class="fx-toggle">
-        <span class="fx-label"><span data-i18n="l_sat">// SATURATION:</span> <b class="val" data-val="adj.sat"></b></span>
-        <input type="range" class="potency-slider" data-adj="sat" min="0" max="200" step="1" aria-label="saturation" />
-      </div>
-      <div class="fx-toggle">
-        <span class="fx-label"><span data-i18n="l_hue">// HUE:</span> <b class="val" data-val="adj.hue"></b></span>
-        <input type="range" class="potency-slider" data-adj="hue" min="-180" max="180" step="1" aria-label="hue" />
-      </div>
-      <div class="btn-row">
-        <button id="resetTfBtn" class="btn btn-sm btn-warn" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_reset">RESET POSITION</button>
-        <button id="resetAdjBtn" class="btn btn-sm btn-warn" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_resetadj">RESET LOOK</button>
-      </div>
-
       <hr class="divider" />
       <div class="fx-toggle">
         <span class="fx-label" data-i18n="l_popout">// POP-OUT:</span>
