@@ -36,7 +36,8 @@ client-side; your images are never uploaded.
   like the built-ins; white tint keeps its colours) and/or a greyscale mask
   (white keeps, black cuts) for any cut-out shape.
 - **Background** — solid colour, EXTEND (the portrait's edges stretched and
-  blurred into the empty space, like GRIDMAP's VIBRANT fill), or transparent.
+  blurred into the empty space, like GRIDMAP's VIBRANT fill), or transparent —
+  three buttons stacked under the preview's top-right tools.
 - **Adjustments** — per-token brightness / contrast / saturation / hue, in a
   COLOUR window opened from the icon in the preview's top-right corner.
 - **Labels** — the token's name as a clipped name PLATE or ARC text (NAME LABEL

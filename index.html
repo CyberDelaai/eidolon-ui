@@ -1,4 +1,4 @@
-<!-- EIDOLON v1.6.6 -->
+<!-- EIDOLON v1.6.7 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -106,7 +106,7 @@
         <a class="app-menu-item current" href="https://cyberdeck.tools/eidolon-ui/" aria-current="page">&gt; EIDOLON_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.6.6</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.6.7</span></span></div>
     <select class="lang-select" id="uiLangSel" aria-label="interface language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </header>
 
@@ -167,18 +167,6 @@
           <span class="thumb"></span><span class="lab" data-i18n="b_inner">INNER</span><span class="lab" data-i18n="b_outer">OUTER</span><span class="lab" data-i18n="b_all">ALL</span><span class="lab" data-i18n="b_off">OFF</span>
         </button>
       </div>
-
-      <hr class="divider" />
-      <h2 data-i18n="h_bg">// BACKGROUND</h2>
-      <div class="fx-toggle">
-        <span class="fx-label" data-i18n="l_fill">// FILL:</span>
-        <span class="fill-group">
-          <button class="fill-swatch" type="button" data-augmented-ui="tl-clip br-clip border" data-for="bgColor" data-bg="color" data-i18n-title="t_fillswatch" title="solid colour — click to pick"></button>
-          <button class="fill-extend" type="button" data-augmented-ui="tl-clip br-clip border" data-bg="extend" data-i18n-title="t_fillextend" title="edge extension — stretch the portrait's edges into the empty space"></button>
-          <button class="fill-transparent" type="button" data-augmented-ui="tl-clip br-clip border" data-bg="transparent" data-i18n-title="t_filltransp" title="transparent (PNG alpha)"></button>
-        </span>
-        <input type="color" id="bgColor" class="fill-input" data-style="bgColor" aria-label="background colour" />
-      </div>
     </aside>
 
     <!-- CENTER working area -->
@@ -222,6 +210,14 @@
         <button class="stage-tool stage-tool-3 stage-tool-warn" id="resetTfBtn" type="button" data-i18n-title="t_reset" title="reset position">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v5h5" /></svg>
         </button>
+        <!-- background fill (global style): a vertical group under the tools -->
+        <span class="stage-sep" aria-hidden="true"></span>
+        <div class="stage-bg" role="group" aria-label="background fill">
+          <button class="fill-swatch" type="button" data-augmented-ui="tl-clip br-clip border" data-for="bgColor" data-bg="color" data-i18n-title="t_fillswatch" title="solid colour — click to pick"></button>
+          <button class="fill-extend" type="button" data-augmented-ui="tl-clip br-clip border" data-bg="extend" data-i18n-title="t_fillextend" title="edge extension — stretch the portrait's edges into the empty space"></button>
+          <button class="fill-transparent" type="button" data-augmented-ui="tl-clip br-clip border" data-bg="transparent" data-i18n-title="t_filltransp" title="transparent (PNG alpha)"></button>
+          <input type="color" id="bgColor" class="fill-input" data-style="bgColor" aria-label="background colour" />
+        </div>
         <button class="stage-tool stage-tool-left" id="guidesBtn" type="button" data-mode="off" aria-pressed="false" data-i18n-title="t_ref_guides" title="guides — click to cycle: off → centre cross → thirds grid">
           <svg class="g-cross" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" opacity=".4" /><path d="M12 3v6M12 15v6M3 12h6M15 12h6" /><circle cx="12" cy="12" r="2.5" /></svg>
           <svg class="g-grid" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" opacity=".4" /><path d="M9 3v18M15 3v18M3 9h18M3 15h18" /></svg>

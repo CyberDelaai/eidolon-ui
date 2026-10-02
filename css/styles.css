@@ -444,6 +444,16 @@
   .stage-tool-2 { top: 50px; }
   .stage-tool-3 { top: 92px; }
   .stage-tool-left { right: auto; left: 8px; }
+  /* background fill: a delimiter, then the three fill modes stacked under the tools */
+  .stage-sep {
+    position: absolute; top: 137px; right: 8px; z-index: 2;
+    width: 34px; height: 1px; background: rgba(var(--main-rgb),0.35);
+  }
+  .stage-bg {
+    position: absolute; top: 149px; right: 8px; z-index: 2;
+    display: flex; flex-direction: column; gap: 8px; width: 34px;
+  }
+  .stage-bg .fill-swatch, .stage-bg .fill-extend, .stage-bg .fill-transparent { flex: 0 0 34px; height: 34px; }
   /* guides cycle: OFF shows the cross (dimmed) as the next step, then cross, then grid */
   #guidesBtn .g-grid, #guidesBtn[data-mode="grid"] .g-cross { display: none; }
   #guidesBtn[data-mode="grid"] .g-grid { display: block; }
