@@ -46,7 +46,8 @@ client-side; your images are never uploaded.
   panel; the rest — name style, colours and RESET POSITION — lives in a NAME or
   BADGE window, opened by the edit icon next to each switch, by the edit icon
   that appears while hovering the name / badge on the preview (a tap on
-  touch), or by right-clicking them. Drag the name or the badge on the preview to move it: it snaps to
+  touch), or by right-clicking them; the window opens right beside the name /
+  badge it edits. Drag the name or the badge on the preview to move it: it snaps to
   key spots (badge: corners, edges, centre; plate: top, bottom, centre and the
   centre lines; arc text: every 45° around the ring) — hold Alt to place it
   freely. Their positions are part of the global look (saved in presets). Plate, name text, badge and badge

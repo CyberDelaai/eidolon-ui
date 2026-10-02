@@ -509,7 +509,7 @@
       const was = drag.overlay;
       drag = null; overlayDrag = null;
       cv.classList.remove('grabbing', 'moving');
-      if (was) { styleChanged(); showHover(was); } else itemChanged(); // (touch has no hover: a tap shows the icon)
+      if (was) { styleChanged(); showHover(was); if (ovlOpen === was) placeOvlPop(); } else itemChanged(); // (touch has no hover: a tap shows the icon)
     };
     cv.addEventListener('pointerleave', (e) => {
       cv.classList.remove('over-overlay');
@@ -1089,9 +1089,10 @@
     });
   }
 
-  // ---- NAME / BADGE window: same spot as the COLOUR window (one open at a
-  // time). Opened by the right panel's edit icons, the edit icon that shows
-  // while hovering the name / badge on the stage, or a right-click on them. ----
+  // ---- NAME / BADGE window: floats beside the name / badge it edits (one of
+  // it and COLOUR open at a time; COLOUR's spot when that overlay isn't drawn).
+  // Opened by the right panel's edit icons, the edit icon that shows while
+  // hovering the name / badge on the stage, or a right-click on them. ----
   let ovlOpen = null; // 'label' | 'badge' | null
   function setOvlOpen(which, focus) {
     ovlOpen = which || null;
@@ -1100,12 +1101,39 @@
     document.querySelectorAll('.ovl-body').forEach((b) => { b.hidden = b.dataset.ovl !== ovlOpen; });
     document.querySelectorAll('[data-ovledit]').forEach((b) => b.setAttribute('aria-expanded', b.dataset.ovledit === ovlOpen ? 'true' : 'false'));
     ovlTitle();
+    placeOvlPop();
     if (ovlOpen && focus) {
       const first = document.querySelector('.ovl-body[data-ovl="' + ovlOpen + '"]').querySelector('select:enabled, button:enabled');
       if (first) first.focus();
     }
   }
   function ovlTitle() { if (ovlOpen) $('ovlTitle').textContent = '// ' + t(ovlOpen === 'badge' ? 'l_badge' : 'l_name'); }
+  // Put the window beside its overlay on the stage: right of it, else left,
+  // else below / above, kept inside the viewport. Without a drawn overlay it
+  // falls back to the stylesheet spot (COLOUR's).
+  function placeOvlPop() {
+    const pop = $('ovlPop'), cv = $('tokenCanvas'), it = cur();
+    pop.style.left = pop.style.top = pop.style.right = '';
+    const b = ovlOpen && it && EIDOLON.overlayBox(cv.width, it, ovlOpen);
+    if (!b) return;
+    const shell = $('stageShell').getBoundingClientRect(), r = cv.getBoundingClientRect(), k = r.width / cv.width;
+    const box = { l: r.left + b.x0 * k, t: r.top + b.y0 * k, r: r.left + b.x1 * k, b: r.top + b.y1 * k };
+    const w = pop.offsetWidth, h = pop.offsetHeight, gap = 16, m = 8;
+    const vw = document.documentElement.clientWidth, vh = window.innerHeight;
+    let x = null, y;
+    if (box.r + gap + w <= vw - m) x = box.r + gap;
+    else if (box.l - gap - w >= m) x = box.l - gap - w;
+    if (x !== null) y = (box.t + box.b) / 2 - h / 2;
+    else {
+      x = (box.l + box.r) / 2 - w / 2;
+      y = box.b + gap + h <= vh - m || box.t - gap - h < m ? box.b + gap : box.t - gap - h;
+    }
+    x = clamp(x, m, Math.max(m, vw - m - w));
+    y = clamp(y, m, Math.max(m, vh - m - h));
+    pop.style.left = (x - shell.left) + 'px';
+    pop.style.top = (y - shell.top) + 'px';
+    pop.style.right = 'auto';
+  }
   function setupOvlPop() {
     document.querySelectorAll('[data-ovledit]').forEach((b) => {
       b.addEventListener('click', () => setOvlOpen(ovlOpen === b.dataset.ovledit ? null : b.dataset.ovledit, true));
@@ -1123,6 +1151,7 @@
       if (ovlOpen && !$('stageShell').contains(e.target) && !e.target.closest('[data-ovledit]')) setOvlOpen(null);
     });
     document.addEventListener('eidolon:lang', ovlTitle);
+    window.addEventListener('resize', () => { if (ovlOpen) placeOvlPop(); });
     setOvlOpen(null);
   }
 

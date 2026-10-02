@@ -485,6 +485,34 @@
     const P = plateLayout(measureCtx, text, g);
     return { x: P.xc + P.pw / 2, y: P.yc - P.h / 2 };
   };
+  // The bounding box { x0, y0, x1, y1 } of an overlay in canvas pixels of an
+  // N×N preview (the NAME / BADGE window sits beside it). null when not drawn.
+  EIDOLON.overlayBox = function overlayBox(N, item, which) {
+    const g = geom(N);
+    if (which === 'badge') {
+      if (!badgeText(item)) return null;
+      const b = badgeLayout(g);
+      return { x0: b.bx - b.r, y0: b.by - b.r, x1: b.bx + b.r, y1: b.by + b.r };
+    }
+    const text = labelText(item);
+    if (!text) return null;
+    measureCtx = measureCtx || document.createElement('canvas').getContext('2d');
+    if (S.style.labelStyle === 'arc') {
+      // sample the band's inner and outer edges along its sweep
+      const L = arcLayout(measureCtx, text, g), a0 = L.th - L.span / 2 - L.pad, a1 = L.th + L.span / 2 + L.pad;
+      const B = { x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity };
+      for (let i = 0; i <= 24; i++) {
+        const a = a0 + ((a1 - a0) * i) / 24;
+        for (const r of [L.r - L.fs * 0.8, L.r + L.fs * 0.8]) {
+          const x = g.cx + r * Math.cos(a), y = g.cy + r * Math.sin(a);
+          B.x0 = Math.min(B.x0, x); B.y0 = Math.min(B.y0, y); B.x1 = Math.max(B.x1, x); B.y1 = Math.max(B.y1, y);
+        }
+      }
+      return B;
+    }
+    const P = plateLayout(measureCtx, text, g);
+    return { x0: P.xc - P.pw / 2, y0: P.yc - P.h / 2, x1: P.xc + P.pw / 2, y1: P.yc + P.h / 2 };
+  };
 
   // Key positions the overlays snap to (in R units, like labelX/Y, badgeX/Y).
   // The arc label snaps its angle to every 45° instead.
