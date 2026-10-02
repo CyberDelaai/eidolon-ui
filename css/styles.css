@@ -280,11 +280,16 @@
     --aug-tl: 8px; --aug-br: 8px;
   }
   .fill-swap {
-    flex: 0 0 30px; width: 30px; background: var(--panel); color: var(--main);
+    flex: 0 0 48px; width: 48px; background: var(--panel); color: var(--main);
     font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700;
     --aug-border-bg: rgba(var(--main-rgb),0.4);
   }
   .fill-swap:hover { background: rgba(var(--main-rgb),0.15); }
+  .fill-swap.disabled { opacity: .4; pointer-events: none; }
+  /* frame + accent pickers with the swap button as a tall strip on their right */
+  .color-pair { display: flex; align-items: stretch; gap: 8px; }
+  .color-pair-main { flex: 1; min-width: 0; }
+  .color-pair > .fill-swap { flex: 0 0 26px; width: 26px; height: auto; margin-top: 10px; }
   /* EXTEND fill mode: the radial rainbow of gridmap-ui's VIBRANT fill button */
   .fill-extend {
     background: radial-gradient(circle at 32% 30%, #ff3d81 0%, #ff9e00 30%, #ffe600 48%, #2bd9a0 66%, #38a8ff 82%, #b15cff 100%);
@@ -320,13 +325,13 @@
 
   /* colour grids (ported from commlink-ui's accent picker): a row of neon
      presets + the saved custom swatch & picker, then a row of softer tones.
-     Ten equal columns stretch across the whole row; the custom group spans
-     two, so the neon row (8 + group) and the soft row (10) line up. */
+     Nine equal columns stretch across the whole row; the custom group spans
+     two, so the neon row (7 + group) and the soft row (9) line up. */
   .color-grid {
-    display: grid; grid-template-columns: repeat(10, 1fr); grid-auto-rows: 26px;
+    display: grid; grid-template-columns: repeat(9, 1fr); grid-auto-rows: 26px;
     gap: 6px; margin-top: 10px;
   }
-  .color-grid .grid-break { display: none; } /* the 10 columns wrap the rows by themselves */
+  .color-grid .grid-break { display: none; } /* the 9 columns wrap the rows by themselves */
   #accentColorRow.disabled { opacity: .4; pointer-events: none; }
   .custom-color-group {
     grid-column: span 2; display: flex; align-items: stretch; gap: 3px; padding: 3px;

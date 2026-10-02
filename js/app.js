@@ -1278,8 +1278,8 @@
   // The COMMLINK accent palette: a neon row (+ the saved custom swatch and
   // picker), then a row of softer tones.
   const PALETTE = [
-    ['#fcee0a', '#00f0ff', '#ff003c', '#39ff14', '#ff8800', '#c800ff', '#00ff9d', '#ff10f0'],
-    ['#ff6b6b', '#ff9f43', '#feca57', '#1dd1a1', '#00d2d3', '#54a0ff', '#a29bfe', '#cd84f1', '#ff9ff3', '#ee5a9b'],
+    ['#fcee0a', '#00f0ff', '#ff003c', '#39ff14', '#ff8800', '#c800ff', '#ff10f0'],
+    ['#ff6b6b', '#ff9f43', '#feca57', '#1dd1a1', '#00d2d3', '#54a0ff', '#a29bfe', '#cd84f1', '#ff9ff3'],
   ];
   const saveColors = () => EIDOLON.save('eidolon:colors', JSON.stringify(S.colors));
   function frameKeys() { return EIDOLON.frameOrder.concat(S.customFrame ? ['custom'] : []); }
@@ -1525,6 +1525,7 @@
     syncSwatches();
     document.querySelectorAll('[data-bg]').forEach((b) => b.classList.toggle('active', st.bgMode === b.dataset.bg));
     $('accentColorRow').classList.toggle('disabled', !st.accent);
+    $('swapBtn').classList.toggle('disabled', !st.accent);
     [['.label-param', st.labelOn], ['.badge-param', st.badgeOn]].forEach(([sel, on]) => {
       document.querySelectorAll(sel).forEach((row) => {
         row.classList.toggle('disabled', !on);

@@ -1,4 +1,4 @@
-<!-- EIDOLON v1.6.7 -->
+<!-- EIDOLON v1.6.8 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -106,7 +106,7 @@
         <a class="app-menu-item current" href="https://cyberdeck.tools/eidolon-ui/" aria-current="page">&gt; EIDOLON_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.6.7</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.6.8</span></span></div>
     <select class="lang-select" id="uiLangSel" aria-label="interface language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </header>
 
@@ -139,19 +139,21 @@
         <span class="fx-label" data-i18n="l_fcolor">// FRAME:</span>
       </div>
       <!-- colour grids (COMMLINK accent picker): swatches built by buildSwatches() -->
-      <div class="color-grid" data-swatches="frameColor" role="group" aria-label="frame colour"></div>
-      <div class="fx-toggle">
-        <span class="fx-label" data-i18n="l_accent">// ACCENT:</span>
-        <button class="side-switch" type="button" data-style="accent" data-pos="left" aria-label="accent details">
-          <span class="thumb"></span><span class="lab l" data-i18n="b_off">OFF</span><span class="lab r" data-i18n="b_on">ON</span>
-        </button>
-      </div>
-      <div id="accentColorRow">
-        <div class="fx-toggle">
-          <span class="fx-label" data-i18n="l_acolor">// ACCENT TINT:</span>
-          <button class="fill-swap" id="swapBtn" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n-title="t_swap" title="swap frame / accent">⇅</button>
+      <!-- the frame + accent pickers share a tall swap button on their right -->
+      <div class="color-pair">
+        <div class="color-pair-main">
+          <div class="color-grid" data-swatches="frameColor" role="group" aria-label="frame colour"></div>
+          <div class="fx-toggle">
+            <span class="fx-label" data-i18n="l_accent">// ACCENT:</span>
+            <button class="side-switch" type="button" data-style="accent" data-pos="left" aria-label="accent details">
+              <span class="thumb"></span><span class="lab l" data-i18n="b_off">OFF</span><span class="lab r" data-i18n="b_on">ON</span>
+            </button>
+          </div>
+          <div id="accentColorRow">
+            <div class="color-grid" data-swatches="accentColor" role="group" aria-label="accent colour"></div>
+          </div>
         </div>
-        <div class="color-grid" data-swatches="accentColor" role="group" aria-label="accent colour"></div>
+        <button class="fill-swap" id="swapBtn" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n-title="t_swap" title="swap frame / accent">⇅</button>
       </div>
       <div class="fx-toggle">
         <span class="fx-label"><span data-i18n="l_thick">// THICKNESS:</span> <b class="val" data-val="thickness"></b></span>
