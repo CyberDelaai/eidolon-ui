@@ -185,6 +185,16 @@
   .side-switch.multi .lab { font-size: 10px; letter-spacing: .5px; }
   .side-switch.multi .lab.on { color: var(--main); }
   .fx-toggle.disabled { opacity: .4; pointer-events: none; }
+  /* ON/OFF switch + an icon button to its right (label / badge reset position) */
+  .switch-row { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .pos-reset {
+    width: 30px; height: 30px; padding: 6px; line-height: 0; cursor: pointer; flex-shrink: 0;
+    background: var(--panel); color: var(--magenta); border: 1px solid rgba(255,0,60,0.45);
+    transition: border-color .12s, box-shadow .12s;
+  }
+  .pos-reset svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: square; }
+  .pos-reset:hover { border-color: var(--magenta); box-shadow: 0 0 8px rgba(255,0,60,0.45); }
+  .pos-reset:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
 
   /* faded-edge cyan horizontal divider between config sections */
   .divider {
@@ -369,6 +379,8 @@
   }
   .stage.has-image #tokenCanvas { cursor: grab; }
   #tokenCanvas.grabbing { cursor: grabbing !important; }
+  .stage.has-image #tokenCanvas.over-overlay { cursor: move; }
+  #tokenCanvas.moving { cursor: move !important; }
   #tokenCanvas:focus-visible { outline: 1px solid var(--accent); outline-offset: 4px; }
   .token-wrap .placeholder {
     position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 70%;

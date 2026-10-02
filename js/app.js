@@ -102,6 +102,11 @@
       st.labelOn = st.labelStyle !== 'none';
       if (st.labelStyle === 'none') st.labelStyle = 'plate';
     }
+    // the old BADGE AT corner dropdown became a draggable position
+    if (st && typeof st === 'object' && typeof st.badgePos === 'string' && typeof st.badgeX !== 'number') {
+      const d = { tl: [-1, -1], tr: [1, -1], bl: [-1, 1], br: [1, 1] }[st.badgePos] || [1, 1];
+      st.badgeX = d[0] * 0.74; st.badgeY = d[1] * 0.74;
+    }
     return st;
   }
   function restore() {
@@ -371,6 +376,7 @@
 
   // ---- stage preview ----
   let drawQueued = false;
+  let overlayDrag = null; // 'label' | 'badge' while one is dragged on the stage
   function requestDraw() {
     if (drawQueued) return;
     drawQueued = true;
@@ -415,28 +421,66 @@
   function setupStage() {
     const cv = $('tokenCanvas'), stage = $('stage');
     let drag = null;
+    // The label / badge under a client point, or null (preview pixels via the canvas size).
+    const overlayAt = (e) => {
+      const r = cv.getBoundingClientRect(), k = cv.width / r.width;
+      return EIDOLON.overlayAt(cv.width, cur(), (e.clientX - r.left) * k, (e.clientY - r.top) * k);
+    };
     cv.addEventListener('pointerdown', (e) => {
       const it = cur();
       if (!it) { $('fileInput').click(); return; }
       if (brush.on) { brushDown(e); return; }
       cv.setPointerCapture(e.pointerId);
-      drag = { x: e.clientX, y: e.clientY, w: cv.getBoundingClientRect().width };
-      cv.classList.add('grabbing');
+      drag = { x: e.clientX, y: e.clientY, w: cv.getBoundingClientRect().width, overlay: overlayAt(e) };
+      if (drag.overlay) {
+        // label / badge drag: moves the style position (R units), snapping unless Alt
+        const st = S.style, b = drag.overlay === 'badge';
+        drag.x0 = b ? st.badgeX : st.labelX; drag.y0 = b ? st.badgeY : st.labelY;
+        drag.sx = e.clientX; drag.sy = e.clientY;
+        overlayDrag = drag.overlay;
+        cv.classList.add('moving'); drawRef();
+      } else {
+        cv.classList.add('grabbing');
+      }
     });
     cv.addEventListener('pointermove', (e) => {
       const it = cur();
-      if (brush.on) { brushMove(e); return; }
-      if (!drag || !it) return;
+      if (brush.on) { cv.classList.remove('over-overlay'); brushMove(e); return; }
+      if (!drag) { cv.classList.toggle('over-overlay', !!(it && overlayAt(e))); return; }
+      if (!it) return;
+      if (drag.overlay) { moveOverlay(e); return; }
       it.tf.x += (e.clientX - drag.x) / drag.w;
       it.tf.y += (e.clientY - drag.y) / drag.w;
       drag.x = e.clientX; drag.y = e.clientY;
       requestDraw();
     });
+    function moveOverlay(e) {
+      const st = S.style, g = EIDOLON.geom(drag.w), r = cv.getBoundingClientRect();
+      let x, y;
+      if (drag.overlay === 'label' && st.labelStyle === 'arc') {
+        // the arc follows the pointer's angle around the centre
+        x = (e.clientX - r.left - r.width / 2) / g.R; y = (e.clientY - r.top - r.height / 2) / g.R;
+      } else {
+        const lim = 1.2;
+        x = clamp(drag.x0 + (e.clientX - drag.sx) / g.R, -lim, lim);
+        y = clamp(drag.y0 + (e.clientY - drag.sy) / g.R, -lim, lim);
+      }
+      [x, y] = EIDOLON.snapOverlay(drag.overlay, x, y, e.altKey);
+      if (drag.overlay === 'badge') { st.badgeX = x; st.badgeY = y; } else { st.labelX = x; st.labelY = y; }
+      requestDraw();
+    }
     const end = () => {
       if (brush.stroke) { brushUp(); return; }
-      if (drag) { drag = null; cv.classList.remove('grabbing'); itemChanged(); }
+      if (!drag) return;
+      const was = drag.overlay;
+      drag = null; overlayDrag = null;
+      cv.classList.remove('grabbing', 'moving');
+      if (was) styleChanged(); else itemChanged();
     };
-    cv.addEventListener('pointerleave', () => { if (brush.on && !brush.stroke) { brush.cursor = null; requestDraw(); } });
+    cv.addEventListener('pointerleave', () => {
+      cv.classList.remove('over-overlay');
+      if (brush.on && !brush.stroke) { brush.cursor = null; requestDraw(); }
+    });
     cv.addEventListener('pointerup', end);
     cv.addEventListener('pointercancel', end);
     // Ctrl+wheel zooms (also trackpad pinch, which arrives as ctrlKey wheel),
@@ -576,6 +620,7 @@
     if (rc.width !== cv.width) { rc.width = cv.width; rc.height = cv.height; }
     EIDOLON.drawReference(rc.getContext('2d'), rc.width);
     if (brush.on && cur()) EIDOLON.drawBrushOverlay(rc.getContext('2d'), rc.width, cur(), brush.cursor);
+    if (overlayDrag) EIDOLON.drawSnapOverlay(rc.getContext('2d'), rc.width, overlayDrag);
   }
   function setCustomRef(blob) {
     decode(blob).then((img) => {
@@ -660,7 +705,7 @@
       PC: ex({ frame: 'ring', frameColor: '#00f0ff', accent: true, accentColor: '#fcee0a', glow: 'all', labelOn: true, labelStyle: 'arc' },
         null, { label: DOGGO }),
       ENEMY: ex({ frame: 'ring', frameColor: '#ff003c', glow: 'outer', bgColor: '#14050a', labelOn: false,
-        badgeFrom: 'custom', badgeColor: '#ff003c', badgePos: 'br' },
+        badgeFrom: 'custom', badgeColor: '#ff003c' },
         null, { badge: '8' }),
       NPC: ex({ frame: 'hex', frameColor: '#e8e8ee', thickness: 6, glow: 'off', labelOn: true, labelStyle: 'plate' }),
       BOSS: ex({ frame: 'segment', frameColor: '#fcee0a', accent: true, accentColor: '#ff003c', thickness: 11, glow: 'all', labelOn: true, labelStyle: 'arc' },
@@ -1235,6 +1280,14 @@
       } else {
         el.addEventListener('input', () => { S.style[k] = el.type === 'range' ? +el.value : el.value; styleChanged(); });
       }
+    });
+    // data-resetpos="label|badge": put a dragged label / badge back where it starts
+    document.querySelectorAll('[data-resetpos]').forEach((b) => {
+      const w = b.dataset.resetpos;
+      b.addEventListener('click', () => {
+        S.style[w + 'X'] = DEFAULT_STYLE[w + 'X']; S.style[w + 'Y'] = DEFAULT_STYLE[w + 'Y'];
+        styleChanged();
+      });
     });
     document.querySelectorAll('[data-for]').forEach((b) => {
       b.addEventListener('click', () => {

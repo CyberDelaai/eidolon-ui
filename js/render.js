@@ -347,60 +347,86 @@
     }
   };
 
-  // ---- label: clipped name plate or text along the bottom arc ----
+  // ---- label + badge placement. Both sit at a style position (labelX/Y,
+  // badgeX/Y: offsets from the centre in units of R); the arc label uses only
+  // its direction. The layouts are shared by drawing and stage hit-testing. ----
+  const clampTo = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  function arcAngle() {
+    const st = S.style;
+    return st.labelX || st.labelY ? Math.atan2(st.labelY, st.labelX) : Math.PI / 2;
+  }
+  function plateLayout(ctx, text, g) {
+    const st = S.style, N = g.N;
+    let fs = N * 0.068;
+    ctx.font = font(fs); setSpacing(ctx, fs * 0.08);
+    const maxW = N * 0.8;
+    let w = ctx.measureText(text).width;
+    if (w > maxW) { fs *= maxW / w; ctx.font = font(fs); setSpacing(ctx, fs * 0.08); w = ctx.measureText(text).width; }
+    const h = fs * 1.6, pw = w + fs * 1.6, pad = N * 0.012;
+    // kept fully on the token
+    const xc = clampTo(g.cx + st.labelX * g.R, pw / 2 + pad, N - pw / 2 - pad);
+    const yc = clampTo(g.cy + st.labelY * g.R, h / 2 + pad, N - h / 2 - pad);
+    return { fs, h, pw, k: h * 0.38, xc, yc };
+  }
+  function arcLayout(ctx, text, g) {
+    const N = g.N;
+    let fs = N * 0.062;
+    const fit = () => {
+      ctx.font = font(fs); setSpacing(ctx, 0);
+      const ws = [...text].map((ch) => ctx.measureText(ch).width + fs * 0.12);
+      return { ws, total: ws.reduce((a, b) => a + b, 0) };
+    };
+    let m = fit(), r = g.R - fs * 0.8;
+    const maxSpan = (150 * Math.PI) / 180;
+    while (m.total / r > maxSpan && fs > N * 0.02) { fs *= 0.92; m = fit(); r = g.R - fs * 0.8; }
+    const th = arcAngle();
+    // on the upper half the text runs the other way round, so it still reads upright
+    return { fs, ws: m.ws, r, th, span: m.total / r, pad: (fs * 0.9) / r, top: Math.sin(th) < -1e-6 };
+  }
+  function badgeLayout(g) {
+    const st = S.style, N = g.N, r = N * 0.088, e = r + N * 0.006;
+    return { r, bx: clampTo(g.cx + st.badgeX * g.R, e, N - e), by: clampTo(g.cy + st.badgeY * g.R, e, N - e) };
+  }
+
+  // ---- label: clipped name plate or text along the ring ----
   function drawLabel(ctx, text, g) {
     const st = S.style, N = g.N;
     ctx.save();
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     if (st.labelStyle === 'plate') {
-      let fs = N * 0.068;
-      ctx.font = font(fs); setSpacing(ctx, fs * 0.08);
-      const maxW = N * 0.8;
-      let w = ctx.measureText(text).width;
-      if (w > maxW) { fs *= maxW / w; ctx.font = font(fs); setSpacing(ctx, fs * 0.08); w = ctx.measureText(text).width; }
-      const h = fs * 1.6, pw = w + fs * 1.6, k = h * 0.38;
-      const yc = Math.min(g.cy + g.R * 0.8, N - h / 2 - N * 0.012), x0 = g.cx - pw / 2, y0 = yc - h / 2;
+      const { fs, h, pw, k, xc, yc } = plateLayout(ctx, text, g);
+      const x0 = xc - pw / 2, y0 = yc - h / 2;
       ctx.beginPath();
       ctx.moveTo(x0 + k, y0); ctx.lineTo(x0 + pw, y0); ctx.lineTo(x0 + pw, y0 + h - k);
       ctx.lineTo(x0 + pw - k, y0 + h); ctx.lineTo(x0, y0 + h); ctx.lineTo(x0, y0 + k); ctx.closePath();
       ctx.fillStyle = colorFrom(st.plateFrom, st.plateColor); ctx.fill();
       if (st.accent) { ctx.lineWidth = Math.max(1, N * 0.004); ctx.strokeStyle = st.accentColor; ctx.stroke(); }
       ctx.fillStyle = colorFrom(st.labelFrom, st.labelColor);
-      ctx.fillText(text, g.cx, yc + fs * 0.04);
+      ctx.fillText(text, xc, yc + fs * 0.04);
     } else if (st.labelStyle === 'arc') {
-      let fs = N * 0.062;
-      const fit = () => {
-        ctx.font = font(fs); setSpacing(ctx, 0);
-        const ws = [...text].map((ch) => ctx.measureText(ch).width + fs * 0.12);
-        return { ws, total: ws.reduce((a, b) => a + b, 0) };
-      };
-      let m = fit(), r = g.R - fs * 0.8;
-      const maxSpan = (150 * Math.PI) / 180;
-      while (m.total / r > maxSpan && fs > N * 0.02) { fs *= 0.92; m = fit(); r = g.R - fs * 0.8; }
-      const span = m.total / r, pad = (fs * 0.9) / r;
-      ctx.strokeStyle = colorFrom(st.plateFrom, st.plateColor); ctx.lineWidth = fs * 1.6; ctx.lineCap = 'butt';
-      ctx.beginPath(); ctx.arc(g.cx, g.cy, r, Math.PI / 2 - span / 2 - pad, Math.PI / 2 + span / 2 + pad); ctx.stroke();
+      const L = arcLayout(ctx, text, g);
+      ctx.strokeStyle = colorFrom(st.plateFrom, st.plateColor); ctx.lineWidth = L.fs * 1.6; ctx.lineCap = 'butt';
+      ctx.beginPath(); ctx.arc(g.cx, g.cy, L.r, L.th - L.span / 2 - L.pad, L.th + L.span / 2 + L.pad); ctx.stroke();
       ctx.fillStyle = colorFrom(st.labelFrom, st.labelColor);
       let acc = 0;
       [...text].forEach((ch, i) => {
-        const th = Math.PI / 2 + span / 2 - (acc + m.ws[i] / 2) / r;
-        acc += m.ws[i];
+        const d = (acc + L.ws[i] / 2) / L.r;
+        const th = L.top ? L.th - L.span / 2 + d : L.th + L.span / 2 - d;
+        acc += L.ws[i];
         ctx.save();
-        ctx.translate(g.cx + r * Math.cos(th), g.cy + r * Math.sin(th));
-        ctx.rotate(th - Math.PI / 2);
-        ctx.fillText(ch, 0, fs * 0.04);
+        ctx.translate(g.cx + L.r * Math.cos(th), g.cy + L.r * Math.sin(th));
+        ctx.rotate(th + (L.top ? Math.PI / 2 : -Math.PI / 2));
+        ctx.fillText(ch, 0, L.fs * 0.04);
         ctx.restore();
       });
     }
     ctx.restore();
   }
 
-  // ---- badge: a numbered/lettered disc on one of the diagonals ----
+  // ---- badge: a numbered/lettered disc ----
   function drawBadge(ctx, text, g) {
     const st = S.style, N = g.N;
-    const dir = { tl: [-1, -1], tr: [1, -1], bl: [-1, 1], br: [1, 1] }[st.badgePos] || [1, 1];
-    const d = g.R * 0.74, bx = g.cx + dir[0] * d, by = g.cy + dir[1] * d;
-    const r = N * 0.088;
+    const { r, bx, by } = badgeLayout(g);
     ctx.save();
     ctx.beginPath(); ctx.arc(bx, by, r, 0, Math.PI * 2);
     const fill = colorFrom(st.badgeFrom, st.badgeColor);
@@ -414,6 +440,82 @@
     ctx.fillText(text, bx, by + fs * 0.05);
     ctx.restore();
   }
+  const labelText = (item) => (S.style.labelOn && item && item.label ? item.label.trim().toUpperCase() : '');
+  const badgeText = (item) => String((S.style.badgeOn && item && item.badge) || '').trim().toUpperCase();
+
+  // Which draggable overlay ('badge' | 'label' | null) is at canvas pixel (x, y)
+  // of an N×N preview of `item`. The badge is drawn last, so it wins.
+  let measureCtx = null;
+  EIDOLON.overlayAt = function overlayAt(N, item, x, y) {
+    const g = geom(N);
+    if (badgeText(item)) {
+      const b = badgeLayout(g);
+      if (Math.hypot(x - b.bx, y - b.by) <= b.r * 1.1) return 'badge';
+    }
+    const text = labelText(item);
+    if (!text) return null;
+    measureCtx = measureCtx || document.createElement('canvas').getContext('2d');
+    if (S.style.labelStyle === 'arc') {
+      const L = arcLayout(measureCtx, text, g);
+      const d = Math.hypot(x - g.cx, y - g.cy);
+      let da = Math.atan2(y - g.cy, x - g.cx) - L.th;
+      da = Math.atan2(Math.sin(da), Math.cos(da));
+      return Math.abs(d - L.r) <= L.fs * 0.9 && Math.abs(da) <= L.span / 2 + L.pad ? 'label' : null;
+    }
+    const P = plateLayout(measureCtx, text, g);
+    return Math.abs(x - P.xc) <= P.pw / 2 && Math.abs(y - P.yc) <= P.h / 2 ? 'label' : null;
+  };
+
+  // Key positions the overlays snap to (in R units, like labelX/Y, badgeX/Y).
+  // The arc label snaps its angle to every 45° instead.
+  const D = 0.74, E = 0.92;
+  const SNAPS = {
+    label: [[0, 0.8], [0, -0.8], [0, 0]],
+    badge: [[D, D], [-D, D], [D, -D], [-D, -D], [0, E], [0, -E], [E, 0], [-E, 0], [0, 0]],
+  };
+  const ARC_STEP = Math.PI / 4, ARC_SNAP = (7 * Math.PI) / 180;
+  const round4 = (v) => Math.round(v * 1e4) / 1e4;
+  // Snap a dragged position (R units): to the nearest key point within reach,
+  // else onto the vertical / horizontal centre line. `free` (Alt) skips the
+  // snapping; the arc label is still put back on its ring. Returns [x, y].
+  EIDOLON.snapOverlay = function snapOverlay(which, x, y, free) {
+    if (which === 'label' && S.style.labelStyle === 'arc') {
+      let th = Math.atan2(y, x);
+      const k = Math.round(th / ARC_STEP) * ARC_STEP;
+      if (!free && Math.abs(th - k) <= ARC_SNAP) th = k;
+      return [round4(Math.cos(th) * 0.8), round4(Math.sin(th) * 0.8)];
+    }
+    if (free) return [x, y];
+    const reach = which === 'badge' ? 0.12 : 0.1;
+    let best = null, bd = reach;
+    SNAPS[which].forEach((p) => { const d = Math.hypot(x - p[0], y - p[1]); if (d < bd) { bd = d; best = p; } });
+    if (best) return [best[0], best[1]];
+    return [Math.abs(x) < reach / 2 ? 0 : x, Math.abs(y) < reach / 2 ? 0 : y];
+  };
+
+  // Preview-only guide while dragging an overlay: its snap points (the one in
+  // use lit), drawn on #refCanvas after the reference.
+  EIDOLON.drawSnapOverlay = function drawSnapOverlay(ctx, N, which) {
+    const st = S.style, g = geom(N), s = N / 90;
+    const at = which === 'badge' ? [st.badgeX, st.badgeY] : [st.labelX, st.labelY];
+    const mark = (x, y, on) => {
+      ctx.beginPath();
+      ctx.moveTo(x - s, y); ctx.lineTo(x + s, y); ctx.moveTo(x, y - s); ctx.lineTo(x, y + s);
+      ctx.strokeStyle = 'rgba(5,5,7,0.8)'; ctx.lineWidth = Math.max(2, N / 150); ctx.stroke();
+      ctx.strokeStyle = on ? '#fcee0a' : 'rgba(232,232,238,0.7)'; ctx.lineWidth = Math.max(1, N / 300); ctx.stroke();
+    };
+    ctx.save();
+    if (which === 'label' && st.labelStyle === 'arc') {
+      const th = arcAngle(), r = g.R * 0.9;
+      for (let i = 0; i < 8; i++) {
+        const a = i * ARC_STEP;
+        mark(g.cx + Math.cos(a) * r, g.cy + Math.sin(a) * r, Math.abs(Math.atan2(Math.sin(th - a), Math.cos(th - a))) < 1e-3);
+      }
+    } else {
+      SNAPS[which].forEach((p) => mark(g.cx + p[0] * g.R, g.cy + p[1] * g.R, Math.abs(p[0] - at[0]) < 1e-6 && Math.abs(p[1] - at[1]) < 1e-6));
+    }
+    ctx.restore();
+  };
 
   // Render the token for `item` (may be null → empty frame preview) onto ctx,
   // whose canvas is N×N. opts.badge overrides the item's badge (numbered sets).
@@ -431,10 +533,10 @@
     ctx.drawImage(B, 0, 0);
     ctx.globalAlpha = 1;
     if (U && item.popOn && item.popMask) ctx.drawImage(popLayer(item, U, g), 0, 0);
-    const label = item && item.label ? item.label.trim().toUpperCase() : '';
-    if (label && st.labelOn) drawLabel(ctx, label, g);
+    const label = labelText(item);
+    if (label) drawLabel(ctx, label, g);
     // numbered sets stamp their badge even with the switch off
-    const badge = String(opts.badge != null ? opts.badge : (st.badgeOn && item && item.badge) || '').trim().toUpperCase();
+    const badge = opts.badge != null ? String(opts.badge).trim().toUpperCase() : badgeText(item);
     if (badge) drawBadge(ctx, badge, g);
     ctx.restore();
   };

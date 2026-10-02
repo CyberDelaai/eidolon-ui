@@ -1,4 +1,4 @@
-<!-- EIDOLON v1.6.0 -->
+<!-- EIDOLON v1.6.1 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -106,7 +106,7 @@
         <a class="app-menu-item current" href="https://cyberdeck.tools/eidolon-ui/" aria-current="page">&gt; EIDOLON_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.6.0</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.6.1</span></span></div>
     <select class="lang-select" id="uiLangSel" aria-label="interface language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </header>
 
@@ -260,7 +260,7 @@
         </div>
       </div>
       </div>
-      <div class="canvas-footer"><span class="canvas-hint" data-i18n="hint_stage">DRAG pan · CTRL+WHEEL zoom · SHIFT+WHEEL rotate · +ALT fine · ARROWS nudge · 0 reset</span></div>
+      <div class="canvas-footer"><span class="canvas-hint" data-i18n="hint_stage">DRAG pan · NAME/BADGE drag to move (ALT no snap) · CTRL+WHEEL zoom · SHIFT+WHEEL rotate · +ALT fine · ARROWS nudge · 0 reset</span></div>
       <div class="roster" id="roster" aria-label="token roster"></div>
     </main>
 
@@ -279,9 +279,14 @@
       </div>
       <div class="fx-toggle">
         <span class="fx-label" data-i18n="l_label">// NAME LABEL:</span>
-        <button class="side-switch" type="button" data-style="labelOn" data-pos="left" aria-label="name label">
-          <span class="thumb"></span><span class="lab l" data-i18n="b_off">OFF</span><span class="lab r" data-i18n="b_on">ON</span>
-        </button>
+        <span class="switch-row">
+          <button class="side-switch" type="button" data-style="labelOn" data-pos="left" aria-label="name label">
+            <span class="thumb"></span><span class="lab l" data-i18n="b_off">OFF</span><span class="lab r" data-i18n="b_on">ON</span>
+          </button>
+          <button class="pos-reset" type="button" data-resetpos="label" data-i18n-title="t_reset" title="reset position">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v5h5" /></svg>
+          </button>
+        </span>
       </div>
       <div class="fx-toggle label-param">
         <span class="fx-label" data-i18n="l_lstyle">// NAME STYLE:</span>
@@ -303,18 +308,14 @@
       <hr class="divider" />
       <div class="fx-toggle">
         <span class="fx-label" data-i18n="l_badgeon">// BADGE:</span>
-        <button class="side-switch" type="button" data-style="badgeOn" data-pos="left" aria-label="badge">
-          <span class="thumb"></span><span class="lab l" data-i18n="b_off">OFF</span><span class="lab r" data-i18n="b_on">ON</span>
-        </button>
-      </div>
-      <div class="fx-toggle badge-param">
-        <span class="fx-label" data-i18n="l_bpos">// BADGE AT:</span>
-        <select class="scale-select" data-style="badgePos" aria-label="badge position">
-          <option value="tl" data-i18n="o_tl">TOP LEFT</option>
-          <option value="tr" data-i18n="o_tr">TOP RIGHT</option>
-          <option value="bl" data-i18n="o_bl">BOTTOM LEFT</option>
-          <option value="br" data-i18n="o_br">BOTTOM RIGHT</option>
-        </select>
+        <span class="switch-row">
+          <button class="side-switch" type="button" data-style="badgeOn" data-pos="left" aria-label="badge">
+            <span class="thumb"></span><span class="lab l" data-i18n="b_off">OFF</span><span class="lab r" data-i18n="b_on">ON</span>
+          </button>
+          <button class="pos-reset" type="button" data-resetpos="badge" data-i18n-title="t_reset" title="reset position">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v5h5" /></svg>
+          </button>
+        </span>
       </div>
       <div class="fx-toggle badge-param">
         <span class="fx-label" data-i18n="l_badgecol">// BADGE FILL:</span>

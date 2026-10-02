@@ -57,7 +57,11 @@ EIDOLON.state = {
     badgeFrom: 'accent', badgeColor: '#fcee0a',       // badge disc
     badgeTextFrom: 'auto', badgeTextColor: '#050507', // badge text
     badgeOn: true,          // draw the badge at all
-    badgePos: 'br',         // 'tl' | 'tr' | 'bl' | 'br'
+    // label / badge centres, dragged on the stage: offsets from the token centre
+    // in units of the frame's outer radius R (so they follow the margin). The arc
+    // label only uses the direction (its angle around the ring).
+    labelX: 0, labelY: 0.8,
+    badgeX: 0.74, badgeY: 0.74,
   },
 
   // -- FX: effects over the portrait / cut-out (persisted as eidolon:fx) --
