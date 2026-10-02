@@ -1,4 +1,4 @@
-<!-- EIDOLON v1.6.2 -->
+<!-- EIDOLON v1.6.3 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -106,7 +106,7 @@
         <a class="app-menu-item current" href="https://cyberdeck.tools/eidolon-ui/" aria-current="page">&gt; EIDOLON_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.6.2</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable" data-i18n="tag">TOKEN MAKER</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.6.3</span></span></div>
     <select class="lang-select" id="uiLangSel" aria-label="interface language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </header>
 
@@ -231,6 +231,9 @@
         <div class="token-wrap" id="tokenWrap">
           <canvas id="tokenCanvas" tabindex="0" aria-label="token preview"></canvas>
           <canvas id="refCanvas" class="ref-canvas" aria-hidden="true"></canvas>
+          <button class="ovl-hover" id="ovlHover" type="button" tabindex="-1" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM13 7l4 4" /></svg>
+          </button>
           <div class="placeholder" id="placeholder">
             <b data-i18n="ph_title">NO TOKEN LOADED</b><br />
             <span data-i18n="ph_body">Drop, paste or load a portrait to start.</span>
@@ -262,8 +265,53 @@
           <button id="resetAdjBtn" class="btn btn-sm btn-warn" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="b_resetadj">RESET LOOK</button>
         </div>
       </div>
+      <!-- NAME / BADGE window: the panel's edit icons, the stage's hover edit
+           icon or a right-click on the name / badge open one of its two bodies -->
+      <div class="adj-pop config" id="ovlPop" role="dialog" aria-labelledby="ovlTitle" data-augmented-ui="tl-clip br-clip border" hidden>
+        <div class="modal-head">
+          <h2 id="ovlTitle"></h2>
+          <button class="adj-close" id="ovlClose" type="button" aria-label="close">&times;</button>
+        </div>
+        <div class="ovl-body" data-ovl="label">
+          <div class="fx-toggle label-param">
+            <span class="fx-label" data-i18n="l_lstyle">// NAME STYLE:</span>
+            <select class="scale-select" data-style="labelStyle" aria-label="name style">
+              <option value="plate" data-i18n="o_plate">PLATE</option>
+              <option value="arc" data-i18n="o_arc">ARC</option>
+            </select>
+          </div>
+          <div class="fx-toggle label-param">
+            <span class="fx-label" data-i18n="l_plate">// PLATE:</span>
+            <span class="src-group" data-src="plateFrom" data-custom="plateColor" data-opts="frame,accent,bg,custom" role="radiogroup" aria-label="name plate colour"></span>
+            <input type="color" id="plateColor" class="fill-input" data-style="plateColor" aria-label="name plate colour" />
+          </div>
+          <div class="fx-toggle label-param">
+            <span class="fx-label" data-i18n="l_ltext">// TEXT:</span>
+            <span class="src-group" data-src="labelFrom" data-custom="labelColor" data-opts="frame,accent,bg,custom" role="radiogroup" aria-label="name text colour"></span>
+            <input type="color" id="labelColor" class="fill-input" data-style="labelColor" aria-label="name text colour" />
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-sm btn-warn" type="button" data-resetpos="label" data-augmented-ui="tl-clip br-clip border" data-i18n="t_reset">RESET POSITION</button>
+          </div>
+        </div>
+        <div class="ovl-body" data-ovl="badge">
+          <div class="fx-toggle badge-param">
+            <span class="fx-label" data-i18n="l_badgecol">// BADGE FILL:</span>
+            <span class="src-group" data-src="badgeFrom" data-custom="badgeColor" data-opts="frame,accent,bg,custom" role="radiogroup" aria-label="badge colour"></span>
+            <input type="color" id="badgeColor" class="fill-input" data-style="badgeColor" aria-label="badge colour" />
+          </div>
+          <div class="fx-toggle badge-param">
+            <span class="fx-label" data-i18n="l_badgetext">// BADGE TEXT:</span>
+            <span class="src-group" data-src="badgeTextFrom" data-custom="badgeTextColor" data-opts="auto,frame,accent,bg,custom" role="radiogroup" aria-label="badge text colour"></span>
+            <input type="color" id="badgeTextColor" class="fill-input" data-style="badgeTextColor" aria-label="badge text colour" />
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-sm btn-warn" type="button" data-resetpos="badge" data-augmented-ui="tl-clip br-clip border" data-i18n="t_reset">RESET POSITION</button>
+          </div>
+        </div>
       </div>
-      <div class="canvas-footer"><span class="canvas-hint" data-i18n="hint_stage">DRAG pan · NAME/BADGE drag to move (ALT no snap) · CTRL+WHEEL zoom · SHIFT+WHEEL rotate · +ALT fine · ARROWS nudge · 0 reset</span></div>
+      </div>
+      <div class="canvas-footer"><span class="canvas-hint" data-i18n="hint_stage">DRAG pan · NAME/BADGE drag to move (ALT no snap), RIGHT-CLICK edit · CTRL+WHEEL zoom · SHIFT+WHEEL rotate · +ALT fine · ARROWS nudge · 0 reset</span></div>
       <div class="roster" id="roster" aria-label="token roster"></div>
     </main>
 
@@ -286,49 +334,21 @@
           <button class="side-switch" type="button" data-style="labelOn" data-pos="left" aria-label="name label">
             <span class="thumb"></span><span class="lab l" data-i18n="b_off">OFF</span><span class="lab r" data-i18n="b_on">ON</span>
           </button>
-          <button class="pos-reset" type="button" data-resetpos="label" data-i18n-title="t_reset" title="reset position">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v5h5" /></svg>
+          <button class="pos-reset ovl-edit-btn" type="button" data-ovledit="label" aria-haspopup="dialog" aria-controls="ovlPop" data-i18n-title="t_edit_label" title="name style &amp; colours">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM13 7l4 4" /></svg>
           </button>
         </span>
       </div>
-      <div class="fx-toggle label-param">
-        <span class="fx-label" data-i18n="l_lstyle">// NAME STYLE:</span>
-        <select class="scale-select" data-style="labelStyle" aria-label="name style">
-          <option value="plate" data-i18n="o_plate">PLATE</option>
-          <option value="arc" data-i18n="o_arc">ARC</option>
-        </select>
-      </div>
-      <div class="fx-toggle label-param">
-        <span class="fx-label" data-i18n="l_plate">// PLATE:</span>
-        <span class="src-group" data-src="plateFrom" data-custom="plateColor" data-opts="frame,accent,bg,custom" role="radiogroup" aria-label="name plate colour"></span>
-        <input type="color" id="plateColor" class="fill-input" data-style="plateColor" aria-label="name plate colour" />
-      </div>
-      <div class="fx-toggle label-param">
-        <span class="fx-label" data-i18n="l_ltext">// TEXT:</span>
-        <span class="src-group" data-src="labelFrom" data-custom="labelColor" data-opts="frame,accent,bg,custom" role="radiogroup" aria-label="name text colour"></span>
-        <input type="color" id="labelColor" class="fill-input" data-style="labelColor" aria-label="name text colour" />
-      </div>
-      <hr class="divider" />
       <div class="fx-toggle">
         <span class="fx-label" data-i18n="l_badgeon">// BADGE:</span>
         <span class="switch-row">
           <button class="side-switch" type="button" data-style="badgeOn" data-pos="left" aria-label="badge">
             <span class="thumb"></span><span class="lab l" data-i18n="b_off">OFF</span><span class="lab r" data-i18n="b_on">ON</span>
           </button>
-          <button class="pos-reset" type="button" data-resetpos="badge" data-i18n-title="t_reset" title="reset position">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v5h5" /></svg>
+          <button class="pos-reset ovl-edit-btn" type="button" data-ovledit="badge" aria-haspopup="dialog" aria-controls="ovlPop" data-i18n-title="t_edit_badge" title="badge colours">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16zM13 7l4 4" /></svg>
           </button>
         </span>
-      </div>
-      <div class="fx-toggle badge-param">
-        <span class="fx-label" data-i18n="l_badgecol">// BADGE FILL:</span>
-        <span class="src-group" data-src="badgeFrom" data-custom="badgeColor" data-opts="frame,accent,bg,custom" role="radiogroup" aria-label="badge colour"></span>
-        <input type="color" id="badgeColor" class="fill-input" data-style="badgeColor" aria-label="badge colour" />
-      </div>
-      <div class="fx-toggle badge-param">
-        <span class="fx-label" data-i18n="l_badgetext">// BADGE TEXT:</span>
-        <span class="src-group" data-src="badgeTextFrom" data-custom="badgeTextColor" data-opts="auto,frame,accent,bg,custom" role="radiogroup" aria-label="badge text colour"></span>
-        <input type="color" id="badgeTextColor" class="fill-input" data-style="badgeTextColor" aria-label="badge text colour" />
       </div>
       <hr class="divider" />
       <div class="fx-toggle">

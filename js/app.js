@@ -430,9 +430,33 @@
       const r = cv.getBoundingClientRect(), k = cv.width / r.width;
       return EIDOLON.overlayAt(cv.width, cur(), (e.clientX - r.left) * k, (e.clientY - r.top) * k);
     };
+    // Hover edit icon: shows over the name / badge under the pointer and opens
+    // its window; it stays while the pointer moves from the canvas onto it.
+    const hov = $('ovlHover');
+    const showHover = (which) => {
+      const it = cur(), a = which && EIDOLON.overlayAnchor(cv.width, it, which);
+      if (!a) { hov.hidden = true; return; }
+      const r = cv.getBoundingClientRect(), k = cv.width / r.width, m = 14;
+      hov.style.left = clamp(a.x / k, m, r.width - m) + 'px';
+      hov.style.top = clamp(a.y / k, m, r.height - m) + 'px';
+      hov.dataset.ovl = which;
+      hov.title = t(which === 'badge' ? 't_edit_badge' : 't_edit_label');
+      hov.hidden = false;
+    };
+    hov.addEventListener('click', () => { setOvlOpen(hov.dataset.ovl, true); hov.hidden = true; });
+    hov.addEventListener('pointerleave', (e) => { if (e.relatedTarget !== cv) hov.hidden = true; });
+    cv.addEventListener('contextmenu', (e) => {
+      const which = cur() && !brush.on && overlayAt(e);
+      if (!which) return;
+      e.preventDefault();
+      hov.hidden = true;
+      setOvlOpen(which, true);
+    });
     cv.addEventListener('pointerdown', (e) => {
       const it = cur();
       if (!it) { $('fileInput').click(); return; }
+      hov.hidden = true;
+      if (e.button === 2) return; // right-click: the contextmenu handler above
       if (brush.on) { brushDown(e); return; }
       cv.setPointerCapture(e.pointerId);
       drag = { x: e.clientX, y: e.clientY, w: cv.getBoundingClientRect().width, overlay: overlayAt(e) };
@@ -449,8 +473,13 @@
     });
     cv.addEventListener('pointermove', (e) => {
       const it = cur();
-      if (brush.on) { cv.classList.remove('over-overlay'); brushMove(e); return; }
-      if (!drag) { cv.classList.toggle('over-overlay', !!(it && overlayAt(e))); return; }
+      if (brush.on) { cv.classList.remove('over-overlay'); hov.hidden = true; brushMove(e); return; }
+      if (!drag) {
+        const which = it && overlayAt(e);
+        cv.classList.toggle('over-overlay', !!which);
+        if (which) showHover(which); else if (e.pointerType === 'mouse') hov.hidden = true;
+        return;
+      }
       if (!it) return;
       if (drag.overlay) { moveOverlay(e); return; }
       it.tf.x += (e.clientX - drag.x) / drag.w;
@@ -479,10 +508,11 @@
       const was = drag.overlay;
       drag = null; overlayDrag = null;
       cv.classList.remove('grabbing', 'moving');
-      if (was) styleChanged(); else itemChanged();
+      if (was) { styleChanged(); showHover(was); } else itemChanged(); // (touch has no hover: a tap shows the icon)
     };
-    cv.addEventListener('pointerleave', () => {
+    cv.addEventListener('pointerleave', (e) => {
       cv.classList.remove('over-overlay');
+      if (e.relatedTarget !== hov) hov.hidden = true;
       if (brush.on && !brush.stroke) { brush.cursor = null; requestDraw(); }
     });
     cv.addEventListener('pointerup', end);
@@ -1044,6 +1074,7 @@
   // ---- COLOUR window: the stage's corner icon opens the selected token's
   // colour adjustments in a window floating to the right of the canvas ----
   function setAdjOpen(on) {
+    if (on) setOvlOpen(null);
     $('adjPop').hidden = !on;
     $('adjBtn').setAttribute('aria-expanded', on ? 'true' : 'false');
   }
@@ -1055,6 +1086,43 @@
     document.addEventListener('pointerdown', (e) => {
       if (!$('adjPop').hidden && !$('stageShell').contains(e.target)) setAdjOpen(false);
     });
+  }
+
+  // ---- NAME / BADGE window: same spot as the COLOUR window (one open at a
+  // time). Opened by the right panel's edit icons, the edit icon that shows
+  // while hovering the name / badge on the stage, or a right-click on them. ----
+  let ovlOpen = null; // 'label' | 'badge' | null
+  function setOvlOpen(which, focus) {
+    ovlOpen = which || null;
+    if (ovlOpen) setAdjOpen(false);
+    $('ovlPop').hidden = !ovlOpen;
+    document.querySelectorAll('.ovl-body').forEach((b) => { b.hidden = b.dataset.ovl !== ovlOpen; });
+    document.querySelectorAll('[data-ovledit]').forEach((b) => b.setAttribute('aria-expanded', b.dataset.ovledit === ovlOpen ? 'true' : 'false'));
+    ovlTitle();
+    if (ovlOpen && focus) {
+      const first = document.querySelector('.ovl-body[data-ovl="' + ovlOpen + '"]').querySelector('select:enabled, button:enabled');
+      if (first) first.focus();
+    }
+  }
+  function ovlTitle() { if (ovlOpen) $('ovlTitle').textContent = '// ' + t(ovlOpen === 'badge' ? 'l_badge' : 'l_name'); }
+  function setupOvlPop() {
+    document.querySelectorAll('[data-ovledit]').forEach((b) => {
+      b.addEventListener('click', () => setOvlOpen(ovlOpen === b.dataset.ovledit ? null : b.dataset.ovledit, true));
+    });
+    $('ovlClose').addEventListener('click', () => {
+      const w = ovlOpen;
+      setOvlOpen(null);
+      const back = document.querySelector('[data-ovledit="' + w + '"]');
+      if (back) back.focus();
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && ovlOpen) setOvlOpen(null); });
+    // like COLOUR: stays open while working on the stage; a press anywhere
+    // else (bar the panel's own edit icons, which toggle it) closes it
+    document.addEventListener('pointerdown', (e) => {
+      if (ovlOpen && !$('stageShell').contains(e.target) && !e.target.closest('[data-ovledit]')) setOvlOpen(null);
+    });
+    document.addEventListener('eidolon:lang', ovlTitle);
+    setOvlOpen(null);
   }
 
   // ---- side panels (PRESETS, FX): fixed, slide in from the left edge, one
@@ -1275,7 +1343,14 @@
           S.style[k] = opts[i]; styleChanged();
         });
       } else if (el.classList.contains('side-switch')) {
-        el.addEventListener('click', () => { S.style[k] = !S.style[k]; styleChanged(); });
+        el.addEventListener('click', () => {
+          S.style[k] = !S.style[k];
+          // NAME LABEL / BADGE ON with an empty field: give the selected token a
+          // stand-in so the label / badge shows at once
+          const it = cur(), fill = { labelOn: ['label', 'Char Name'], badgeOn: ['badge', '1'] }[k];
+          if (fill && S.style[k] && it && !String(it[fill[0]] || '').trim()) { it[fill[0]] = fill[1]; itemChanged(it); }
+          styleChanged();
+        });
       } else {
         el.addEventListener('input', () => { S.style[k] = el.type === 'range' ? +el.value : el.value; styleChanged(); });
       }
@@ -1378,6 +1453,10 @@
         row.querySelectorAll('select, button, input').forEach((c) => { c.disabled = !on; });
       });
     });
+    // edit icons follow their ON/OFF switch; switching OFF closes the open window
+    const ovlOn = { label: st.labelOn, badge: st.badgeOn };
+    document.querySelectorAll('[data-ovledit]').forEach((b) => { b.disabled = !ovlOn[b.dataset.ovledit]; });
+    if (ovlOpen && !ovlOn[ovlOpen]) setOvlOpen(null);
     document.querySelectorAll('[data-tf], [data-adj]').forEach((el) => {
       const grp = el.dataset.tf ? 'tf' : 'adj', k = el.dataset[grp], v = (grp === 'tf' ? tf : adj)[k];
       el.disabled = !it;
@@ -1529,6 +1608,7 @@
     setupFx();
     setupPanels();
     setupAdjPop();
+    setupOvlPop();
     setupBatch();
     buildFrameGrid();
     bindControls();

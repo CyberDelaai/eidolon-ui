@@ -40,12 +40,16 @@ client-side; your images are never uploaded.
 - **Adjustments** — per-token brightness / contrast / saturation / hue, in a
   COLOUR window opened from the icon in the preview's top-right corner.
 - **Labels** — the token's name as a clipped name PLATE or ARC text (NAME LABEL
-  ON/OFF switch; OFF hides the name and dims its settings), and a
-  **badge** (number / letter; BADGE ON/OFF switch; numbered sets still stamp
-  theirs). Drag the name or the badge on the preview to move it: it snaps to
+  ON/OFF switch — switching it ON with an empty name field fills in Char Name; OFF hides the name and dims its settings), and a
+  **badge** (number / letter; BADGE ON/OFF switch — switching it ON with an empty badge field fills in 1; numbered sets still stamp
+  theirs). The name / badge text fields and ON/OFF switches stay in the token
+  panel; the rest — name style, colours and RESET POSITION — lives in a NAME or
+  BADGE window, opened by the edit icon next to each switch, by the edit icon
+  that appears while hovering the name / badge on the preview (a tap on
+  touch), or by right-clicking them. Drag the name or the badge on the preview to move it: it snaps to
   key spots (badge: corners, edges, centre; plate: top, bottom, centre and the
   centre lines; arc text: every 45° around the ring) — hold Alt to place it
-  freely; the reset icon next to each ON/OFF switch puts it back. Their positions are part of the global look (saved in presets). Plate, name text, badge and badge
+  freely. Their positions are part of the global look (saved in presets). Plate, name text, badge and badge
   text colours each take the frame / accent / background colour or a custom
   one (badge text can also pick dark or light automatically for contrast).
 - **Pop-out brush** — per token: PAINT POP-OUT, then paint over whatever should

@@ -465,6 +465,26 @@
     const P = plateLayout(measureCtx, text, g);
     return Math.abs(x - P.xc) <= P.pw / 2 && Math.abs(y - P.yc) <= P.h / 2 ? 'label' : null;
   };
+  // Where the stage's hover edit icon sits for an overlay, in canvas pixels of
+  // an N×N preview: the badge's / plate's top-right corner, just outside the
+  // middle of the arc. null when that overlay isn't drawn.
+  EIDOLON.overlayAnchor = function overlayAnchor(N, item, which) {
+    const g = geom(N);
+    if (which === 'badge') {
+      if (!badgeText(item)) return null;
+      const b = badgeLayout(g);
+      return { x: b.bx + b.r * 0.75, y: b.by - b.r * 0.75 };
+    }
+    const text = labelText(item);
+    if (!text) return null;
+    measureCtx = measureCtx || document.createElement('canvas').getContext('2d');
+    if (S.style.labelStyle === 'arc') {
+      const L = arcLayout(measureCtx, text, g), d = L.r + L.fs * 1.4;
+      return { x: g.cx + d * Math.cos(L.th), y: g.cy + d * Math.sin(L.th) };
+    }
+    const P = plateLayout(measureCtx, text, g);
+    return { x: P.xc + P.pw / 2, y: P.yc - P.h / 2 };
+  };
 
   // Key positions the overlays snap to (in R units, like labelX/Y, badgeX/Y).
   // The arc label snaps its angle to every 45° instead.

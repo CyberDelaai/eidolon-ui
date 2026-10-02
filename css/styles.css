@@ -429,6 +429,22 @@
   }
   .adj-close:hover { color: var(--magenta); }
   .adj-pop .btn-row { margin-top: 12px; }
+  /* NAME / BADGE window (an .adj-pop): the open overlay's body only */
+  .ovl-body[hidden] { display: none; }
+  /* edit icon over the hovered name / badge on the stage (centred on its anchor) */
+  .ovl-hover {
+    position: absolute; z-index: 3; transform: translate(-50%, -50%);
+    width: 26px; height: 26px; padding: 5px; line-height: 0; cursor: pointer;
+    background: var(--panel); color: var(--accent); border: 1px solid var(--accent);
+    box-shadow: 0 0 8px rgba(var(--accent-rgb),0.45);
+  }
+  .ovl-hover[hidden] { display: none; }
+  .ovl-hover svg, .ovl-edit-btn svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; }
+  /* the right panel's edit icons: main colour (the base .pos-reset is magenta) */
+  .ovl-edit-btn { color: var(--main); border-color: rgba(var(--main-rgb),0.35); }
+  .ovl-edit-btn:hover { border-color: rgba(var(--main-rgb),0.8); box-shadow: 0 0 8px rgba(var(--main-rgb),0.45); }
+  .ovl-edit-btn:disabled { opacity: .35; cursor: not-allowed; box-shadow: none; border-color: rgba(var(--main-rgb),0.35); }
+  .ovl-edit-btn[aria-expanded="true"] { color: var(--accent); border-color: var(--accent); box-shadow: 0 0 8px rgba(var(--accent-rgb),0.45); }
   .canvas-footer { text-align: center; margin-top: -4px; }
   .canvas-hint { font-size: 10px; letter-spacing: 1.5px; color: var(--dim); text-transform: uppercase; }
 
