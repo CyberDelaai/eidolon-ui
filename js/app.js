@@ -1276,10 +1276,10 @@
 
   // ---- frame grid + colour grids ----
   // The COMMLINK accent palette: a neon row (+ the saved custom swatch and
-  // picker), then a row of softer tones.
+  // picker), then a row of softer tones (+ the AUTO button).
   const PALETTE = [
     ['#fcee0a', '#00f0ff', '#ff003c', '#39ff14', '#ff8800', '#c800ff', '#ff10f0'],
-    ['#ff6b6b', '#ff9f43', '#feca57', '#1dd1a1', '#00d2d3', '#54a0ff', '#a29bfe', '#cd84f1', '#ff9ff3'],
+    ['#ff6b6b', '#ff9f43', '#feca57', '#1dd1a1', '#00d2d3', '#54a0ff', '#a29bfe'],
   ];
   const saveColors = () => EIDOLON.save('eidolon:colors', JSON.stringify(S.colors));
   function frameKeys() { return EIDOLON.frameOrder.concat(S.customFrame ? ['custom'] : []); }
@@ -1351,11 +1351,227 @@
       brk.className = 'grid-break';
       box.appendChild(brk);
       row(PALETTE[1]);
+      const auto = document.createElement('button');
+      auto.type = 'button'; auto.className = 'swatch-auto';
+      auto.setAttribute('data-augmented-ui', 'tl-clip br-clip border');
+      auto.addEventListener('click', () => autoColor(k));
+      box.appendChild(auto);
     });
     swatchTitles();
   }
   function swatchTitles() {
     document.querySelectorAll('.color-grid .swatch-pick-btn').forEach((l) => { l.title = t('t_pick'); });
+    document.querySelectorAll('.color-grid .swatch-auto').forEach((b) => { b.textContent = t('b_autocol'); b.title = t('t_autocol'); });
+  }
+
+  // ---- AUTO colours ----
+  // Detects the selected token's primary (frameColor) and secondary
+  // (accentColor) colours: a seeded k-means over its centre-weighted pixels,
+  // then a seeded weighted pick among the clusters. Every press draws a new
+  // seed, so repeated presses walk through the other plausible matches; the
+  // first press of a session (seed 0) takes the best-scoring one.
+  let autoSeed = 0;
+  const autoCache = new WeakMap(); // source canvas -> sampled pixels
+  function rng(seed) { // mulberry32
+    return () => {
+      seed = (seed + 0x6d2b79f5) | 0;
+      let r = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
+      return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  // [r, g, b, weight] per opaque pixel of a ≤64 px copy; centre pixels weigh
+  // more, since that's where the character usually is. px.bg = the backdrop
+  // colours: the big colour groups of the outer 4% border.
+  function autoPixels(src) {
+    let px = autoCache.get(src);
+    if (px) return px;
+    const k = 64 / Math.max(src.width, src.height), c = document.createElement('canvas');
+    const W = c.width = Math.max(1, Math.round(src.width * k)), H = c.height = Math.max(1, Math.round(src.height * k));
+    const x = c.getContext('2d', { willReadFrequently: true });
+    x.drawImage(src, 0, 0, W, H);
+    const d = x.getImageData(0, 0, W, H).data, edge = Math.max(1, Math.round(Math.min(W, H) * 0.04));
+    const border = [];
+    px = [];
+    for (let y = 0; y < H; y++) {
+      for (let xx = 0; xx < W; xx++) {
+        const i = (y * W + xx) * 4;
+        if (d[i + 3] < 128) continue;
+        const dx = (xx + 0.5) / W - 0.5, dy = (y + 0.5) / H - 0.5;
+        px.push([d[i], d[i + 1], d[i + 2], Math.exp(-(dx * dx + dy * dy) * 5)]);
+        if (y < edge || y >= H - edge || xx < edge || xx >= W - edge) border.push([d[i], d[i + 1], d[i + 2], 1]);
+      }
+    }
+    px.bg = border.length ? kmeans(border, Math.min(3, border.length), rng(7)).filter((o) => o.w > 0.3).map((o) => o.c) : [];
+    px.outerL = border.length ? border.reduce((s, p) => s + lightness(p), 0) / border.length : null;
+    autoCache.set(src, px);
+    return px;
+  }
+  // 0 on a backdrop colour, rising to 1 away from it.
+  function notBg(c, bg) {
+    return bg.reduce((f, b) => f * (1 - Math.exp(-dist2(c, b) / (2 * 28 * 28))), 1);
+  }
+  // Discount the backdrop, unless that would leave next to nothing (a close-up
+  // whose border is the character itself).
+  function dropBg(px, bg) {
+    const out = px.map((p) => [p[0], p[1], p[2], p[3] * notBg(p, bg)]);
+    const sum = (a) => a.reduce((s, p) => s + p[3], 0);
+    return sum(out) > 0.15 * sum(px) ? out.filter((p) => p[3] > 0) : px;
+  }
+  // The same [r, g, b, weight] list over every pixel of the full-size source,
+  // binned to 5 bits per channel (each bin keeps its mean colour), so tiny
+  // details survive that the 64 px copy would average away.
+  const autoFullCache = new WeakMap();
+  function autoPixelsFull(src) {
+    let px = autoFullCache.get(src);
+    if (px) return px;
+    const W = src.width, H = src.height;
+    const d = src.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, W, H).data;
+    const bins = new Float64Array(32768 * 4);
+    for (let y = 0; y < H; y++) {
+      const dy = (y + 0.5) / H - 0.5;
+      for (let x = 0; x < W; x++) {
+        const i = (y * W + x) * 4;
+        if (d[i + 3] < 128) continue;
+        const dx = (x + 0.5) / W - 0.5, w = Math.exp(-(dx * dx + dy * dy) * 5);
+        const b = (((d[i] >> 3) << 10) | ((d[i + 1] >> 3) << 5) | (d[i + 2] >> 3)) * 4;
+        bins[b] += d[i] * w; bins[b + 1] += d[i + 1] * w; bins[b + 2] += d[i + 2] * w; bins[b + 3] += w;
+      }
+    }
+    px = [];
+    for (let b = 0; b < bins.length; b += 4) {
+      const w = bins[b + 3];
+      if (w) px.push([bins[b] / w, bins[b + 1] / w, bins[b + 2] / w, w]);
+    }
+    autoFullCache.set(src, px);
+    return px;
+  }
+  const dist2 = (a, b) => (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2;
+  // Weighted k-means (k-means++ seeding) -> [{ c: [r, g, b], w }], w summing to 1.
+  function kmeans(px, K, rand, minW) {
+    const cents = [px[Math.floor(rand() * px.length)].slice(0, 3)];
+    while (cents.length < K) {
+      let sum = 0;
+      const d = px.map((p) => { const v = p[3] * Math.min(...cents.map((c) => dist2(p, c))); sum += v; return v; });
+      if (!sum) break;
+      let r = rand() * sum, i = 0;
+      while (i < d.length - 1 && (r -= d[i]) > 0) i++;
+      cents.push(px[i].slice(0, 3));
+    }
+    let acc = [];
+    for (let it = 0; it < 10; it++) {
+      acc = cents.map(() => [0, 0, 0, 0]);
+      px.forEach((p) => {
+        let best = 0, bd = Infinity;
+        cents.forEach((c, j) => { const v = dist2(p, c); if (v < bd) { bd = v; best = j; } });
+        const a = acc[best];
+        a[0] += p[0] * p[3]; a[1] += p[1] * p[3]; a[2] += p[2] * p[3]; a[3] += p[3];
+      });
+      acc.forEach((a, j) => { if (a[3]) cents[j] = [a[0] / a[3], a[1] / a[3], a[2] / a[3]]; });
+    }
+    const total = acc.reduce((s, a) => s + a[3], 0) || 1;
+    return cents.map((c, j) => ({ c, w: acc[j][3] / total })).filter((o) => o.w > (minW || 0.02));
+  }
+  // HSV saturation, 0..1.
+  const sat = (c) => { const mx = Math.max(c[0], c[1], c[2]); return mx ? (mx - Math.min(c[0], c[1], c[2])) / mx : 0; };
+  const ACCENT_SAT = 0.45; // accents should read as a colour, not a tinted grey
+  // Accent candidates: the colourful (chroma > 20%, saturation ≥ ACCENT_SAT)
+  // pixels that differ from the main colour, weighted by their chroma and
+  // clustered on their own, so small colour groups (sparks, eyes, a glowing
+  // rune) get a group instead of being swallowed by the big grey ones. Falls
+  // back to any pixels far from the main colour, then to the most distant
+  // 15%, for images with little colour.
+  function accentClusters(px, main, rand) {
+    const chroma = (p) => (Math.max(p[0], p[1], p[2]) - Math.min(p[0], p[1], p[2])) / 255;
+    const far = px.filter((p) => dist2(p, main) > 90 * 90);
+    let set = far.filter((p) => chroma(p) > 0.2 && sat(p) >= ACCENT_SAT).map((p) => [p[0], p[1], p[2], p[3] * chroma(p)]);
+    if (set.length < 24) set = far;
+    if (set.length < 24) {
+      const by = px.map((p) => [dist2(p, main), p]).sort((a, b) => b[0] - a[0]);
+      set = by.slice(0, Math.max(1, Math.ceil(by.length * 0.15))).map((e) => e[1]);
+    }
+    return kmeans(set, Math.min(5, set.length), rand, 0.01);
+  }
+  // Group candidates into hue families (within 35°; greys form their own), so
+  // a colour split into several shades doesn't crowd out a rarer one.
+  function hueFamilies(cand) {
+    const fams = [];
+    cand.forEach((o) => {
+      const [r, g, b] = hexRgb(o.hex), mx = Math.max(r, g, b), mn = Math.min(r, g, b), ch = mx - mn;
+      const grey = !mx || ch / mx < 0.15;
+      const h = grey || !ch ? 0 : 60 * (mx === r ? ((g - b) / ch + 6) % 6 : mx === g ? (b - r) / ch + 2 : (r - g) / ch + 4);
+      const f = fams.find((f) => f.grey === grey && (grey || Math.min(Math.abs(f.h - h), 360 - Math.abs(f.h - h)) < 35));
+      if (f) f.m.push(o); else fams.push({ h, grey, s: o.s, m: [o] }); // cand is sorted, so s = its best
+    });
+    return fams;
+  }
+  // Seeded weighted pick (weight = w(o)); seed 0 always takes the first.
+  function seededPick(list, w, seed, rand) {
+    if (!seed) return list[0];
+    const sum = list.reduce((s, o) => s + w(o), 0);
+    let r = rand() * sum;
+    return list.find((o) => (r -= w(o)) <= 0) || list[list.length - 1];
+  }
+  // HSV saturation × value: how much a colour reads as a colour, 0..1.
+  function vivid(c) {
+    const mx = Math.max(...c), mn = Math.min(...c);
+    return mx ? ((mx - mn) / mx) * (mx / 255) : 0;
+  }
+  // HSL lightness, 0..1.
+  const lightness = (c) => (Math.max(c[0], c[1], c[2]) + Math.min(c[0], c[1], c[2])) / 510;
+  const FRAME_GAP = 0.22; // the frame's minimum lightness distance from the image's outer edge
+  // Re-light a colour: with `outer` (the image edge's lightness, for the frame)
+  // keep it at least FRAME_GAP lighter or darker than that edge — on its own
+  // side when that's enough already, else towards the side with more room;
+  // without it (accent), clamp it so a near-black / near-white cluster still
+  // shows up on the dark stage.
+  function autoHex(c, outer) {
+    let [r, g, b] = c.map((v) => v / 255);
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2;
+    let L = clamp(l, 0.3, 0.8);
+    if (outer != null && Math.abs(l - outer) < FRAME_GAP) {
+      L = clamp(outer < 0.5 ? outer + FRAME_GAP : outer - FRAME_GAP, 0.08, 0.92);
+    } else if (outer != null) L = clamp(l, 0.08, 0.92);
+    if (L !== l) {
+      // scale the chroma around the new lightness, keeping hue and saturation
+      const s = mx === mn ? 0 : (mx - mn) / (1 - Math.abs(2 * l - 1));
+      const k = s * (1 - Math.abs(2 * L - 1)) / ((mx - mn) || 1);
+      [r, g, b] = [r, g, b].map((v) => L + (v - l) * k);
+    }
+    return '#' + [r, g, b].map((v) => Math.round(clamp(v, 0, 1) * 255).toString(16).padStart(2, '0')).join('');
+  }
+  const hexRgb = (h) => [1, 3, 5].map((i) => parseInt(String(h).slice(i, i + 2), 16) || 0);
+  function autoColor(k) {
+    const item = cur();
+    if (!item || !item.src) { setStatus(t('s_autonone'), 'warn'); return; }
+    const isFrame = k === 'frameColor';
+    let px;
+    try { px = dropBg(isFrame ? autoPixels(item.src) : autoPixelsFull(item.src), autoPixels(item.src).bg); } catch (e) { px = []; }
+    if (!px.length) { setStatus(t('s_autonone'), 'warn'); return; }
+    const seed = autoSeed++, rand = rng(seed * 2654435761 + 1);
+    const frame = hexRgb(S.style.frameColor), now = hexRgb(S.style[k]);
+    const clusters = isFrame ? kmeans(px, 6, rand) : accentClusters(px, frame, rand);
+    // frame: big, colourful and already contrasting with the image's outer
+    // edge wins; accent: colourful and far from the frame, its size barely
+    // matters (a rare colour is as good a pick as a common one)
+    const outer = isFrame ? autoPixels(item.src).outerL : null;
+    const score = (o) => isFrame
+      ? o.w * (0.15 + vivid(o.c)) * (outer == null ? 1 : 0.3 + Math.abs(lightness(o.c) - outer))
+      : Math.pow(o.w, 0.2) * (0.2 + vivid(o.c)) * Math.sqrt(dist2(o.c, frame)) / 441;
+    let cand = clusters.map((o) => ({ hex: autoHex(o.c, outer), s: score(o) }))
+      .filter((o) => o.s > 0).sort((a, b) => b.s - a.s);
+    // never land on (nearly) the colour already set, when there's another option
+    const fresh = cand.filter((o) => dist2(hexRgb(o.hex), now) > 900);
+    if (fresh.length) cand = fresh;
+    // accent: drop washed-out groups (averaging can dull a cluster), if any colourful one is left
+    const vivids = isFrame ? [] : cand.filter((o) => sat(hexRgb(o.hex)) >= ACCENT_SAT);
+    if (vivids.length) cand = vivids;
+    if (!cand.length) return;
+    // accent: pick a hue family first (by its best score), then a shade in it
+    const pool = isFrame ? cand : seededPick(hueFamilies(cand), (f) => f.s, seed, rand).m;
+    // kept as the grid's saved custom swatch, as if picked with the picker
+    S.style[k] = S.colors[k] = seededPick(pool, (o) => o.s * o.s, seed, rand).hex;
+    saveColors(); styleChanged();
   }
   function syncSwatches() {
     document.querySelectorAll('[data-swatches]').forEach((box) => {

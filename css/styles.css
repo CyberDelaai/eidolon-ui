@@ -326,7 +326,7 @@
   /* colour grids (ported from commlink-ui's accent picker): a row of neon
      presets + the saved custom swatch & picker, then a row of softer tones.
      Nine equal columns stretch across the whole row; the custom group spans
-     two, so the neon row (7 + group) and the soft row (9) line up. */
+     two, as does AUTO, so the neon row (7 + group) and the soft row (7 + AUTO) line up. */
   .color-grid {
     display: grid; grid-template-columns: repeat(9, 1fr); grid-auto-rows: 26px;
     gap: 6px; margin-top: 10px;
@@ -365,6 +365,15 @@
   .swatch-pick-btn svg {
     position: absolute; inset: 0; margin: auto; width: 16px; height: 16px; pointer-events: none;
   }
+  /* AUTO: detect the colour from the selected token; spans the soft row's last two columns */
+  .swatch-auto {
+    grid-column: span 2; min-width: 0; padding: 0; margin: 0; border: none; cursor: pointer;
+    background: transparent; color: var(--cyan); font: inherit; font-size: 10px; letter-spacing: 1px;
+    transition: background 0.15s;
+    --aug-border-all: 1px; --aug-border-bg: var(--cyan);
+    --aug-inlay-all: 0px; --aug-inlay-bg: transparent; --aug-tl: 7px; --aug-br: 7px;
+  }
+  .swatch-auto:hover { background: color-mix(in srgb, var(--cyan) 18%, transparent); }
   .swatch-pick-btn input[type="color"] {
     position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%;
     cursor: pointer; border: none; padding: 0;
