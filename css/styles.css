@@ -664,6 +664,7 @@
 
   /* FX panel content */
   .fx-master { margin-top: 4px; }
+  .fx-master + .hint { margin-top: 14px; }
   .fx-master .fx-label { color: var(--accent); font-weight: 700; font-size: 13px; }
   .fx-body.off { opacity: .4; pointer-events: none; }
   .fx-body .divider { margin: 16px 0 2px; }
