@@ -20,7 +20,7 @@
     }
     ctx.closePath();
   }
-  // Vertices of the same polygon (for accent dots).
+  // Vertices of the same polygon (for accent strokes).
   function polyPts(n, a0, cx, cy, r) {
     const out = [];
     for (let i = 0; i < n; i++) {
@@ -98,6 +98,26 @@
     ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineCap = 'square';
     ctx.beginPath();
     ctx.moveTo(x + sx * len, y); ctx.lineTo(x, y); ctx.lineTo(x, y + sy * len);
+    ctx.stroke();
+  }
+  // Inner polygon accents, stroked along the outline of polygon `shape` inset
+  // by d px (the stroke's centre line). polyCorners draws a chevron hugging each
+  // vertex, arms reaching fraction f of the edge.
+  function polyInner(g, shape, d) {
+    const p = POLY[shape];
+    return polyPts(p.n, p.a0, g.cx, g.cy, g.R - d / Math.cos(Math.PI / p.n));
+  }
+  function polyCorners(ctx, g, shape, d, f, w, color) {
+    if (!color) return;
+    const pts = polyInner(g, shape, d), n = pts.length;
+    ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineCap = 'butt'; ctx.lineJoin = 'miter';
+    ctx.beginPath();
+    pts.forEach(([x, y], i) => {
+      const [px, py] = pts[(i + n - 1) % n], [nx, ny] = pts[(i + 1) % n];
+      ctx.moveTo(x + (px - x) * f, y + (py - y) * f);
+      ctx.lineTo(x, y);
+      ctx.lineTo(x + (nx - x) * f, y + (ny - y) * f);
+    });
     ctx.stroke();
   }
   const hair = (g) => Math.max(1, g.u * 2.2);
@@ -215,13 +235,13 @@
         bracket(ctx, g.cx - h, g.cy + h, 1, -1, len, w, c.accent);
       },
     },
-    // hexagon with accent vertex nodes
+    // hexagon with accent chevrons hugging the inner corners
     hex: {
       shape: 'hex',
       draw(ctx, g, c) {
         band(ctx, g, 'hex', 0, g.t, c.main);
-        const rv = g.R - (g.t / 2) / Math.cos(Math.PI / 6);
-        polyPts(6, POLY.hex.a0, g.cx, g.cy, rv).forEach(([x, y]) => dot(ctx, x, y, g.t * 0.42, c.accent));
+        const w = Math.max(1, g.t * 0.22);
+        polyCorners(ctx, g, 'hex', g.t + g.u * 6 + w / 2, 0.24, w, c.accent);
       },
     },
     // octagon with an inner accent line
@@ -232,13 +252,12 @@
         band(ctx, g, 'octa', g.t + g.u * 5, g.t + g.u * 5 + hair(g), c.accent);
       },
     },
-    // diamond with accent vertex nodes
+    // diamond with accent chevrons running down the middle of the band at each corner
     diamond: {
       shape: 'diamond',
       draw(ctx, g, c) {
         band(ctx, g, 'diamond', 0, g.t, c.main);
-        const rv = g.R - (g.t / 2) / Math.cos(Math.PI / 4);
-        polyPts(4, POLY.diamond.a0, g.cx, g.cy, rv).forEach(([x, y]) => dot(ctx, x, y, g.t * 0.5, c.accent));
+        polyCorners(ctx, g, 'diamond', g.t / 2, 0.2, Math.max(1, g.t * 0.22), c.accent);
       },
     },
     // no frame — just the round cut-out
