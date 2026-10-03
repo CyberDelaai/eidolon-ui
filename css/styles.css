@@ -468,6 +468,8 @@
     display: flex; flex-direction: column; gap: 8px; width: 34px;
   }
   .stage-bg .fill-swatch, .stage-bg .fill-extend, .stage-bg .fill-transparent { flex: 0 0 34px; height: 34px; }
+  /* the colour swatch carries the picker icon, dark or light against its fill (syncControls) */
+  .stage-bg .fill-swatch svg { width: 16px; height: 16px; pointer-events: none; opacity: 0.85; }
   /* guides cycle: OFF shows the cross (dimmed) as the next step, then cross, then grid */
   #guidesBtn .g-grid, #guidesBtn[data-mode="grid"] .g-cross { display: none; }
   #guidesBtn[data-mode="grid"] .g-grid { display: block; }

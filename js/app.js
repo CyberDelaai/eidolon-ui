@@ -1737,7 +1737,12 @@
       } else if (el.classList.contains('side-switch')) el.dataset.pos = v ? 'right' : 'left';
       else if (String(el.value) !== String(v)) el.value = v;
     });
-    document.querySelectorAll('[data-for]').forEach((b) => { b.style.background = st[b.dataset.for]; });
+    document.querySelectorAll('[data-for]').forEach((b) => {
+      const hex = st[b.dataset.for], n = parseInt(String(hex).slice(1), 16) || 0;
+      b.style.background = hex;
+      // picker icon: dark on light fills, light on dark ones
+      b.style.color = ((n >> 16) * 299 + ((n >> 8) & 255) * 587 + (n & 255) * 114) / 1000 > 140 ? '#111' : '#fff';
+    });
     syncSwatches();
     document.querySelectorAll('[data-bg]').forEach((b) => b.classList.toggle('active', st.bgMode === b.dataset.bg));
     $('accentColorRow').classList.toggle('disabled', !st.accent);
