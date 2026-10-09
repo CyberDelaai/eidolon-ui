@@ -95,8 +95,6 @@
       t_src_auto: 'automatic — dark or light, whichever reads best',
       t_popload: 'load a mask image — white (or opaque) breaks out, black (or transparent) stays inside; stretched over the portrait', s_popmask: 'POP-OUT MASK LOADED',
       tag: 'TOKEN MAKER', tag_alt: 'PERSONAFIX',
-      seo_title: 'EIDOLON — Cyberpunk TTRPG Token & Avatar Maker for Roll20 & Foundry VTT',
-      seo_desc: 'EIDOLON is a free in-browser token maker for TTRPG characters. Frame portraits in 12 cyberpunk frames, add name plates, numbered badges, pop-out and glitch FX, then batch-export PNG / WebP tokens for Roll20, Foundry VTT and other VTTs. No signup, no upload.',
     },
     ru: {
       h_source: '// ИСТОЧНИК', b_load: 'ФАЙЛ', b_clear: 'ОЧИСТИТЬ', b_sure: 'ТОЧНО?', b_go: 'ОК',
@@ -186,8 +184,6 @@
       t_src_auto: 'автоматически — тёмный или светлый, что читается лучше',
       t_popload: 'загрузить маску — белое (или непрозрачное) выходит поверх рамки, чёрное (или прозрачное) остаётся внутри; растягивается на портрет', s_popmask: 'МАСКА ВЫХОДА ЗАГРУЖЕНА',
       tag: 'КОНСТРУКТОР ТОКЕНОВ', tag_alt: 'PERSONAFIX',
-      seo_title: 'EIDOLON — киберпанк-конструктор токенов и аватаров для НРИ, Roll20 и Foundry VTT',
-      seo_desc: 'EIDOLON — бесплатный конструктор токенов персонажей для НРИ прямо в браузере. 12 киберпанк-рамок, таблички с именем, номерные значки, эффект выхода за рамку и глитч, пакетный экспорт PNG / WebP для Roll20, Foundry VTT и других VTT. Без регистрации и загрузки на сервер.',
     },
     fr: {
       h_source: '// SOURCE', b_load: 'CHARGER', b_clear: 'VIDER', b_sure: 'SÛR ?', b_go: 'OK',
@@ -277,8 +273,6 @@
       t_src_auto: 'automatique — sombre ou clair, le plus lisible',
       t_popload: 'charger un masque — le blanc (ou opaque) déborde, le noir (ou transparent) reste dedans ; étiré sur le portrait', s_popmask: 'MASQUE DE DÉBORDEMENT CHARGÉ',
       tag: 'CRÉATEUR DE JETONS', tag_alt: 'PERSONAFIX',
-      seo_title: "EIDOLON — créateur de jetons et d'avatars cyberpunk pour JDR, Roll20 et Foundry VTT",
-      seo_desc: 'EIDOLON est un créateur de jetons gratuit pour personnages de JDR, dans le navigateur. 12 cadres cyberpunk, plaques de nom, badges numérotés, effets pop-out et glitch, export PNG / WebP par lots pour Roll20, Foundry VTT et autres VTT. Sans inscription ni envoi.',
     },
     de: {
       h_source: '// QUELLE', b_load: 'LADEN', b_clear: 'LEEREN', b_sure: 'SICHER?', b_go: 'OK',
@@ -368,8 +362,6 @@
       t_src_auto: 'automatisch — dunkel oder hell, was besser lesbar ist',
       t_popload: 'Maskenbild laden — Weiß (oder deckend) ragt heraus, Schwarz (oder transparent) bleibt innen; über das Porträt gestreckt', s_popmask: 'POP-OUT-MASKE GELADEN',
       tag: 'TOKEN-ERSTELLER', tag_alt: 'PERSONAFIX',
-      seo_title: 'EIDOLON — Cyberpunk-Token- & Avatar-Ersteller für Pen & Paper, Roll20 und Foundry VTT',
-      seo_desc: 'EIDOLON ist ein kostenloser Token-Ersteller für Rollenspiel-Charaktere im Browser. 12 Cyberpunk-Rahmen, Namensschilder, nummerierte Abzeichen, Pop-out- und Glitch-Effekte, Stapel-Export als PNG / WebP für Roll20, Foundry VTT und andere VTTs. Ohne Anmeldung, ohne Upload.',
     },
     es: {
       h_source: '// ORIGEN', b_load: 'CARGAR', b_clear: 'VACIAR', b_sure: '¿SEGURO?', b_go: 'OK',
@@ -459,8 +451,6 @@
       t_src_auto: 'automático — oscuro o claro, lo que mejor se lea',
       t_popload: 'cargar una máscara — el blanco (u opaco) sale del marco, el negro (o transparente) queda dentro; se estira sobre el retrato', s_popmask: 'MÁSCARA DE DESBORDE CARGADA',
       tag: 'CREADOR DE TOKENS', tag_alt: 'PERSONAFIX',
-      seo_title: 'EIDOLON — creador de tokens y avatares cyberpunk para rol, Roll20 y Foundry VTT',
-      seo_desc: 'EIDOLON es un creador de tokens gratuito para personajes de rol, en el navegador. 12 marcos cyberpunk, placas de nombre, insignias numeradas, efectos pop-out y glitch, exportación PNG / WebP por lotes para Roll20, Foundry VTT y otros VTT. Sin registro ni subidas.',
     },
     it: {
       h_source: '// ORIGINE', b_load: 'CARICA', b_clear: 'SVUOTA', b_sure: 'SICURO?', b_go: 'OK',
@@ -550,8 +540,6 @@
       t_src_auto: 'automatico — scuro o chiaro, il più leggibile',
       t_popload: 'carica una maschera — il bianco (o opaco) esce dalla cornice, il nero (o trasparente) resta dentro; stirata sul ritratto', s_popmask: 'MASCHERA DI FUORIUSCITA CARICATA',
       tag: 'CREATORE DI TOKEN', tag_alt: 'PERSONAFIX',
-      seo_title: 'EIDOLON — creatore di token e avatar cyberpunk per GDR, Roll20 e Foundry VTT',
-      seo_desc: 'EIDOLON è un creatore di token gratuito per personaggi di GDR, nel browser. 12 cornici cyberpunk, targhette col nome, badge numerati, effetti pop-out e glitch, esportazione PNG / WebP in blocco per Roll20, Foundry VTT e altri VTT. Senza registrazione né upload.',
     },
     ja: {
       h_source: '// ソース', b_load: '読込', b_clear: 'クリア', b_sure: '本当に？', b_go: 'OK',
@@ -641,8 +629,6 @@
       t_src_auto: '自動 — 読みやすい暗色か明色',
       t_popload: 'マスク画像を読み込み — 白（または不透明）が飛び出し、黒（または透明）は内側に残ります。肖像に合わせて引き伸ばされます', s_popmask: '飛び出しマスクを読み込みました',
       tag: 'トークンメーカー', tag_alt: 'PERSONAFIX',
-      seo_title: 'EIDOLON — TRPG向けサイバーパンク風トークン・アバターメーカー（Roll20・Foundry VTT対応）',
-      seo_desc: 'EIDOLONはブラウザで使える無料のTRPGキャラクタートークンメーカー。12種のサイバーパンク風フレーム、名前プレート、番号バッジ、フレームからはみ出すポップアウトやグリッチ効果、Roll20・Foundry VTT向けPNG / WebP一括書き出しに対応。登録・アップロード不要。',
     },
     zh: {
       h_source: '// 来源', b_load: '载入', b_clear: '清空', b_sure: '确定？', b_go: '确定',
@@ -732,8 +718,6 @@
       t_src_auto: '自动 — 深色或浅色，取更易读者',
       t_popload: '载入遮罩图 — 白色（或不透明）出框，黑色（或透明）留在框内；拉伸覆盖整个肖像', s_popmask: '已载入出框遮罩',
       tag: '令牌制作器', tag_alt: 'PERSONAFIX',
-      seo_title: 'EIDOLON — 赛博朋克风格 TRPG 令牌与头像制作器（支持 Roll20 与 Foundry VTT）',
-      seo_desc: 'EIDOLON 是一款免费的浏览器端 TRPG 角色令牌制作器。12 种赛博朋克边框、名字铭牌、编号徽标、出框与故障特效，可批量导出 PNG / WebP 令牌用于 Roll20、Foundry VTT 等 VTT。无需注册，图片不会上传。',
     },
   };
   let lang = 'en';
@@ -759,10 +743,6 @@
       if (v) el.setAttribute('placeholder', v);
     });
     document.documentElement.lang = lang;
-    // Tab title + meta description follow the UI language (crawlers see the EN head).
-    document.title = EIDOLON.t('seo_title');
-    const desc = document.querySelector('meta[name="description"]');
-    if (desc) desc.setAttribute('content', EIDOLON.t('seo_desc'));
     document.dispatchEvent(new Event('eidolon:lang'));
   };
 
@@ -770,10 +750,20 @@
   document.addEventListener('DOMContentLoaded', () => {
     const sel = $('uiLangSel');
     const saved = (() => { try { return localStorage.getItem('eidolon:lang'); } catch (e) { return null; } })();
-    const start = saved && I18N[saved] ? saved : 'en';
+    // A generated language page (/eidolon-ui/ru/ … — see make_langs.py) pins its language.
+    const urlLang = document.documentElement.getAttribute('data-url-lang');
+    const start = urlLang && I18N[urlLang] ? urlLang : saved && I18N[saved] ? saved : 'en';
     if (sel) {
       sel.value = start;
-      sel.addEventListener('change', () => EIDOLON.applyLang(sel.value));
+      sel.addEventListener('change', () => {
+        // Served over http(s): open that language's own URL (./ for EN, ./<lang>/
+        // otherwise — see make_langs.py) so the address matches the UI; on file://
+        // switch in place.
+        if (location.protocol === 'file:') return EIDOLON.applyLang(sel.value);
+        EIDOLON.save('eidolon:lang', sel.value);
+        const root = document.documentElement.hasAttribute('data-url-lang') ? '../' : './';
+        location.href = new URL(root + (sel.value === 'en' ? '' : sel.value + '/'), location.href).href;
+      });
     }
     EIDOLON.applyLang(start);
   });

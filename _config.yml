@@ -9,3 +9,4 @@ exclude:
   - TODO.md
   - bump_version.py
   - make_favicons.py
+  - make_langs.py

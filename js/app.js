@@ -164,7 +164,9 @@
   // once the roster has anything, so deleting it never brings it back), and
   // every EXAMPLE preset turns the selected token into it. Opened from file://
   // the fetch fails and we just skip.
-  const DOGGO_SRC = { img: 'examples/cyber-doggo.webp', mask: 'examples/cyber-doggo-pop-out-mask.webp', name: 'cyber-doggo.webp', tf: { zoom: 1, y: 0.02 } };
+  // (one folder up on a generated /<lang>/ page — see make_langs.py)
+  const ASSET_ROOT = document.documentElement.hasAttribute('data-url-lang') ? '../' : '';
+  const DOGGO_SRC = { img: ASSET_ROOT + 'examples/cyber-doggo.webp', mask: ASSET_ROOT + 'examples/cyber-doggo-pop-out-mask.webp', name: 'cyber-doggo.webp', tf: { zoom: 1, y: 0.02 } };
   let doggoAssets = null, doggoPending = null, doggoFailed = false;
   // -> Promise<{ blob, img, mask }>, fetched once and shared
   function getDoggo() {
