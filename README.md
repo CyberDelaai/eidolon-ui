@@ -1,7 +1,7 @@
 # EIDOLON
 
 A free, in-browser **token / avatar maker for TTRPG characters** — a tool in the
-[cyberdeck.tools](https://cyberdeck.tools/) family (COMMLINK · CHRONOS · GRIDMAP · ATLAS).
+[cyberdeck.tools](https://cyberdeck.tools/) family (COMMLINK · CHRONOS · GRIDMAP · SINFORGE).
 
 Build cyberpunk-styled character tokens for your virtual tabletop and export them
 as PNG. No build step, no backend — just open `index.html`. Everything runs
